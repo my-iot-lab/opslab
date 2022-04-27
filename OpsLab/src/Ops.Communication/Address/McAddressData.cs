@@ -1,4 +1,4 @@
-using Ops.Communication.Ethernet.Profinet.Melsec;
+using Ops.Communication.Profinet.Melsec;
 
 namespace Ops.Communication.Address;
 
@@ -246,6 +246,6 @@ public class McAddressData : DeviceAddressDataBase
 			return new OperateResult<McAddressData>(ex.Message);
 		}
 
-		return OperateResult.CreateSuccessResult(mcAddressData);
+		return OperateResult.Ok(mcAddressData);
 	}
 }

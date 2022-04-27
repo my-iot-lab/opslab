@@ -9,7 +9,7 @@ public class DeviceAddressAttribute : Attribute
 	/// <summary>
 	/// 设备的类型，如果指定了特殊的PLC，那么该地址就可以支持多种不同PLC
 	/// </summary>
-	public Type? DeviceType { get; set; }
+	public Type DeviceType { get; set; }
 
 	/// <summary>
 	/// 数据的地址信息，真实的设备的地址信息

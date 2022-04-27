@@ -81,7 +81,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T> Convert<T>(T content)
 	{
-		return IsSuccess ? CreateSuccessResult(content) : CreateFailedResult<T>(this);
+		return IsSuccess ? Ok(content) : Error<T>(this);
 	}
 
 	/// <summary>
@@ -89,9 +89,9 @@ public class OperateResult
 	/// </summary>
 	/// <typeparam name="T">结果类型</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T> ConvertFailed<T>()
+	public OperateResult<T> ConvertError<T>()
 	{
-		return CreateFailedResult<T>(this);
+		return Error<T>(this);
 	}
 
 	/// <summary>
@@ -104,7 +104,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2> Convert<T1, T2>(T1 content1, T2 content2)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2) : CreateFailedResult<T1, T2>(this);
+		return IsSuccess ? Ok(content1, content2) : Error<T1, T2>(this);
 	}
 
 	/// <summary>
@@ -113,9 +113,9 @@ public class OperateResult
 	/// <typeparam name="T1">泛型参数一</typeparam>
 	/// <typeparam name="T2">泛型参数二</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2> ConvertFailed<T1, T2>()
+	public OperateResult<T1, T2> ConvertError<T1, T2>()
 	{
-		return CreateFailedResult<T1, T2>(this);
+		return Error<T1, T2>(this);
 	}
 
 	/// <summary>
@@ -130,7 +130,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2, T3> Convert<T1, T2, T3>(T1 content1, T2 content2, T3 content3)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2, content3) : CreateFailedResult<T1, T2, T3>(this);
+		return IsSuccess ? Ok(content1, content2, content3) : Error<T1, T2, T3>(this);
 	}
 
 	/// <summary>
@@ -140,9 +140,9 @@ public class OperateResult
 	/// <typeparam name="T2">泛型参数二</typeparam>
 	/// <typeparam name="T3">泛型参数三</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2, T3> ConvertFailed<T1, T2, T3>()
+	public OperateResult<T1, T2, T3> ConvertError<T1, T2, T3>()
 	{
-		return CreateFailedResult<T1, T2, T3>(this);
+		return Error<T1, T2, T3>(this);
 	}
 
 	/// <summary>
@@ -159,7 +159,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2, T3, T4> Convert<T1, T2, T3, T4>(T1 content1, T2 content2, T3 content3, T4 content4)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2, content3, content4) : CreateFailedResult<T1, T2, T3, T4>(this);
+		return IsSuccess ? Ok(content1, content2, content3, content4) : Error<T1, T2, T3, T4>(this);
 	}
 
 	/// <summary>
@@ -170,9 +170,9 @@ public class OperateResult
 	/// <typeparam name="T3">泛型参数三</typeparam>
 	/// <typeparam name="T4">泛型参数四</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2, T3, T4> ConvertFailed<T1, T2, T3, T4>()
+	public OperateResult<T1, T2, T3, T4> ConvertError<T1, T2, T3, T4>()
 	{
-		return CreateFailedResult<T1, T2, T3, T4>(this);
+		return Error<T1, T2, T3, T4>(this);
 	}
 
 	/// <summary>
@@ -191,7 +191,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2, T3, T4, T5> Convert<T1, T2, T3, T4, T5>(T1 content1, T2 content2, T3 content3, T4 content4, T5 content5)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2, content3, content4, content5) : CreateFailedResult<T1, T2, T3, T4, T5>(this);
+		return IsSuccess ? Ok(content1, content2, content3, content4, content5) : Error<T1, T2, T3, T4, T5>(this);
 	}
 
 	/// <summary>
@@ -203,9 +203,9 @@ public class OperateResult
 	/// <typeparam name="T4">泛型参数四</typeparam>
 	/// <typeparam name="T5">泛型参数五</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2, T3, T4, T5> ConvertFailed<T1, T2, T3, T4, T5>()
+	public OperateResult<T1, T2, T3, T4, T5> ConvertError<T1, T2, T3, T4, T5>()
 	{
-		return CreateFailedResult<T1, T2, T3, T4, T5>(this);
+		return Error<T1, T2, T3, T4, T5>(this);
 	}
 
 	/// <summary>
@@ -226,7 +226,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2, T3, T4, T5, T6> Convert<T1, T2, T3, T4, T5, T6>(T1 content1, T2 content2, T3 content3, T4 content4, T5 content5, T6 content6)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2, content3, content4, content5, content6) : CreateFailedResult<T1, T2, T3, T4, T5, T6>(this);
+		return IsSuccess ? Ok(content1, content2, content3, content4, content5, content6) : Error<T1, T2, T3, T4, T5, T6>(this);
 	}
 
 	/// <summary>
@@ -239,9 +239,9 @@ public class OperateResult
 	/// <typeparam name="T5">泛型参数五</typeparam>
 	/// <typeparam name="T6">泛型参数六</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2, T3, T4, T5, T6> ConvertFailed<T1, T2, T3, T4, T5, T6>()
+	public OperateResult<T1, T2, T3, T4, T5, T6> ConvertError<T1, T2, T3, T4, T5, T6>()
 	{
-		return CreateFailedResult<T1, T2, T3, T4, T5, T6>(this);
+		return Error<T1, T2, T3, T4, T5, T6>(this);
 	}
 
 	/// <summary>
@@ -264,7 +264,7 @@ public class OperateResult
 	/// <returns>最终的结果类对象</returns>
 	public OperateResult<T1, T2, T3, T4, T5, T6, T7> Convert<T1, T2, T3, T4, T5, T6, T7>(T1 content1, T2 content2, T3 content3, T4 content4, T5 content5, T6 content6, T7 content7)
 	{
-		return IsSuccess ? CreateSuccessResult(content1, content2, content3, content4, content5, content6, content7) : CreateFailedResult<T1, T2, T3, T4, T5, T6, T7>(this);
+		return IsSuccess ? Ok(content1, content2, content3, content4, content5, content6, content7) : Error<T1, T2, T3, T4, T5, T6, T7>(this);
 	}
 
 	/// <summary>
@@ -278,126 +278,126 @@ public class OperateResult
 	/// <typeparam name="T6">泛型参数六</typeparam>
 	/// <typeparam name="T7">泛型参数七</typeparam>
 	/// <returns>最终失败的结果类对象</returns>
-	public OperateResult<T1, T2, T3, T4, T5, T6, T7> ConvertFailed<T1, T2, T3, T4, T5, T6, T7>()
+	public OperateResult<T1, T2, T3, T4, T5, T6, T7> ConvertError<T1, T2, T3, T4, T5, T6, T7>()
 	{
-		return CreateFailedResult<T1, T2, T3, T4, T5, T6, T7>(this);
+		return Error<T1, T2, T3, T4, T5, T6, T7>(this);
 	}
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult Then(Func<OperateResult> func)
-	{
-		return IsSuccess ? func() : this;
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult Then(Func<OperateResult> func)
+    {
+        return IsSuccess ? func() : this;
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T">泛型参数</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T> Then<T>(Func<OperateResult<T>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T">泛型参数</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T> Then<T>(Func<OperateResult<T>> func)
+    {
+        return IsSuccess ? func() : Error<T>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2> Then<T1, T2>(Func<OperateResult<T1, T2>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2> Then<T1, T2>(Func<OperateResult<T1, T2>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <typeparam name="T3">泛型参数三</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2, T3> Then<T1, T2, T3>(Func<OperateResult<T1, T2, T3>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2, T3>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <typeparam name="T3">泛型参数三</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2, T3> Then<T1, T2, T3>(Func<OperateResult<T1, T2, T3>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2, T3>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。.
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <typeparam name="T3">泛型参数三</typeparam>
-	/// <typeparam name="T4">泛型参数四</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2, T3, T4> Then<T1, T2, T3, T4>(Func<OperateResult<T1, T2, T3, T4>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2, T3, T4>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。.
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <typeparam name="T3">泛型参数三</typeparam>
+    /// <typeparam name="T4">泛型参数四</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2, T3, T4> Then<T1, T2, T3, T4>(Func<OperateResult<T1, T2, T3, T4>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2, T3, T4>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <typeparam name="T3">泛型参数三</typeparam>
-	/// <typeparam name="T4">泛型参数四</typeparam>
-	/// <typeparam name="T5">泛型参数五</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2, T3, T4, T5> Then<T1, T2, T3, T4, T5>(Func<OperateResult<T1, T2, T3, T4, T5>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2, T3, T4, T5>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <typeparam name="T3">泛型参数三</typeparam>
+    /// <typeparam name="T4">泛型参数四</typeparam>
+    /// <typeparam name="T5">泛型参数五</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2, T3, T4, T5> Then<T1, T2, T3, T4, T5>(Func<OperateResult<T1, T2, T3, T4, T5>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2, T3, T4, T5>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <typeparam name="T3">泛型参数三</typeparam>
-	/// <typeparam name="T4">泛型参数四</typeparam>
-	/// <typeparam name="T5">泛型参数五</typeparam>
-	/// <typeparam name="T6">泛型参数六</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2, T3, T4, T5, T6> Then<T1, T2, T3, T4, T5, T6>(Func<OperateResult<T1, T2, T3, T4, T5, T6>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2, T3, T4, T5, T6>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <typeparam name="T3">泛型参数三</typeparam>
+    /// <typeparam name="T4">泛型参数四</typeparam>
+    /// <typeparam name="T5">泛型参数五</typeparam>
+    /// <typeparam name="T6">泛型参数六</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2, T3, T4, T5, T6> Then<T1, T2, T3, T4, T5, T6>(Func<OperateResult<T1, T2, T3, T4, T5, T6>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2, T3, T4, T5, T6>(this);
+    }
 
-	/// <summary>
-	/// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
-	/// </summary>
-	/// <typeparam name="T1">泛型参数一</typeparam>
-	/// <typeparam name="T2">泛型参数二</typeparam>
-	/// <typeparam name="T3">泛型参数三</typeparam>
-	/// <typeparam name="T4">泛型参数四</typeparam>
-	/// <typeparam name="T5">泛型参数五</typeparam>
-	/// <typeparam name="T6">泛型参数六</typeparam>
-	/// <typeparam name="T7">泛型参数七</typeparam>
-	/// <param name="func">等待当前对象成功后执行的内容</param>
-	/// <returns>返回整个方法链最终的成功失败结果</returns>
-	public OperateResult<T1, T2, T3, T4, T5, T6, T7> Then<T1, T2, T3, T4, T5, T6, T7>(Func<OperateResult<T1, T2, T3, T4, T5, T6, T7>> func)
-	{
-		return IsSuccess ? func() : CreateFailedResult<T1, T2, T3, T4, T5, T6, T7>(this);
-	}
+    /// <summary>
+    /// 指定接下来要做的是内容，当前对象如果成功，就返回接下来的执行结果，如果失败，就返回当前对象本身。
+    /// </summary>
+    /// <typeparam name="T1">泛型参数一</typeparam>
+    /// <typeparam name="T2">泛型参数二</typeparam>
+    /// <typeparam name="T3">泛型参数三</typeparam>
+    /// <typeparam name="T4">泛型参数四</typeparam>
+    /// <typeparam name="T5">泛型参数五</typeparam>
+    /// <typeparam name="T6">泛型参数六</typeparam>
+    /// <typeparam name="T7">泛型参数七</typeparam>
+    /// <param name="func">等待当前对象成功后执行的内容</param>
+    /// <returns>返回整个方法链最终的成功失败结果</returns>
+    public OperateResult<T1, T2, T3, T4, T5, T6, T7> Then<T1, T2, T3, T4, T5, T6, T7>(Func<OperateResult<T1, T2, T3, T4, T5, T6, T7>> func)
+    {
+        return IsSuccess ? func() : Error<T1, T2, T3, T4, T5, T6, T7>(this);
+    }
 
-	/// <summary>
-	/// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
-	/// </summary>
-	/// <typeparam name="T">目标数据类型</typeparam>
-	/// <param name="result">之前的结果对象</param>
-	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T> CreateFailedResult<T>(OperateResult result)
+    /// <summary>
+    /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+    /// </summary>
+    /// <typeparam name="T">目标数据类型</typeparam>
+    /// <param name="result">之前的结果对象</param>
+    /// <returns>带默认泛型对象的失败结果类</returns>
+    public static OperateResult<T> Error<T>(OperateResult result)
 	{
 		return new OperateResult<T>
 		{
@@ -413,7 +413,7 @@ public class OperateResult
 	/// <typeparam name="T2">目标数据类型二</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2> CreateFailedResult<T1, T2>(OperateResult result)
+	public static OperateResult<T1, T2> Error<T1, T2>(OperateResult result)
 	{
 		return new OperateResult<T1, T2>
 		{
@@ -430,7 +430,7 @@ public class OperateResult
 	/// <typeparam name="T3">目标数据类型三</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2, T3> CreateFailedResult<T1, T2, T3>(OperateResult result)
+	public static OperateResult<T1, T2, T3> Error<T1, T2, T3>(OperateResult result)
 	{
 		return new OperateResult<T1, T2, T3>
 		{
@@ -448,7 +448,7 @@ public class OperateResult
 	/// <typeparam name="T4">目标数据类型四</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2, T3, T4> CreateFailedResult<T1, T2, T3, T4>(OperateResult result)
+	public static OperateResult<T1, T2, T3, T4> Error<T1, T2, T3, T4>(OperateResult result)
 	{
 		return new OperateResult<T1, T2, T3, T4>
 		{
@@ -467,7 +467,7 @@ public class OperateResult
 	/// <typeparam name="T5">目标数据类型五</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2, T3, T4, T5> CreateFailedResult<T1, T2, T3, T4, T5>(OperateResult result)
+	public static OperateResult<T1, T2, T3, T4, T5> Error<T1, T2, T3, T4, T5>(OperateResult result)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5>
 		{
@@ -487,7 +487,7 @@ public class OperateResult
 	/// <typeparam name="T6">目标数据类型六</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2, T3, T4, T5, T6> CreateFailedResult<T1, T2, T3, T4, T5, T6>(OperateResult result)
+	public static OperateResult<T1, T2, T3, T4, T5, T6> Error<T1, T2, T3, T4, T5, T6>(OperateResult result)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5, T6>
 		{
@@ -508,7 +508,7 @@ public class OperateResult
 	/// <typeparam name="T7">目标数据类型七</typeparam>
 	/// <param name="result">之前的结果对象</param>
 	/// <returns>带默认泛型对象的失败结果类</returns>
-	public static OperateResult<T1, T2, T3, T4, T5, T6, T7> CreateFailedResult<T1, T2, T3, T4, T5, T6, T7>(OperateResult result)
+	public static OperateResult<T1, T2, T3, T4, T5, T6, T7> Error<T1, T2, T3, T4, T5, T6, T7>(OperateResult result)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5, T6, T7>
 		{
@@ -521,7 +521,7 @@ public class OperateResult
 	/// 创建并返回一个成功的结果对象
 	/// </summary>
 	/// <returns>成功的结果对象</returns>
-	public static OperateResult CreateSuccessResult()
+	public static OperateResult Ok()
 	{
 		return new OperateResult
 		{
@@ -535,7 +535,7 @@ public class OperateResult
 	/// <typeparam name="T">参数类型</typeparam>
 	/// <param name="value">类型的值对象</param>
 	/// <returns>成功的结果对象</returns>
-	public static OperateResult<T> CreateSuccessResult<T>(T value)
+	public static OperateResult<T> Ok<T>(T value)
 	{
 		return new OperateResult<T>
 		{
@@ -552,7 +552,7 @@ public class OperateResult
 	/// <param name="value1">类型一对象</param>
 	/// <param name="value2">类型二对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2> CreateSuccessResult<T1, T2>(T1 value1, T2 value2)
+	public static OperateResult<T1, T2> Ok<T1, T2>(T1 value1, T2 value2)
 	{
 		return new OperateResult<T1, T2>
 		{
@@ -572,7 +572,7 @@ public class OperateResult
 	/// <param name="value2">类型二对象</param>
 	/// <param name="value3">类型三对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2, T3> CreateSuccessResult<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
+	public static OperateResult<T1, T2, T3> Ok<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
 	{
 		return new OperateResult<T1, T2, T3>
 		{
@@ -595,7 +595,7 @@ public class OperateResult
 	/// <param name="value3">类型三对象</param>
 	/// <param name="value4">类型四对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2, T3, T4> CreateSuccessResult<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4)
+	public static OperateResult<T1, T2, T3, T4> Ok<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4)
 	{
 		return new OperateResult<T1, T2, T3, T4>
 		{
@@ -621,7 +621,7 @@ public class OperateResult
 	/// <param name="value4">类型四对象</param>
 	/// <param name="value5">类型五对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2, T3, T4, T5> CreateSuccessResult<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5)
+	public static OperateResult<T1, T2, T3, T4, T5> Ok<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5>
 		{
@@ -650,7 +650,7 @@ public class OperateResult
 	/// <param name="value5">类型五对象</param>
 	/// <param name="value6">类型六对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2, T3, T4, T5, T6> CreateSuccessResult<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6)
+	public static OperateResult<T1, T2, T3, T4, T5, T6> Ok<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5, T6>
 		{
@@ -682,7 +682,7 @@ public class OperateResult
 	/// <param name="value6">类型六对象</param>
 	/// <param name="value7">类型七对象</param>
 	/// <returns>成的结果对象</returns>
-	public static OperateResult<T1, T2, T3, T4, T5, T6, T7> CreateSuccessResult<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7)
+	public static OperateResult<T1, T2, T3, T4, T5, T6, T7> Ok<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7)
 	{
 		return new OperateResult<T1, T2, T3, T4, T5, T6, T7>
 		{
@@ -769,7 +769,7 @@ public class OperateResult<T> : OperateResult
 		OperateResult operateResult = check(Content);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T>(operateResult);
+			return Error<T>(operateResult);
 		}
 		return this;
 	}
@@ -792,7 +792,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -804,7 +804,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -817,7 +817,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -831,7 +831,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -846,7 +846,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -862,7 +862,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -879,7 +879,7 @@ public class OperateResult<T> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -959,7 +959,7 @@ public class OperateResult<T1, T2> : OperateResult
 		OperateResult operateResult = check(Content1, Content2);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T1, T2>(operateResult);
+			return Error<T1, T2>(operateResult);
 		}
 		return this;
 	}
@@ -982,7 +982,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -994,7 +994,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -1007,7 +1007,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -1021,7 +1021,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -1036,7 +1036,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -1052,7 +1052,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -1069,7 +1069,7 @@ public class OperateResult<T1, T2> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -1157,7 +1157,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 		OperateResult operateResult = check(Content1, Content2, Content3);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<T1, T2, T3>(operateResult);
+			return OperateResult.Error<T1, T2, T3>(operateResult);
 		}
 		return this;
 	}
@@ -1180,7 +1180,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, T3, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -1192,7 +1192,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, T3, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -1205,7 +1205,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, T3, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -1219,7 +1219,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, T3, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -1234,7 +1234,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, T3, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -1250,7 +1250,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, T3, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return base.IsSuccess ? func(Content1, Content2, Content3) : OperateResult.CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return base.IsSuccess ? func(Content1, Content2, Content3) : OperateResult.Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -1267,7 +1267,7 @@ public class OperateResult<T1, T2, T3> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, T3, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2, Content3) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -1361,7 +1361,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 		OperateResult operateResult = check(Content1, Content2, Content3, Content4);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T1, T2, T3, T4>(operateResult);
+			return Error<T1, T2, T3, T4>(operateResult);
 		}
 		return this;
 	}
@@ -1384,7 +1384,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, T3, T4, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -1396,7 +1396,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -1409,7 +1409,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -1423,7 +1423,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -1438,7 +1438,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -1454,7 +1454,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -1471,7 +1471,7 @@ public class OperateResult<T1, T2, T3, T4> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, T3, T4, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -1571,7 +1571,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 		OperateResult operateResult = check(Content1, Content2, Content3, Content4, Content5);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T1, T2, T3, T4, T5>(operateResult);
+			return Error<T1, T2, T3, T4, T5>(operateResult);
 		}
 		return this;
 	}
@@ -1594,7 +1594,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, T3, T4, T5, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -1606,7 +1606,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -1619,7 +1619,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -1633,7 +1633,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -1648,7 +1648,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -1664,7 +1664,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -1681,7 +1681,7 @@ public class OperateResult<T1, T2, T3, T4, T5> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, T3, T4, T5, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -1787,7 +1787,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 		OperateResult operateResult = check(Content1, Content2, Content3, Content4, Content5, Content6);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T1, T2, T3, T4, T5, T6>(operateResult);
+			return Error<T1, T2, T3, T4, T5, T6>(operateResult);
 		}
 		return this;
 	}
@@ -1810,7 +1810,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -1822,7 +1822,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -1835,7 +1835,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -1849,7 +1849,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -1864,7 +1864,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -1880,7 +1880,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -1897,7 +1897,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, T3, T4, T5, T6, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }
 
@@ -2009,7 +2009,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 		OperateResult operateResult = check(Content1, Content2, Content3, Content4, Content5, Content6, Content7);
 		if (!operateResult.IsSuccess)
 		{
-			return CreateFailedResult<T1, T2, T3, T4, T5, T6, T7>(operateResult);
+			return Error<T1, T2, T3, T4, T5, T6, T7>(operateResult);
 		}
 		return this;
 	}
@@ -2032,7 +2032,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult> Then<TResult>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult>(this);
 	}
 
 	/// <summary>
@@ -2044,7 +2044,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2> Then<TResult1, TResult2>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2>(this);
 	}
 
 	/// <summary>
@@ -2057,7 +2057,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3> Then<TResult1, TResult2, TResult3>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2, TResult3>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2, TResult3>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2, TResult3>(this);
 	}
 
 	/// <summary>
@@ -2071,7 +2071,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4> Then<TResult1, TResult2, TResult3, TResult4>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2, TResult3, TResult4>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2, TResult3, TResult4>(this);
 	}
 
 	/// <summary>
@@ -2086,7 +2086,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5> Then<TResult1, TResult2, TResult3, TResult4, TResult5>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2, TResult3, TResult4, TResult5>(this);
 	}
 
 	/// <summary>
@@ -2102,7 +2102,7 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6>(this);
 	}
 
 	/// <summary>
@@ -2119,6 +2119,6 @@ public class OperateResult<T1, T2, T3, T4, T5, T6, T7> : OperateResult
 	/// <returns>返回整个方法链最终的成功失败结果</returns>
 	public OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7> Then<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(Func<T1, T2, T3, T4, T5, T6, T7, OperateResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>> func)
 	{
-		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : CreateFailedResult<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
+		return IsSuccess ? func(Content1, Content2, Content3, Content4, Content5, Content6, Content7) : Error<TResult1, TResult2, TResult3, TResult4, TResult5, TResult6, TResult7>(this);
 	}
 }

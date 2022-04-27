@@ -1,5 +1,5 @@
 using Ops.Communication.Core;
-using Ops.Communication.Ethernet.Profinet.Omron;
+using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Extensions;
 
 namespace Ops.Communication.Address;
@@ -124,6 +124,6 @@ public class OmronFinsAddress : DeviceAddressDataBase
 			return new OperateResult<OmronFinsAddress>(ex.Message);
 		}
 
-		return OperateResult.CreateSuccessResult(omronFinsAddress);
+		return OperateResult.Ok(omronFinsAddress);
 	}
 }

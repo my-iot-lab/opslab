@@ -29,7 +29,7 @@ public class ReflectionHelper
 				continue;
 			}
 
-			DeviceAddressAttribute? attr = null;
+			DeviceAddressAttribute attr = null;
 			for (int j = 0; j < customAttributes.Length; j++)
 			{
 				var attr2 = (DeviceAddressAttribute)customAttributes[j];
@@ -64,7 +64,7 @@ public class ReflectionHelper
 				OperateResult<short> operateResult = readWrite.ReadInt16(attr.Address);
 				if (!operateResult.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult);
+					return OperateResult.Error<T>(operateResult);
 				}
 				propertyInfo.SetValue(obj, operateResult.Content, null);
 			}
@@ -73,7 +73,7 @@ public class ReflectionHelper
 				var operateResult2 = readWrite.ReadInt16(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult2.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult2);
+					return OperateResult.Error<T>(operateResult2);
 				}
 				propertyInfo.SetValue(obj, operateResult2.Content, null);
 			}
@@ -82,7 +82,7 @@ public class ReflectionHelper
 				OperateResult<ushort> operateResult3 = readWrite.ReadUInt16(attr.Address);
 				if (!operateResult3.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult3);
+					return OperateResult.Error<T>(operateResult3);
 				}
 				propertyInfo.SetValue(obj, operateResult3.Content, null);
 			}
@@ -91,7 +91,7 @@ public class ReflectionHelper
 				var operateResult4 = readWrite.ReadUInt16(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult4.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult4);
+					return OperateResult.Error<T>(operateResult4);
 				}
 				propertyInfo.SetValue(obj, operateResult4.Content, null);
 			}
@@ -100,7 +100,7 @@ public class ReflectionHelper
 				OperateResult<int> operateResult5 = readWrite.ReadInt32(attr.Address);
 				if (!operateResult5.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult5);
+					return OperateResult.Error<T>(operateResult5);
 				}
 				propertyInfo.SetValue(obj, operateResult5.Content, null);
 			}
@@ -109,7 +109,7 @@ public class ReflectionHelper
 				var operateResult6 = readWrite.ReadInt32(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult6.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult6);
+					return OperateResult.Error<T>(operateResult6);
 				}
 				propertyInfo.SetValue(obj, operateResult6.Content, null);
 			}
@@ -118,7 +118,7 @@ public class ReflectionHelper
 				OperateResult<uint> operateResult7 = readWrite.ReadUInt32(attr.Address);
 				if (!operateResult7.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult7);
+					return OperateResult.Error<T>(operateResult7);
 				}
 				propertyInfo.SetValue(obj, operateResult7.Content, null);
 			}
@@ -127,7 +127,7 @@ public class ReflectionHelper
 				OperateResult<uint[]> operateResult8 = readWrite.ReadUInt32(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult8.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult8);
+					return OperateResult.Error<T>(operateResult8);
 				}
 				propertyInfo.SetValue(obj, operateResult8.Content, null);
 			}
@@ -136,7 +136,7 @@ public class ReflectionHelper
 				OperateResult<long> operateResult9 = readWrite.ReadInt64(attr.Address);
 				if (!operateResult9.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult9);
+					return OperateResult.Error<T>(operateResult9);
 				}
 				propertyInfo.SetValue(obj, operateResult9.Content, null);
 			}
@@ -145,7 +145,7 @@ public class ReflectionHelper
 				OperateResult<long[]> operateResult10 = readWrite.ReadInt64(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult10.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult10);
+					return OperateResult.Error<T>(operateResult10);
 				}
 				propertyInfo.SetValue(obj, operateResult10.Content, null);
 			}
@@ -154,7 +154,7 @@ public class ReflectionHelper
 				OperateResult<ulong> operateResult11 = readWrite.ReadUInt64(attr.Address);
 				if (!operateResult11.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult11);
+					return OperateResult.Error<T>(operateResult11);
 				}
 				propertyInfo.SetValue(obj, operateResult11.Content, null);
 			}
@@ -163,7 +163,7 @@ public class ReflectionHelper
 				OperateResult<ulong[]> operateResult12 = readWrite.ReadUInt64(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult12.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult12);
+					return OperateResult.Error<T>(operateResult12);
 				}
 				propertyInfo.SetValue(obj, operateResult12.Content, null);
 			}
@@ -172,7 +172,7 @@ public class ReflectionHelper
 				OperateResult<float> operateResult13 = readWrite.ReadFloat(attr.Address);
 				if (!operateResult13.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult13);
+					return OperateResult.Error<T>(operateResult13);
 				}
 				propertyInfo.SetValue(obj, operateResult13.Content, null);
 			}
@@ -181,7 +181,7 @@ public class ReflectionHelper
 				OperateResult<float[]> operateResult14 = readWrite.ReadFloat(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult14.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult14);
+					return OperateResult.Error<T>(operateResult14);
 				}
 				propertyInfo.SetValue(obj, operateResult14.Content, null);
 			}
@@ -190,7 +190,7 @@ public class ReflectionHelper
 				OperateResult<double> operateResult15 = readWrite.ReadDouble(attr.Address);
 				if (!operateResult15.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult15);
+					return OperateResult.Error<T>(operateResult15);
 				}
 				propertyInfo.SetValue(obj, operateResult15.Content, null);
 			}
@@ -199,7 +199,7 @@ public class ReflectionHelper
 				OperateResult<double[]> operateResult16 = readWrite.ReadDouble(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult16.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult16);
+					return OperateResult.Error<T>(operateResult16);
 				}
 				propertyInfo.SetValue(obj, operateResult16.Content, null);
 			}
@@ -208,7 +208,7 @@ public class ReflectionHelper
 				OperateResult<string> operateResult17 = readWrite.ReadString(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult17.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult17);
+					return OperateResult.Error<T>(operateResult17);
 				}
 				propertyInfo.SetValue(obj, operateResult17.Content, null);
 			}
@@ -217,7 +217,7 @@ public class ReflectionHelper
 				OperateResult<byte[]> operateResult18 = readWrite.Read(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult18.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult18);
+					return OperateResult.Error<T>(operateResult18);
 				}
 				propertyInfo.SetValue(obj, operateResult18.Content, null);
 			}
@@ -226,7 +226,7 @@ public class ReflectionHelper
 				OperateResult<bool> operateResult19 = readWrite.ReadBool(attr.Address);
 				if (!operateResult19.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult19);
+					return OperateResult.Error<T>(operateResult19);
 				}
 				propertyInfo.SetValue(obj, operateResult19.Content, null);
 			}
@@ -235,13 +235,13 @@ public class ReflectionHelper
 				OperateResult<bool[]> operateResult20 = readWrite.ReadBool(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!operateResult20.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(operateResult20);
+					return OperateResult.Error<T>(operateResult20);
 				}
 				propertyInfo.SetValue(obj, operateResult20.Content, null);
 			}
 		}
 
-		return OperateResult.CreateSuccessResult((T)obj);
+		return OperateResult.Ok((T)obj);
 	}
 
 	/// <summary>
@@ -462,7 +462,7 @@ public class ReflectionHelper
 				}
 			}
 		}
-		return OperateResult.CreateSuccessResult(data);
+		return OperateResult.Ok(data);
 	}
 
 	/// <summary>
@@ -516,7 +516,7 @@ public class ReflectionHelper
 				OperateResult<short> valueResult8 = await readWrite.ReadInt16Async(attr.Address);
 				if (!valueResult8.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult8);
+					return OperateResult.Error<T>(valueResult8);
 				}
 				property.SetValue(obj, valueResult8.Content, null);
 			}
@@ -525,7 +525,7 @@ public class ReflectionHelper
 				OperateResult<short[]> valueResult9 = await readWrite.ReadInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult9.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult9);
+					return OperateResult.Error<T>(valueResult9);
 				}
 				property.SetValue(obj, valueResult9.Content, null);
 			}
@@ -534,7 +534,7 @@ public class ReflectionHelper
 				OperateResult<ushort> valueResult12 = await readWrite.ReadUInt16Async(attr.Address);
 				if (!valueResult12.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult12);
+					return OperateResult.Error<T>(valueResult12);
 				}
 				property.SetValue(obj, valueResult12.Content, null);
 			}
@@ -543,7 +543,7 @@ public class ReflectionHelper
 				OperateResult<ushort[]> valueResult13 = await readWrite.ReadUInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult13.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult13);
+					return OperateResult.Error<T>(valueResult13);
 				}
 				property.SetValue(obj, valueResult13.Content, null);
 			}
@@ -552,7 +552,7 @@ public class ReflectionHelper
 				OperateResult<int> valueResult14 = await readWrite.ReadInt32Async(attr.Address);
 				if (!valueResult14.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult14);
+					return OperateResult.Error<T>(valueResult14);
 				}
 				property.SetValue(obj, valueResult14.Content, null);
 			}
@@ -561,7 +561,7 @@ public class ReflectionHelper
 				OperateResult<int[]> valueResult17 = await readWrite.ReadInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult17.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult17);
+					return OperateResult.Error<T>(valueResult17);
 				}
 				property.SetValue(obj, valueResult17.Content, null);
 			}
@@ -570,7 +570,7 @@ public class ReflectionHelper
 				OperateResult<uint> valueResult18 = await readWrite.ReadUInt32Async(attr.Address);
 				if (!valueResult18.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult18);
+					return OperateResult.Error<T>(valueResult18);
 				}
 				property.SetValue(obj, valueResult18.Content, null);
 			}
@@ -579,7 +579,7 @@ public class ReflectionHelper
 				OperateResult<uint[]> valueResult19 = await readWrite.ReadUInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult19.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult19);
+					return OperateResult.Error<T>(valueResult19);
 				}
 				property.SetValue(obj, valueResult19.Content, null);
 			}
@@ -588,7 +588,7 @@ public class ReflectionHelper
 				OperateResult<long> valueResult20 = await readWrite.ReadInt64Async(attr.Address);
 				if (!valueResult20.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult20);
+					return OperateResult.Error<T>(valueResult20);
 				}
 				property.SetValue(obj, valueResult20.Content, null);
 			}
@@ -597,7 +597,7 @@ public class ReflectionHelper
 				OperateResult<long[]> valueResult16 = await readWrite.ReadInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult16.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult16);
+					return OperateResult.Error<T>(valueResult16);
 				}
 				property.SetValue(obj, valueResult16.Content, null);
 			}
@@ -606,7 +606,7 @@ public class ReflectionHelper
 				OperateResult<ulong> valueResult15 = await readWrite.ReadUInt64Async(attr.Address);
 				if (!valueResult15.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult15);
+					return OperateResult.Error<T>(valueResult15);
 				}
 				property.SetValue(obj, valueResult15.Content, null);
 			}
@@ -615,7 +615,7 @@ public class ReflectionHelper
 				OperateResult<ulong[]> valueResult11 = await readWrite.ReadUInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult11.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult11);
+					return OperateResult.Error<T>(valueResult11);
 				}
 				property.SetValue(obj, valueResult11.Content, null);
 			}
@@ -624,7 +624,7 @@ public class ReflectionHelper
 				OperateResult<float> valueResult10 = await readWrite.ReadFloatAsync(attr.Address);
 				if (!valueResult10.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult10);
+					return OperateResult.Error<T>(valueResult10);
 				}
 				property.SetValue(obj, valueResult10.Content, null);
 			}
@@ -633,7 +633,7 @@ public class ReflectionHelper
 				OperateResult<float[]> valueResult7 = await readWrite.ReadFloatAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult7.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult7);
+					return OperateResult.Error<T>(valueResult7);
 				}
 				property.SetValue(obj, valueResult7.Content, null);
 			}
@@ -642,7 +642,7 @@ public class ReflectionHelper
 				OperateResult<double> valueResult6 = await readWrite.ReadDoubleAsync(attr.Address);
 				if (!valueResult6.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult6);
+					return OperateResult.Error<T>(valueResult6);
 				}
 				property.SetValue(obj, valueResult6.Content, null);
 			}
@@ -651,7 +651,7 @@ public class ReflectionHelper
 				OperateResult<double[]> valueResult5 = await readWrite.ReadDoubleAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult5.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult5);
+					return OperateResult.Error<T>(valueResult5);
 				}
 				property.SetValue(obj, valueResult5.Content, null);
 			}
@@ -660,7 +660,7 @@ public class ReflectionHelper
 				OperateResult<string> valueResult4 = await readWrite.ReadStringAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult4.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult4);
+					return OperateResult.Error<T>(valueResult4);
 				}
 				property.SetValue(obj, valueResult4.Content, null);
 			}
@@ -669,7 +669,7 @@ public class ReflectionHelper
 				OperateResult<byte[]> valueResult3 = await readWrite.ReadAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult3.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult3);
+					return OperateResult.Error<T>(valueResult3);
 				}
 				property.SetValue(obj, valueResult3.Content, null);
 			}
@@ -678,7 +678,7 @@ public class ReflectionHelper
 				OperateResult<bool> valueResult2 = await readWrite.ReadBoolAsync(attr.Address);
 				if (!valueResult2.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult2);
+					return OperateResult.Error<T>(valueResult2);
 				}
 				property.SetValue(obj, valueResult2.Content, null);
 			}
@@ -687,12 +687,12 @@ public class ReflectionHelper
 				OperateResult<bool[]> valueResult = await readWrite.ReadBoolAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
 				if (!valueResult.IsSuccess)
 				{
-					return OperateResult.CreateFailedResult<T>(valueResult);
+					return OperateResult.Error<T>(valueResult);
 				}
 				property.SetValue(obj, valueResult.Content, null);
 			}
 		}
-		return OperateResult.CreateSuccessResult((T)obj);
+		return OperateResult.Ok((T)obj);
 	}
 
 	/// <summary>
@@ -894,6 +894,6 @@ public class ReflectionHelper
 			}
 		}
 
-		return OperateResult.CreateSuccessResult(data);
+		return OperateResult.Ok(data);
 	}
 }

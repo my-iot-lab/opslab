@@ -18,7 +18,7 @@ public abstract class NetworkBase
 	/// <summary>
 	/// 对客户端而言是的通讯用的套接字，对服务器来说是用于侦听的套接字。
 	/// </summary>
-	protected Socket? CoreSocket = null;
+	protected Socket CoreSocket = null;
 
 	/// <summary>
 	/// 文件传输的时候的缓存大小，直接影响传输的速度，值越大，传输速度越快，越占内存，默认为100K大小。
@@ -57,7 +57,7 @@ public abstract class NetworkBase
 	{
 		if (length == 0)
 		{
-			return OperateResult.CreateSuccessResult(Array.Empty<byte>());
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 
 		try
@@ -66,7 +66,7 @@ public abstract class NetworkBase
 			if (length > 0)
 			{
 				byte[] value = NetSupport.ReadBytesFromSocket(socket, length, reportProgress);
-				return OperateResult.CreateSuccessResult(value);
+				return OperateResult.Ok(value);
 			}
 
 			byte[] array = new byte[2048];
@@ -76,7 +76,7 @@ public abstract class NetworkBase
 				throw new RemoteCloseException();
 			}
 
-			return OperateResult.CreateSuccessResult(SoftBasic.ArraySelectBegin(array, num));
+			return OperateResult.Ok(SoftBasic.ArraySelectBegin(array, num));
 		}
 		catch (RemoteCloseException)
 		{
@@ -135,7 +135,7 @@ public abstract class NetworkBase
 			{
 				return new OperateResult<byte[]>(ErrorCode.ReceiveDataTimeout.Desc());
 			}
-			return OperateResult.CreateSuccessResult(list.ToArray());
+			return OperateResult.Ok(list.ToArray());
 		}
 		catch (Exception ex)
 		{
@@ -182,7 +182,7 @@ public abstract class NetworkBase
 			{
 				return new OperateResult<byte[]>(ErrorCode.ReceiveDataTimeout.Desc());
 			}
-			return OperateResult.CreateSuccessResult(list.ToArray());
+			return OperateResult.Ok(list.ToArray());
 		}
 		catch (Exception ex)
 		{
@@ -221,7 +221,7 @@ public abstract class NetworkBase
 		}
 
 		netMessage.ContentBytes = operateResult2.Content;
-		return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(operateResult.Content, operateResult2.Content));
+		return OperateResult.Ok(SoftBasic.SpliceArray(operateResult.Content, operateResult2.Content));
 	}
 
 	/// <summary>
@@ -234,7 +234,7 @@ public abstract class NetworkBase
 	{
 		if (data == null)
 		{
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 
 		return Send(socket, data, 0, data.Length);
@@ -252,7 +252,7 @@ public abstract class NetworkBase
 	{
 		if (data == null)
 		{
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 
 		try
@@ -266,7 +266,7 @@ public abstract class NetworkBase
 			}
 			while (num < size);
 
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 		catch (Exception ex)
 		{
@@ -309,7 +309,7 @@ public abstract class NetworkBase
 	/// <param name="timeOut">连接的超时时间</param>
 	/// <param name="local">如果需要绑定本地的IP地址，就需要设置当前的对象</param>
 	/// <returns>返回套接字的封装结果对象</returns>
-	protected OperateResult<Socket> CreateSocketAndConnect(IPEndPoint endPoint, int timeOut, IPEndPoint? local = null)
+	protected OperateResult<Socket> CreateSocketAndConnect(IPEndPoint endPoint, int timeOut, IPEndPoint local = null)
 	{
 		int num = 0;
 		while (true)
@@ -328,7 +328,7 @@ public abstract class NetworkBase
 				connectErrorCount = 0;
 				hslTimeOut.IsSuccessful = true;
 
-				return OperateResult.CreateSuccessResult(socket);
+				return OperateResult.Ok(socket);
 			}
 			catch (Exception ex)
 			{
@@ -385,7 +385,7 @@ public abstract class NetworkBase
 
 		manualResetEvent.WaitOne();
 		manualResetEvent.Close();
-		return fileStateObject.IsError ? new OperateResult<int>(fileStateObject.ErrerMsg) : OperateResult.CreateSuccessResult(fileStateObject.AlreadyDealLength);
+		return fileStateObject.IsError ? new OperateResult<int>(fileStateObject.ErrerMsg) : OperateResult.Ok(fileStateObject.AlreadyDealLength);
 	}
 
 	private void ReadStreamCallBack(IAsyncResult ar)
@@ -442,7 +442,7 @@ public abstract class NetworkBase
 				Message = fileStateObject.ErrerMsg
 			};
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	private void WriteStreamCallBack(IAsyncResult ar)
@@ -530,7 +530,7 @@ public abstract class NetworkBase
 	/// <returns>是否发送成功</returns>
 	protected OperateResult SendStringAndCheckReceive(Socket socket, int customer, string send)
 	{
-		byte[]? send2 = string.IsNullOrEmpty(send) ? null : Encoding.Unicode.GetBytes(send);
+		byte[] send2 = string.IsNullOrEmpty(send) ? null : Encoding.Unicode.GetBytes(send);
 		return SendBaseAndCheckReceive(socket, 1001, customer, send2);
 	}
 
@@ -571,7 +571,7 @@ public abstract class NetworkBase
 		var operateResult = Receive(socket, 32, timeOut);
 		if (!operateResult.IsSuccess)
 		{
-			return operateResult.ConvertFailed<byte[], byte[]>();
+			return operateResult.ConvertError<byte[], byte[]>();
 		}
 
 		if (!CheckRemoteToken(operateResult.Content))
@@ -584,19 +584,19 @@ public abstract class NetworkBase
 		var operateResult2 = Receive(socket, num, timeOut);
 		if (!operateResult2.IsSuccess)
 		{
-			return operateResult2.ConvertFailed<byte[], byte[]>();
+			return operateResult2.ConvertError<byte[], byte[]>();
 		}
 
 		var operateResult3 = SendLong(socket, 32 + num);
 		if (!operateResult3.IsSuccess)
 		{
-			return operateResult3.ConvertFailed<byte[], byte[]>();
+			return operateResult3.ConvertError<byte[], byte[]>();
 		}
 
 		byte[] content = operateResult.Content;
 		byte[] content2 = operateResult2.Content;
 		content2 = OpsProtocol.CommandAnalysis(content, content2);
-		return OperateResult.CreateSuccessResult(content, content2);
+		return OperateResult.Ok(content, content2);
 	}
 
 	/// <summary>
@@ -610,7 +610,7 @@ public abstract class NetworkBase
 		var operateResult = ReceiveAndCheckBytes(socket, timeOut);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, string>(operateResult);
+			return OperateResult.Error<int, string>(operateResult);
 		}
 
 		if (BitConverter.ToInt32(operateResult.Content1, 0) != 1001)
@@ -623,7 +623,7 @@ public abstract class NetworkBase
 		{
 			operateResult.Content2 = new byte[0];
 		}
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(operateResult.Content1, 4), Encoding.Unicode.GetString(operateResult.Content2));
+		return OperateResult.Ok(BitConverter.ToInt32(operateResult.Content1, 4), Encoding.Unicode.GetString(operateResult.Content2));
 	}
 
 	/// <summary>
@@ -637,7 +637,7 @@ public abstract class NetworkBase
 		var operateResult = ReceiveAndCheckBytes(socket, timeOut);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, string[]>(operateResult);
+			return OperateResult.Error<int, string[]>(operateResult);
 		}
 		if (BitConverter.ToInt32(operateResult.Content1, 0) != 1005)
 		{
@@ -649,7 +649,7 @@ public abstract class NetworkBase
 		{
 			operateResult.Content2 = new byte[4];
 		}
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(operateResult.Content1, 4), OpsProtocol.UnPackStringArrayFromByte(operateResult.Content2));
+		return OperateResult.Ok(BitConverter.ToInt32(operateResult.Content1, 4), OpsProtocol.UnPackStringArrayFromByte(operateResult.Content2));
 	}
 
 	/// <summary>
@@ -663,7 +663,7 @@ public abstract class NetworkBase
 		var operateResult = ReceiveAndCheckBytes(socket, timeout);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, byte[]>(operateResult);
+			return OperateResult.Error<int, byte[]>(operateResult);
 		}
 
 		if (BitConverter.ToInt32(operateResult.Content1, 0) != 1002)
@@ -671,7 +671,7 @@ public abstract class NetworkBase
 			socket?.Close();
 			return new OperateResult<int, byte[]>("CommandHeadCodeCheckFailed");
 		}
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(operateResult.Content1, 4), operateResult.Content2);
+		return OperateResult.Ok(BitConverter.ToInt32(operateResult.Content1, 4), operateResult.Content2);
 	}
 
 	/// <summary>
@@ -684,9 +684,9 @@ public abstract class NetworkBase
 		var operateResult = Receive(socket, 8, -1);
 		if (operateResult.IsSuccess)
 		{
-			return OperateResult.CreateSuccessResult(BitConverter.ToInt64(operateResult.Content, 0));
+			return OperateResult.Ok(BitConverter.ToInt64(operateResult.Content, 0));
 		}
-		return OperateResult.CreateFailedResult<long>(operateResult);
+		return OperateResult.Error<long>(operateResult);
 	}
 
 	/// <summary>
@@ -748,7 +748,7 @@ public abstract class NetworkBase
 				report?.Invoke(num, receive);
 			}
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -793,7 +793,7 @@ public abstract class NetworkBase
 				report?.Invoke(num, totalLength);
 			}
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -803,7 +803,7 @@ public abstract class NetworkBase
 	/// <param name="timeOut"></param>
 	/// <param name="local">不为 null 时，表示该 Socket 是一个 Bind 的侦听套接字</param>
 	/// <returns></returns>
-	protected async Task<OperateResult<Socket>> CreateSocketAndConnectAsync(IPEndPoint endPoint, int timeOut, IPEndPoint? local = null)
+	protected async Task<OperateResult<Socket>> CreateSocketAndConnectAsync(IPEndPoint endPoint, int timeOut, IPEndPoint local = null)
 	{
 		int connectCount = 0;
 		while (true)
@@ -820,7 +820,7 @@ public abstract class NetworkBase
 				await Task.Factory.FromAsync(socket.BeginConnect(endPoint, null, socket), socket.EndConnect);
 				connectErrorCount = 0;
 				connectTimeout.IsSuccessful = true;
-				return OperateResult.CreateSuccessResult(socket);
+				return OperateResult.Ok(socket);
 			}
 			catch (Exception ex)
 			{
@@ -859,7 +859,7 @@ public abstract class NetworkBase
 	{
 		if (length == 0)
 		{
-			return OperateResult.CreateSuccessResult(new byte[0]);
+			return OperateResult.Ok(new byte[0]);
 		}
 
 		var hslTimeOut = OpsTimeOut.HandleTimeOutCheck(socket, timeOut);
@@ -886,7 +886,7 @@ public abstract class NetworkBase
 				while (alreadyCount < length);
 
 				hslTimeOut.IsSuccessful = true;
-				return OperateResult.CreateSuccessResult(buffer);
+				return OperateResult.Ok(buffer);
 			}
 
 			byte[] buffer2 = new byte[2048];
@@ -897,7 +897,7 @@ public abstract class NetworkBase
 			}
 
 			hslTimeOut.IsSuccessful = true;
-			return OperateResult.CreateSuccessResult(SoftBasic.ArraySelectBegin(buffer2, count));
+			return OperateResult.Ok(SoftBasic.ArraySelectBegin(buffer2, count));
 		}
 		catch (RemoteCloseException)
 		{
@@ -956,7 +956,7 @@ public abstract class NetworkBase
 				return new OperateResult<byte[]>("ReceiveDataTimeout");
 			}
 
-			return OperateResult.CreateSuccessResult(bufferArray.ToArray());
+			return OperateResult.Ok(bufferArray.ToArray());
 		}
 		catch (Exception ex2)
 		{
@@ -996,7 +996,7 @@ public abstract class NetworkBase
 			{
 				return new OperateResult<byte[]>(ErrorCode.ReceiveDataTimeout.Desc());
 			}
-			return OperateResult.CreateSuccessResult(bufferArray.ToArray());
+			return OperateResult.Ok(bufferArray.ToArray());
 		}
 		catch (Exception ex)
 		{
@@ -1009,7 +1009,7 @@ public abstract class NetworkBase
 	{
 		if (data == null)
 		{
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 		return await SendAsync(socket, data, 0, data.Length);
 	}
@@ -1018,7 +1018,7 @@ public abstract class NetworkBase
 	{
 		if (data == null)
 		{
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 
 		int alreadyCount = 0;
@@ -1032,7 +1032,7 @@ public abstract class NetworkBase
 			}
 			while (alreadyCount < size);
 
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 		catch (Exception ex)
 		{
@@ -1067,14 +1067,14 @@ public abstract class NetworkBase
 		}
 
 		netMessage.ContentBytes = contentResult.Content;
-		return OperateResult.CreateSuccessResult(SoftBasic.SpliceArray(headResult.Content, contentResult.Content));
+		return OperateResult.Ok(SoftBasic.SpliceArray(headResult.Content, contentResult.Content));
 	}
 
 	protected async Task<OperateResult<int>> ReadStreamAsync(Stream stream, byte[] buffer)
 	{
 		try
 		{
-			return OperateResult.CreateSuccessResult(await stream.ReadAsync(buffer, 0, buffer.Length));
+			return OperateResult.Ok(await stream.ReadAsync(buffer, 0, buffer.Length));
 		}
 		catch (Exception ex)
 		{
@@ -1089,7 +1089,7 @@ public abstract class NetworkBase
 		try
 		{
 			await stream.WriteAsync(buffer, alreadyCount, buffer.Length - alreadyCount);
-			return OperateResult.CreateSuccessResult(alreadyCount);
+			return OperateResult.Ok(alreadyCount);
 		}
 		catch (Exception ex)
 		{
@@ -1103,9 +1103,9 @@ public abstract class NetworkBase
 		var read = await ReceiveAsync(socket, 8, -1);
 		if (read.IsSuccess)
 		{
-			return OperateResult.CreateSuccessResult(BitConverter.ToInt64(read.Content, 0));
+			return OperateResult.Ok(BitConverter.ToInt64(read.Content, 0));
 		}
-		return OperateResult.CreateFailedResult<long>(read);
+		return OperateResult.Error<long>(read);
 	}
 
 	private async Task<OperateResult> SendLongAsync(Socket socket, long value)
@@ -1162,7 +1162,7 @@ public abstract class NetworkBase
 		OperateResult<byte[]> headResult = await ReceiveAsync(socket, 32, timeout);
 		if (!headResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<byte[], byte[]>(headResult);
+			return OperateResult.Error<byte[], byte[]>(headResult);
 		}
 
 		if (!CheckRemoteToken(headResult.Content))
@@ -1175,19 +1175,19 @@ public abstract class NetworkBase
 		OperateResult<byte[]> contentResult = await ReceiveAsync(socket, contentLength, timeout);
 		if (!contentResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<byte[], byte[]>(contentResult);
+			return OperateResult.Error<byte[], byte[]>(contentResult);
 		}
 
 		OperateResult checkResult = await SendLongAsync(socket, 32 + contentLength);
 		if (!checkResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<byte[], byte[]>(checkResult);
+			return OperateResult.Error<byte[], byte[]>(checkResult);
 		}
 
 		byte[] head = headResult.Content;
 		byte[] content2 = contentResult.Content;
 		content2 = OpsProtocol.CommandAnalysis(head, content2);
-		return OperateResult.CreateSuccessResult(head, content2);
+		return OperateResult.Ok(head, content2);
 	}
 
 	protected async Task<OperateResult<int, string>> ReceiveStringContentFromSocketAsync(Socket socket, int timeOut = 30000)
@@ -1195,7 +1195,7 @@ public abstract class NetworkBase
 		OperateResult<byte[], byte[]> receive = await ReceiveAndCheckBytesAsync(socket, timeOut);
 		if (!receive.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, string>(receive);
+			return OperateResult.Error<int, string>(receive);
 		}
 
 		if (BitConverter.ToInt32(receive.Content1, 0) != 1001)
@@ -1208,7 +1208,7 @@ public abstract class NetworkBase
 		{
 			receive.Content2 = new byte[0];
 		}
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(receive.Content1, 4), Encoding.Unicode.GetString(receive.Content2));
+		return OperateResult.Ok(BitConverter.ToInt32(receive.Content1, 4), Encoding.Unicode.GetString(receive.Content2));
 	}
 
 	protected async Task<OperateResult<int, string[]>> ReceiveStringArrayContentFromSocketAsync(Socket socket, int timeOut = 30000)
@@ -1216,7 +1216,7 @@ public abstract class NetworkBase
 		var receive = await ReceiveAndCheckBytesAsync(socket, timeOut);
 		if (!receive.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, string[]>(receive);
+			return OperateResult.Error<int, string[]>(receive);
 		}
 
 		if (BitConverter.ToInt32(receive.Content1, 0) != 1005)
@@ -1229,7 +1229,7 @@ public abstract class NetworkBase
 		{
 			receive.Content2 = new byte[4];
 		}
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(receive.Content1, 4), OpsProtocol.UnPackStringArrayFromByte(receive.Content2));
+		return OperateResult.Ok(BitConverter.ToInt32(receive.Content1, 4), OpsProtocol.UnPackStringArrayFromByte(receive.Content2));
 	}
 
 	protected async Task<OperateResult<int, byte[]>> ReceiveBytesContentFromSocketAsync(Socket socket, int timeout = 30000)
@@ -1237,7 +1237,7 @@ public abstract class NetworkBase
 		var receive = await ReceiveAndCheckBytesAsync(socket, timeout);
 		if (!receive.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, byte[]>(receive);
+			return OperateResult.Error<int, byte[]>(receive);
 		}
 
 		if (BitConverter.ToInt32(receive.Content1, 0) != 1002)
@@ -1246,7 +1246,7 @@ public abstract class NetworkBase
 			return new OperateResult<int, byte[]>("CommandHeadCodeCheckFailed");
 		}
 
-		return OperateResult.CreateSuccessResult(BitConverter.ToInt32(receive.Content1, 4), receive.Content2);
+		return OperateResult.Ok(BitConverter.ToInt32(receive.Content1, 4), receive.Content2);
 	}
 
 	protected async Task<OperateResult> SendStreamToSocketAsync(Socket socket, Stream stream, long receive, Action<long, long> report, bool reportByPercent)
@@ -1288,7 +1288,7 @@ public abstract class NetworkBase
 				report?.Invoke(SendTotal, receive);
 			}
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	protected async Task<OperateResult> WriteStreamFromSocketAsync(Socket socket, Stream stream, long totalLength, Action<long, long> report, bool reportByPercent)
@@ -1325,7 +1325,7 @@ public abstract class NetworkBase
 				report?.Invoke(count_receive, totalLength);
 			}
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -1338,20 +1338,20 @@ public abstract class NetworkBase
 		var operateResult = Receive(socket, 32, 10000);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, int, byte[]>(operateResult);
+			return OperateResult.Error<int, int, byte[]>(operateResult);
 		}
 
 		int length = BitConverter.ToInt32(operateResult.Content, operateResult.Content.Length - 4);
 		var operateResult2 = Receive(socket, length);
 		if (!operateResult2.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, int, byte[]>(operateResult2);
+			return OperateResult.Error<int, int, byte[]>(operateResult2);
 		}
 
 		byte[] value = OpsProtocol.CommandAnalysis(operateResult.Content, operateResult2.Content);
 		int value2 = BitConverter.ToInt32(operateResult.Content, 0);
 		int value3 = BitConverter.ToInt32(operateResult.Content, 4);
-		return OperateResult.CreateSuccessResult(value2, value3, value);
+		return OperateResult.Ok(value2, value3, value);
 	}
 
 	protected async Task<OperateResult<int, int, byte[]>> ReceiveHslMessageAsync(Socket socket)
@@ -1359,20 +1359,20 @@ public abstract class NetworkBase
 		var receiveHead = await ReceiveAsync(socket, 32, 10000);
 		if (!receiveHead.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, int, byte[]>(receiveHead);
+			return OperateResult.Error<int, int, byte[]>(receiveHead);
 		}
 
 		int receive_length = BitConverter.ToInt32(receiveHead.Content, receiveHead.Content.Length - 4);
 		var receiveContent = await ReceiveAsync(socket, receive_length);
 		if (!receiveContent.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<int, int, byte[]>(receiveContent);
+			return OperateResult.Error<int, int, byte[]>(receiveContent);
 		}
 
 		byte[] Content = OpsProtocol.CommandAnalysis(receiveHead.Content, receiveContent.Content);
 		int protocol = BitConverter.ToInt32(receiveHead.Content, 0);
 		int customer = BitConverter.ToInt32(receiveHead.Content, 4);
-		return OperateResult.CreateSuccessResult(protocol, customer, Content);
+		return OperateResult.Ok(protocol, customer, Content);
 	}
 
 	/// <summary>

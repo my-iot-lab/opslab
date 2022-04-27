@@ -148,6 +148,6 @@ public class S7AddressData : DeviceAddressDataBase
 			return new OperateResult<S7AddressData>(ex.Message);
 		}
 
-		return OperateResult.CreateSuccessResult(s7AddressData);
+		return OperateResult.Ok(s7AddressData);
 	}
 }

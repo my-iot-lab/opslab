@@ -60,7 +60,7 @@ public class NetworkUdpBase : NetworkBase
 
 	protected virtual OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
 	{
-		return OperateResult.CreateSuccessResult(response);
+		return OperateResult.Ok(response);
 	}
 
 	public virtual OperateResult<byte[]> ReadFromCoreServer(byte[] send)
@@ -93,12 +93,12 @@ public class NetworkUdpBase : NetworkBase
 			if (ReceiveTimeout < 0)
 			{
 				hybirdLock.Leave();
-				return OperateResult.CreateSuccessResult(new byte[0]);
+				return OperateResult.Ok(new byte[0]);
 			}
 			if (!hasResponseData)
 			{
 				hybirdLock.Leave();
-				return OperateResult.CreateSuccessResult(new byte[0]);
+				return OperateResult.Ok(new byte[0]);
 			}
 
 			socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, ReceiveTimeout);
@@ -111,7 +111,7 @@ public class NetworkUdpBase : NetworkBase
 
 			Logger?.LogDebug($"{ToString()} Receive: {SoftBasic.ByteToHexString(array3)}");
 			connectErrorCount = 0;
-			return usePackAndUnpack ? UnpackResponseContent(array, array3) : OperateResult.CreateSuccessResult(array3);
+			return usePackAndUnpack ? UnpackResponseContent(array, array3) : OperateResult.Ok(array3);
 		}
 		catch (Exception ex)
 		{

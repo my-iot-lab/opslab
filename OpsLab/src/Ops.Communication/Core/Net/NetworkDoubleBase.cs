@@ -303,7 +303,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>是否初始化成功，依据具体的协议进行重写</returns>
 	protected virtual OperateResult InitializationOnConnect(Socket socket)
 	{
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -316,7 +316,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>当断开连接时额外的操作结果</returns>
 	protected virtual OperateResult ExtraOnDisconnect(Socket socket)
 	{
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -369,7 +369,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		{
 			return new OperateResult(operateResult2.Content2[0]);
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	protected async Task<OperateResult> AccountCertificateAsync(Socket socket)
@@ -390,17 +390,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		{
 			return new OperateResult(read.Content2[0]);
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	protected virtual Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		return Task.FromResult(OperateResult.CreateSuccessResult());
+		return Task.FromResult(OperateResult.Ok());
 	}
 
 	protected virtual Task<OperateResult> ExtraOnDisconnectAsync(Socket socket)
 	{
-		return Task.FromResult(OperateResult.CreateSuccessResult());
+		return Task.FromResult(OperateResult.Ok());
 	}
 
 	private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
@@ -433,7 +433,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				{
 					return new OperateResult<Socket>(ErrorCode.ConnectionIsNotAvailable.Desc());
 				}
-				return OperateResult.CreateSuccessResult(CoreSocket);
+				return OperateResult.Ok(CoreSocket);
 			}
 
 			if (IsSocketError || CoreSocket == null)
@@ -442,13 +442,13 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				if (!connect.IsSuccess)
 				{
 					IsSocketError = true;
-					return OperateResult.CreateFailedResult<Socket>(connect);
+					return OperateResult.Error<Socket>(connect);
 				}
 
 				IsSocketError = false;
-				return OperateResult.CreateSuccessResult(CoreSocket);
+				return OperateResult.Ok(CoreSocket);
 			}
-			return OperateResult.CreateSuccessResult(CoreSocket);
+			return OperateResult.Ok(CoreSocket);
 		}
 
 		// 非长连接，每个请求都会创建一个新的 Socket。
@@ -510,17 +510,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		OperateResult sendResult = await SendAsync(socket, sendValue);
 		if (!sendResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<byte[]>(sendResult);
+			return OperateResult.Error<byte[]>(sendResult);
 		}
 
 		if (receiveTimeOut < 0)
 		{
-			return OperateResult.CreateSuccessResult(new byte[0]);
+			return OperateResult.Ok(new byte[0]);
 		}
 
 		if (!hasResponseData)
 		{
-			return OperateResult.CreateSuccessResult(new byte[0]);
+			return OperateResult.Ok(new byte[0]);
 		}
 
 		if (SleepTime > 0)
@@ -616,7 +616,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>返回拆包之后的报文信息，默认不进行任何的拆包操作</returns>
 	protected virtual OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
 	{
-		return OperateResult.CreateSuccessResult(response);
+		return OperateResult.Ok(response);
 	}
 
 	/// <summary>
@@ -633,7 +633,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				{
 					return new OperateResult<Socket>("ConnectionIsNotAvailable");
 				}
-				return OperateResult.CreateSuccessResult(CoreSocket);
+				return OperateResult.Ok(CoreSocket);
 			}
 
 			if (IsSocketError || CoreSocket == null)
@@ -642,12 +642,12 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				if (!operateResult.IsSuccess)
 				{
 					IsSocketError = true;
-					return OperateResult.CreateFailedResult<Socket>(operateResult);
+					return OperateResult.Error<Socket>(operateResult);
 				}
 				IsSocketError = false;
-				return OperateResult.CreateSuccessResult(CoreSocket);
+				return OperateResult.Ok(CoreSocket);
 			}
-			return OperateResult.CreateSuccessResult(CoreSocket);
+			return OperateResult.Ok(CoreSocket);
 		}
 		return CreateSocketAndInitialication();
 	}
@@ -697,15 +697,15 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		OperateResult operateResult = Send(socket, array);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<byte[]>(operateResult);
+			return OperateResult.Error<byte[]>(operateResult);
 		}
 		if (receiveTimeOut < 0)
 		{
-			return OperateResult.CreateSuccessResult(Array.Empty<byte>());
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 		if (!hasResponseData)
 		{
-			return OperateResult.CreateSuccessResult(Array.Empty<byte>());
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 
 		if (SleepTime > 0)
@@ -727,7 +727,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				$"Send: {SoftBasic.ByteToHexString(array, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(operateResult2.Content, ' ')}");
 		}
-		return usePackAndUnpack ? UnpackResponseContent(array, operateResult2.Content) : OperateResult.CreateSuccessResult(operateResult2.Content);
+		return usePackAndUnpack ? UnpackResponseContent(array, operateResult2.Content) : OperateResult.Ok(operateResult2.Content);
 	}
 
 	public OperateResult<byte[]> ReadFromCoreServer(byte[] send)

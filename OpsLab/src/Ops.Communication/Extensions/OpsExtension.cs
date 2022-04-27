@@ -182,7 +182,7 @@ public static class OpsExtension
 	/// <typeparam name="T">类型对象</typeparam>
 	/// <param name="value">数组对象</param>
 	/// <returns>拷贝的结果内容</returns>
-	public static T[] CopyArray<T>(this T[]? value)
+	public static T[] CopyArray<T>(this T[] value)
 	{
 		if (value == null)
 		{
@@ -302,7 +302,7 @@ public static class OpsExtension
 		try
 		{
 			socket.BeginReceive(new byte[0], 0, 0, SocketFlags.None, callback, obj);
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 		catch (Exception ex)
 		{
@@ -332,7 +332,7 @@ public static class OpsExtension
 	{
 		try
 		{
-			return OperateResult.CreateSuccessResult(socket.EndReceive(ar));
+			return OperateResult.Ok(socket.EndReceive(ar));
 		}
 		catch (Exception ex)
 		{

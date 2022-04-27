@@ -42,7 +42,7 @@ public class OpsHelper
 			string text = match.Value.Substring(paraName.Length + 1, match.Value.Length - paraName.Length - 2);
 			int value = text.StartsWith("0x") ? Convert.ToInt32(text[2..], 16) : (text.StartsWith("0") ? Convert.ToInt32(text, 8) : Convert.ToInt32(text));
 			address = address.Replace(match.Value, "");
-			return OperateResult.CreateSuccessResult(value);
+			return OperateResult.Ok(value);
 		}
 		catch (Exception ex)
 		{
@@ -146,7 +146,7 @@ public class OpsHelper
 				array2[i] = array2[i - 1] + array[i - 1];
 			}
 		}
-		return OperateResult.CreateSuccessResult(array2, array);
+		return OperateResult.Ok(array2, array);
 	}
 
 	/// <summary>
@@ -192,7 +192,7 @@ public class OpsHelper
 			Marshal.Copy(content, 0, intPtr, num);
 			T value = Marshal.PtrToStructure<T>(intPtr);
 			Marshal.FreeHGlobal(intPtr);
-			return OperateResult.CreateSuccessResult(value);
+			return OperateResult.Ok(value);
 		}
 		catch (Exception ex)
 		{

@@ -152,7 +152,7 @@ public class SerialBase : IDisposable
 				m_ReadData.Open();
 				return InitializationOnOpen();
 			}
-			return OperateResult.CreateSuccessResult();
+			return OperateResult.Ok();
 		}
 		catch (Exception ex)
 		{
@@ -202,7 +202,7 @@ public class SerialBase : IDisposable
 
 	protected virtual OperateResult<byte[]> UnpackResponseContent(byte[] send, byte[] response)
 	{
-		return OperateResult.CreateSuccessResult(response);
+		return OperateResult.Ok(response);
 	}
 
 	/// <summary>
@@ -222,7 +222,7 @@ public class SerialBase : IDisposable
 		if (!operateResult.IsSuccess)
 		{
 			hybirdLock.Leave();
-			return OperateResult.CreateFailedResult<byte[]>(operateResult);
+			return OperateResult.Error<byte[]>(operateResult);
 		}
 
 		if (IsClearCacheBeforeRead)
@@ -234,13 +234,13 @@ public class SerialBase : IDisposable
 		if (!operateResult2.IsSuccess)
 		{
 			hybirdLock.Leave();
-			return OperateResult.CreateFailedResult<byte[]>(operateResult2);
+			return OperateResult.Error<byte[]>(operateResult2);
 		}
 
 		if (!hasResponseData)
 		{
 			hybirdLock.Leave();
-			return OperateResult.CreateSuccessResult(new byte[0]);
+			return OperateResult.Ok(new byte[0]);
 		}
 
 		OperateResult<byte[]> operateResult3 = SPReceived(m_ReadData, awaitData: true);
@@ -270,12 +270,12 @@ public class SerialBase : IDisposable
 
 	protected virtual OperateResult InitializationOnOpen()
 	{
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	protected virtual OperateResult ExtraOnClose()
 	{
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -291,7 +291,7 @@ public class SerialBase : IDisposable
 			try
 			{
 				serialPort.Write(data, 0, data.Length);
-				return OperateResult.CreateSuccessResult();
+				return OperateResult.Ok();
 			}
 			catch (Exception ex)
 			{
@@ -302,7 +302,7 @@ public class SerialBase : IDisposable
 				return new OperateResult(-connectErrorCount, ex.Message);
 			}
 		}
-		return OperateResult.CreateSuccessResult();
+		return OperateResult.Ok();
 	}
 
 	/// <summary>
@@ -355,7 +355,7 @@ public class SerialBase : IDisposable
 
 		byte[] value = memoryStream.ToArray();
 		connectErrorCount = 0;
-		return OperateResult.CreateSuccessResult(value);
+		return OperateResult.Ok(value);
 	}
 
 	/// <summary>

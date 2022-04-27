@@ -221,7 +221,7 @@ internal class OpsProtocol
 	/// <param name="token">令牌</param>
 	/// <param name="data">字符串数据信息</param>
 	/// <returns>包装后的指令信息</returns>
-	internal static byte[] CommandBytes(int customer, Guid token, string? data)
+	internal static byte[] CommandBytes(int customer, Guid token, string data)
 	{
 		if (data == null)
 		{
@@ -319,7 +319,7 @@ internal class OpsProtocol
 	{
 		if (content.Length == 0)
 		{
-			return OperateResult.CreateSuccessResult((NetHandle)0, Array.Empty<byte>());
+			return OperateResult.Ok((NetHandle)0, Array.Empty<byte>());
 		}
 
 		byte[] array = new byte[32];
@@ -343,6 +343,6 @@ internal class OpsProtocol
 			return new OperateResult<NetHandle, byte[]>(Encoding.Unicode.GetString(array2));
 		}
 
-		return OperateResult.CreateSuccessResult((NetHandle)num2, array2);
+		return OperateResult.Ok((NetHandle)num2, array2);
 	}
 }

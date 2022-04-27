@@ -57,7 +57,7 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 			Thread.Sleep(20);
 		}
 
-		TConnector? connector = default;
+		TConnector connector = default;
 		lock (_syncLock)
 		{
 			for (int i = 0; i < _connectors.Count; i++)
@@ -122,7 +122,7 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 		}
 	}
 
-	private void TimerCheckBackground(object? obj)
+	private void TimerCheckBackground(object obj)
 	{
 		lock (_syncLock)
 		{

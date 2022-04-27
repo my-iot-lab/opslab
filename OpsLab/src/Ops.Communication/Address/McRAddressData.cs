@@ -1,4 +1,4 @@
-using Ops.Communication.Ethernet.Profinet.Melsec;
+using Ops.Communication.Profinet.Melsec;
 
 namespace Ops.Communication.Address;
 
@@ -47,10 +47,10 @@ public class McRAddressData : DeviceAddressDataBase
 		OperateResult<MelsecMcRDataType, int> operateResult = MelsecMcRNet.AnalysisAddress(address);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<McRAddressData>(operateResult);
+			return OperateResult.Error<McRAddressData>(operateResult);
 		}
 
-		return OperateResult.CreateSuccessResult(new McRAddressData
+		return OperateResult.Ok(new McRAddressData
 		{
 			McDataType = operateResult.Content1,
 			AddressStart = operateResult.Content2,

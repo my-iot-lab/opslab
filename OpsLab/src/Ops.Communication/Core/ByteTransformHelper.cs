@@ -20,9 +20,9 @@ public static class ByteTransformHelper
 		{
 			if (result.IsSuccess)
 			{
-				return OperateResult.CreateSuccessResult(translator(result.Content));
+				return OperateResult.Ok(translator(result.Content));
 			}
-			return OperateResult.CreateFailedResult<TResult>(result);
+			return OperateResult.Error<TResult>(result);
 		}
 		catch (Exception ex)
 		{
@@ -55,9 +55,9 @@ public static class ByteTransformHelper
 	{
 		if (!result.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(result);
+			return OperateResult.Error<TResult>(result);
 		}
-		return OperateResult.CreateSuccessResult(trans(result.Content));
+		return OperateResult.Ok(trans(result.Content));
 	}
 
 	/// <summary>
@@ -88,7 +88,7 @@ public static class ByteTransformHelper
 	{
 		if (!result.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(result);
+			return OperateResult.Error<TResult>(result);
 		}
 		return trans(result.Content);
 	}
@@ -109,13 +109,13 @@ public static class ByteTransformHelper
 	{
 		if (!result.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(result);
+			return OperateResult.Error<TResult>(result);
 		}
 
 		OperateResult<TIn2> operateResult = trans1(result.Content);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(operateResult);
+			return OperateResult.Error<TResult>(operateResult);
 		}
 		return trans2(operateResult.Content);
 	}
@@ -139,19 +139,19 @@ public static class ByteTransformHelper
 	{
 		if (!result.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(result);
+			return OperateResult.Error<TResult>(result);
 		}
 
 		OperateResult<TIn2> operateResult = trans1(result.Content);
 		if (!operateResult.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(operateResult);
+			return OperateResult.Error<TResult>(operateResult);
 		}
 
 		OperateResult<TIn3> operateResult2 = trans2(operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
-			return OperateResult.CreateFailedResult<TResult>(operateResult2);
+			return OperateResult.Error<TResult>(operateResult2);
 		}
 
 		return trans3(operateResult2.Content);

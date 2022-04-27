@@ -53,7 +53,7 @@ internal sealed class AsyncCoordinator
 	/// 超时的方法
 	/// </summary>
 	/// <param name="o"></param>
-	private void TimeExpired(object? o)
+	private void TimeExpired(object o)
 	{
 		ReportStatus(CoordinationStatus.Timeout);
 	}
