@@ -1,7 +1,7 @@
 using Ops.Communication.Address;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Extensions;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Omron;
 

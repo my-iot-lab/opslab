@@ -1,11 +1,11 @@
 using System.IO.Compression;
 
-namespace Ops.Communication.Basic;
+namespace Ops.Communication.Utils;
 
 /// <summary>
 /// 一个负责压缩解压数据字节的类
 /// </summary>
-public class SoftZipped
+public class Zipped
 {
 	/// <summary>
 	/// 压缩字节数据
@@ -21,10 +21,9 @@ public class SoftZipped
 		}
 
 		using var memoryStream = new MemoryStream();
-		using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress))
-		{
-			gZipStream.Write(bytes, 0, bytes.Length);
-		}
+		using var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress);
+		gZipStream.Write(bytes, 0, bytes.Length);
+
 		return memoryStream.ToArray();
 	}
 

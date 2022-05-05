@@ -1,7 +1,7 @@
 using System.Text;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Reflection;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Serial;
 

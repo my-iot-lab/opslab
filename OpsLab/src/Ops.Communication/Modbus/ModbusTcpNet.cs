@@ -1,8 +1,8 @@
 using System.Net.Sockets;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Core.Message;
 using Ops.Communication.Core.Net;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Modbus;
 
@@ -100,7 +100,7 @@ namespace Ops.Communication.Modbus;
 /// </example>
 public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadWriteNet
 {
-	private readonly SoftIncrementCount softIncrementCount;
+	private readonly IncrementCount softIncrementCount;
 
 	private bool isAddressStartWithZero = true;
 
@@ -161,16 +161,16 @@ public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadW
 	}
 
 	/// <summary>
-	/// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="SoftIncrementCount" />说明。
+	/// 获取modbus协议自增的消息号，你可以自定义modbus的消息号的规则，详细参见<see cref="ModbusTcpNet" />说明，也可以查找<see cref="IncrementCount" />说明。
 	/// </summary>
-	public SoftIncrementCount MessageId => softIncrementCount;
+	public IncrementCount MessageId => softIncrementCount;
 
 	/// <summary>
 	/// 实例化一个Modbus-Tcp协议的客户端对象。
 	/// </summary>
 	public ModbusTcpNet()
 	{
-		softIncrementCount = new SoftIncrementCount(65535L, 0L);
+		softIncrementCount = new IncrementCount(65535L, 0L);
 		base.WordLength = 1;
 		Station = 1;
 		base.ByteTransform = new ReverseWordTransform();
@@ -184,7 +184,7 @@ public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadW
 	/// <param name="station">客户端自身的站号</param>
 	public ModbusTcpNet(string ipAddress, int port = 502, byte station = 1)
 	{
-		softIncrementCount = new SoftIncrementCount(65535L, 0L);
+		softIncrementCount = new IncrementCount(65535L, 0L);
 		IpAddress = ipAddress;
 		Port = port;
 		base.WordLength = 1;

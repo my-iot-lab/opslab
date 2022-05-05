@@ -1,5 +1,5 @@
 using System.Text;
-using Ops.Communication.Basic;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication;
 
@@ -197,7 +197,7 @@ internal class OpsProtocol
 		int num = BitConverter.ToInt32(head, 8);
 		if (num == ProtocolZipped)
 		{
-			content = SoftZipped.Decompress(content);
+			content = Zipped.Decompress(content);
 		}
 		return OpsSecurity.ByteDecrypt(content);
 	}
@@ -315,7 +315,7 @@ internal class OpsProtocol
 	/// </summary>
 	/// <param name="content">数据内容</param>
 	/// <returns>包含结果对象的信息</returns>
-	public static OperateResult<NetHandle, byte[]> ExtractHslData(byte[] content)
+	public static OperateResult<NetHandle, byte[]> ExtractOpsData(byte[] content)
 	{
 		if (content.Length == 0)
 		{

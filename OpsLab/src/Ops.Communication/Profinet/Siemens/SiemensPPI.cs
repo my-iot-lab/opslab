@@ -1,6 +1,6 @@
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Serial;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Siemens;
 

@@ -2,8 +2,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
-using Ops.Communication.Basic;
 using Ops.Communication.Extensions;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Core.Net;
 

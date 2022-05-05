@@ -1,11 +1,11 @@
 using Ops.Communication.Core;
 
-namespace Ops.Communication.Basic;
+namespace Ops.Communication.Utils;
 
 /// <summary>
 /// 一个简单的不持久化的序号自增类，采用线程安全实现，并允许指定最大数字，将包含该最大值，到达后清空从指定数开始
 /// </summary>
-public sealed class SoftIncrementCount : IDisposable
+public sealed class IncrementCount : IDisposable
 {
 	private long start = 0L;
 
@@ -33,7 +33,7 @@ public sealed class SoftIncrementCount : IDisposable
 	/// <param name="max">数据的最大值，必须指定</param>
 	/// <param name="start">数据的起始值，默认为0</param>
 	/// <param name="tick">每次的增量值</param>
-	public SoftIncrementCount(long max, long start = 0L, int tick = 1)
+	public IncrementCount(long max, long start = 0L, int tick = 1)
 	{
 		this.start = start;
 		this.max = max;
@@ -150,6 +150,6 @@ public sealed class SoftIncrementCount : IDisposable
 
 	public void Dispose()
 	{
-		Dispose(disposing: true);
+		Dispose(true);
 	}
 }

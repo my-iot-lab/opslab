@@ -1,6 +1,6 @@
 using System.Text;
 using Ops.Communication.Address;
-using Ops.Communication.Basic;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Melsec;
 

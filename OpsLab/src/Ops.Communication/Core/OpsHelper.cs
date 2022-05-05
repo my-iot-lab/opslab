@@ -1,7 +1,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Ops.Communication.Basic;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Core;
 

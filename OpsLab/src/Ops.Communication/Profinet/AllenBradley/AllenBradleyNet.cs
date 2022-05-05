@@ -1,11 +1,11 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Core.Message;
 using Ops.Communication.Core.Net;
 using Ops.Communication.Extensions;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.AllenBradley;
 

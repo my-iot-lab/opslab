@@ -2,6 +2,7 @@
 
 /// <summary>
 /// 一个连接池管理器，负责维护多个可用的连接，并且自动清理，扩容，用于快速读写服务器或是PLC时使用。<br />
+/// 关于连接池管理，可参考 <see cref="SocketsHttpHandler"/> 中引用的 <see cref="System.Net.Http.HttpConnectionPoolManager"/> 对象。
 /// </summary>
 /// <typeparam name="TConnector">管理的连接类，需要支持IConnector接口</typeparam>
 /// <remarks>
@@ -12,7 +13,7 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 {
 	private readonly Func<TConnector> _createConnector;
 	private bool _canGetConnector = true;
-	private readonly Timer _timerCheck;
+	private readonly Timer _checkTimer;
 	private readonly object _syncLock = new();
 	private readonly List<TConnector> _connectors = new();
 
@@ -43,7 +44,9 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 	public ConnectPool(Func<TConnector> createConnector)
 	{
 		_createConnector = createConnector;
-		_timerCheck = new Timer(TimerCheckBackground, null, 10000, 30000);
+		// 采用基于线程池的计时器处理过期连接，其是一个简单的轻型计时器。所有的 Timer 对象只使用了一个线程来管理。
+		var state = new WeakReference<ConnectPool<TConnector>>(this);
+		_checkTimer = new Timer(TimerCheckBackground, state, 10000, 30000);
 	}
 
 	/// <summary>
@@ -122,7 +125,21 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 		}
 	}
 
+	public void Dispose()
+    {
+		_checkTimer.Dispose();
+	}
+
 	private void TimerCheckBackground(object obj)
+	{
+		var weakReference = (WeakReference<ConnectPool<TConnector>>)obj;
+		if (weakReference.TryGetTarget(out var target))
+		{
+			target.RemoveStalePools();
+		}
+	}
+
+	private void RemoveStalePools()
 	{
 		lock (_syncLock)
 		{

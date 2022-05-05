@@ -720,7 +720,7 @@ public class ReflectionHelper
 				continue;
 			}
 
-			var attr = attributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType()); ;
+			var attr = attributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType());
 			if (attr == null)
 			{
 				attr = attributes.FirstOrDefault(s => s.DeviceType == null);

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using System.Net.Sockets;
-using Ops.Communication.Basic;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Extensions;
 

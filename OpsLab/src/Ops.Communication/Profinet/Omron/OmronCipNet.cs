@@ -1,7 +1,7 @@
 using System.Text;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Profinet.AllenBradley;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Omron;
 

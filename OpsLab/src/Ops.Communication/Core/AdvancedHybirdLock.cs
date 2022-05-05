@@ -36,7 +36,7 @@ internal sealed class AdvancedHybirdLock : IDisposable
 	/// </summary>
 	public void Dispose()
 	{
-		Dispose(disposing: true);
+		Dispose(true);
 	}
 
 	/// <summary>

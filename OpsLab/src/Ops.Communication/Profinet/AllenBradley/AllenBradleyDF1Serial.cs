@@ -1,7 +1,7 @@
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Extensions;
 using Ops.Communication.Serial;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.AllenBradley;
 
@@ -10,7 +10,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// </summary>
 public class AllenBradleyDF1Serial : SerialDeviceBase
 {
-	private readonly SoftIncrementCount incrementCount;
+	private readonly IncrementCount incrementCount;
 
 	/// <summary>
 	/// 站号信息
@@ -39,7 +39,7 @@ public class AllenBradleyDF1Serial : SerialDeviceBase
 	{
 		base.WordLength = 2;
 		base.ByteTransform = new RegularByteTransform();
-		incrementCount = new SoftIncrementCount(65535L, 0L);
+		incrementCount = new IncrementCount(65535L, 0L);
 		CheckType = CheckType.CRC16;
 	}
 

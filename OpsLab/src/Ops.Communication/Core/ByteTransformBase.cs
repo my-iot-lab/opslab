@@ -1,6 +1,6 @@
 using System.Diagnostics.Contracts;
 using System.Text;
-using Ops.Communication.Basic;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Core;
 

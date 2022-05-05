@@ -1,12 +1,12 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Core.Message;
 using Ops.Communication.Core.Net;
-using Ops.Communication.Profinet.AllenBradley;
 using Ops.Communication.Extensions;
+using Ops.Communication.Profinet.AllenBradley;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Omron;
 
@@ -181,7 +181,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	/// </summary>
 	private uint OTConnectionId = 0u;
 
-	private SoftIncrementCount incrementCount = new SoftIncrementCount(65535L, 0L);
+	private IncrementCount incrementCount = new IncrementCount(65535L, 0L);
 
 	public uint SessionHandle { get; protected set; }
 

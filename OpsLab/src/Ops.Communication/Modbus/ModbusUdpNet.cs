@@ -1,6 +1,6 @@
-using Ops.Communication.Basic;
 using Ops.Communication.Core;
 using Ops.Communication.Core.Net;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Modbus;
 
@@ -13,7 +13,7 @@ namespace Ops.Communication.Modbus;
 /// </remarks>
 public class ModbusUdpNet : NetworkUdpDeviceBase, IModbus, IReadWriteDevice, IReadWriteNet
 {
-	private readonly SoftIncrementCount softIncrementCount;
+	private readonly IncrementCount softIncrementCount;
 
 	public bool AddressStartWithZero { get; set; } = true;
 
@@ -43,7 +43,7 @@ public class ModbusUdpNet : NetworkUdpDeviceBase, IModbus, IReadWriteDevice, IRe
 		}
 	}
 
-	public SoftIncrementCount MessageId => softIncrementCount;
+	public IncrementCount MessageId => softIncrementCount;
 
 	/// <summary>
 	/// 实例化一个MOdbus-Udp协议的客户端对象。
@@ -51,7 +51,7 @@ public class ModbusUdpNet : NetworkUdpDeviceBase, IModbus, IReadWriteDevice, IRe
 	public ModbusUdpNet()
 	{
 		base.ByteTransform = new ReverseWordTransform();
-		softIncrementCount = new SoftIncrementCount(65535L, 0L);
+		softIncrementCount = new IncrementCount(65535L, 0L);
 		base.WordLength = 1;
 	}
 
