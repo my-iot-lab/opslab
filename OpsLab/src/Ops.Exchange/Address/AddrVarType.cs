@@ -1,4 +1,4 @@
-﻿namespace Ops.Scada.Address;
+﻿namespace Ops.Exchange.Address;
 
 /// <summary>
 /// 地址变量类型

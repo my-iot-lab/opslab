@@ -1,8 +1,8 @@
-﻿using Grpc.Core.Interceptors;
+﻿using Microsoft.Extensions.Logging;
+using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using Microsoft.Extensions.Logging;
 
-namespace Ops.Scada.Rpc;
+namespace Ops.Exchange.Rpc;
 
 public class OpsGrpcChannel
 {

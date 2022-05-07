@@ -1,4 +1,4 @@
-﻿namespace Ops.Scada.Dispatcher;
+﻿namespace Ops.Exchange.Dispatcher;
 
 /// <summary>
 /// 任务状态

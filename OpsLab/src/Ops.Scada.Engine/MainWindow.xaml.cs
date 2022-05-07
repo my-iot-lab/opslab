@@ -6,8 +6,11 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Extensions.DependencyInjection;
 using MaterialDesignThemes.Wpf;
 using Ops.Scada.Engine.Domain;
+using Ops.Scada.Engine.UIControls;
+using Ops.Scada.Engine.Domain.ViewModels;
 
 namespace Ops.Scada.Engine;
 
@@ -20,12 +23,11 @@ public partial class MainWindow : Window
 
         Task.Factory.StartNew(() => Thread.Sleep(2500)).ContinueWith(t =>
         {
-            //note you can use the message queue from any thread, but just for the demo here we 
-            //need to get the message queue from the snackbar, so need to be on the dispatcher
             MainSnackbar.MessageQueue?.Enqueue("Welcome to Material Design In XAML Tookit");
         }, TaskScheduler.FromCurrentSynchronizationContext());
 
-        DataContext = new MainWindowViewModel(MainSnackbar.MessageQueue!);
+        //DataContext = new MainWindowViewModel(MainSnackbar.MessageQueue!);
+        DataContext = App.Current.Services.GetService<MainViewModel>();
 
         var paletteHelper = new PaletteHelper();
         var theme = paletteHelper.GetTheme();

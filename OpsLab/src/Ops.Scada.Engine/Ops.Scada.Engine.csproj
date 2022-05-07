@@ -13,18 +13,31 @@
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.1.2" />
     <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ops.Communication\Ops.Communication.csproj" />
-    <ProjectReference Include="..\Ops.Scada\Ops.Scada.csproj" />
+    <ProjectReference Include="..\Ops.Exchange\Ops.Exchange.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\*.jpg" />
     <Resource Include="Resources\*.png" />
 	<Resource Include="Resources\favicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Domain\Models\" />
+    <Folder Include="Domain\Services\Impl\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

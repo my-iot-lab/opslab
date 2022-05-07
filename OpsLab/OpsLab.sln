@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{67FF79E8-1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Communication", "src\Ops.Communication\Ops.Communication.csproj", "{2D7FB479-D5E7-4CCB-8004-A2C261C07591}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Scada", "src\Ops.Scada\Ops.Scada.csproj", "{C3649AA7-4661-41E9-97E7-662B1E2BAD46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Exchange", "src\Ops.Exchange\Ops.Exchange.csproj", "{C3649AA7-4661-41E9-97E7-662B1E2BAD46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ops.Scada.Engine", "src\Ops.Scada.Engine\Ops.Scada.Engine.csproj", "{9284D410-80F8-4BFF-A282-14F4D65ED2F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Scada.Engine", "src\Ops.Scada.Engine\Ops.Scada.Engine.csproj", "{9284D410-80F8-4BFF-A282-14F4D65ED2F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -117,7 +117,7 @@
                                     <Button
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         HorizontalAlignment="Left"
-                                        x:Name="GitHubButton" Click="GitHubButton_OnClick">
+                                        Command="{Binding GitHubCommand}">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Github"/>
                                             <TextBlock
@@ -130,8 +130,7 @@
                                     <Button
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         HorizontalAlignment="Right"
-                                        x:Name="TwitterButton"
-                                        Click="TwitterButton_OnClick">
+                                        Command="{Binding TwitterCommand}">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Twitter"/>
                                             <TextBlock
@@ -152,8 +151,7 @@
                                     <Button
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         HorizontalAlignment="Left"
-                                        x:Name="ChatButton"
-                                        Click="ChatButton_OnClick">
+                                        Command="{Binding ChatCommand}">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Message"/>
                                             <TextBlock
@@ -166,8 +164,7 @@
                                     <Button
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         HorizontalAlignment="Right"
-                                        x:Name="EmailButton"
-                                        Click="EmailButton_OnClick">
+                                        Command="{Binding EmailCommand}">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Email"/>
                                             <TextBlock
@@ -227,8 +224,7 @@
                                     <Button
                                         Style="{StaticResource MaterialDesignFlatButton}" 
                                         DockPanel.Dock="Right"
-                                        x:Name="DonateButton"
-                                        Click="DonateButton_OnClick">
+                                        Command="{Binding DonateCommand}">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Gift"/>
                                             <TextBlock
@@ -261,19 +257,19 @@
             <StackPanel>
                 <Button
                     ToolTip="GitHub"
-                    Click="GitHubButton_OnClick"
+                    Command="{Binding GitHubCommand}"
                     Content="{materialDesign:PackIcon Kind=Github, Size=20}"/>
 
                 <Button
                     ToolTip="Twitter"
-                    Click="TwitterButton_OnClick"
+                    Command="{Binding TwitterCommand}"
                     Background="{DynamicResource PrimaryHueMidBrush}"
                     Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
                     Content="{materialDesign:PackIcon Kind=Twitter, Size=20}"/>
 
                 <Button
                     ToolTip="Chat"
-                    Click="ChatButton_OnClick"
+                    Command="{Binding ChatCommand}"
                     Content="{materialDesign:PackIcon Kind=Message, Size=20}">
                     <!-- mix up the colours by bringing in a named palette (see merged dictionaries at top) -->
                     <Button.Background>
@@ -287,14 +283,14 @@
 
                 <Button
                     ToolTip="Email"
-                    Click="EmailButton_OnClick"
+                    Command="{Binding EmailCommand}"
                     Background="{DynamicResource SecondaryHueMidBrush}"
                     Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
                     Content="{materialDesign:PackIcon Kind=Email, Size=20}"/>
 
                 <Button
                     ToolTip="Feel like you want to make a donation?  It would be gratefully received.  Click the button to donate via Pledgie." 
-                    Click="DonateButton_OnClick"
+                    Command="{Binding DonateCommand}"
                     Content="{materialDesign:PackIcon Kind=Gift, Size=20}">
                     <Button.Background>
                         <SolidColorBrush Color="{StaticResource GreenPrimary200}"/>

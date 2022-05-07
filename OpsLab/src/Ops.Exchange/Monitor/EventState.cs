@@ -1,4 +1,4 @@
-﻿namespace Ops.Scada.Monitor;
+﻿namespace Ops.Exchange.Monitor;
 
 /// <summary>
 /// 时间状态

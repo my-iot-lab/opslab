@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Ops.Scada.Engine.Domain;
+namespace Ops.Scada.Engine.UIControls;
 
 public partial class DocumentationLinks : UserControl
 {

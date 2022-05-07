@@ -390,22 +390,21 @@ public abstract class NetworkBase
 
 	private void ReadStreamCallBack(IAsyncResult ar)
 	{
-		var fileStateObject = ar.AsyncState as FileStateObject;
-		if (fileStateObject != null)
-		{
-			try
-			{
-				fileStateObject.AlreadyDealLength += fileStateObject.Stream.EndRead(ar);
-				fileStateObject.WaitDone.Set();
-			}
-			catch (Exception ex)
-			{
-				fileStateObject.IsError = true;
-				fileStateObject.ErrerMsg = ex.Message;
-				fileStateObject.WaitDone.Set();
-			}
-		}
-	}
+        if (ar.AsyncState is FileStateObject fileStateObject)
+        {
+            try
+            {
+                fileStateObject.AlreadyDealLength += fileStateObject.Stream.EndRead(ar);
+                fileStateObject.WaitDone.Set();
+            }
+            catch (Exception ex)
+            {
+                fileStateObject.IsError = true;
+                fileStateObject.ErrerMsg = ex.Message;
+                fileStateObject.WaitDone.Set();
+            }
+        }
+    }
 
 	/// <summary>
 	/// 将缓冲区的数据写入到流里面去
@@ -447,13 +446,12 @@ public abstract class NetworkBase
 
 	private void WriteStreamCallBack(IAsyncResult ar)
 	{
-		var fileStateObject = ar.AsyncState as FileStateObject;
-		if (fileStateObject == null)
-		{
-			return;
-		}
+        if (ar.AsyncState is not FileStateObject fileStateObject)
+        {
+            return;
+        }
 
-		try
+        try
 		{
 			fileStateObject.Stream.EndWrite(ar);
 		}

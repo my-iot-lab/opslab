@@ -1,4 +1,4 @@
-﻿namespace Ops.Scada.Monitor;
+﻿namespace Ops.Exchange.Monitor;
 
 /// <summary>
 /// 基于线程的轮询监视器

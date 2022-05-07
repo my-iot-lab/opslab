@@ -1,4 +1,4 @@
-﻿namespace Ops.Scada.Rpc;
+﻿namespace Ops.Exchange.Rpc;
 
 /// <summary>
 /// 代理对象

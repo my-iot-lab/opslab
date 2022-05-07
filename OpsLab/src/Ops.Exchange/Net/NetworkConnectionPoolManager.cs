@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Ops.Scada.Net;
+namespace Ops.Exchange.Net;
 
 /// <summary>
 /// 网络连接池管理
