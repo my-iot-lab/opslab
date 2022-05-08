@@ -33,4 +33,7 @@
 	</PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+	 <InternalsVisibleTo Include="..\..\test\Ops.Exchange.Tests\Ops.Exchange.Tests.csproj" />
+  </ItemGroup>
 </Project>
