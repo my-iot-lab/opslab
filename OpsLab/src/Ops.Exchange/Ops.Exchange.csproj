@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!--<Nullable>true</Nullable>-->
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
-	 <InternalsVisibleTo Include="..\..\test\Ops.Exchange.Tests\Ops.Exchange.Tests.csproj" />
+	<Protobuf Include="Protos\Greeter.proto" />
+  </ItemGroup>	
+	
+  <ItemGroup>
+	 <InternalsVisibleTo Include="Ops.Exchange.Tests" />
   </ItemGroup>
 </Project>

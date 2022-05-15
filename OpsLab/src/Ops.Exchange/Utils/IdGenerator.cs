@@ -3,7 +3,7 @@
 /// <summary>
 /// ID 生成器,根据 SnowFlake 算法生成。
 /// </summary>
-public class IdGenerator
+public sealed class IdGenerator
 {
     //机器ID
     private readonly long _workerId;
