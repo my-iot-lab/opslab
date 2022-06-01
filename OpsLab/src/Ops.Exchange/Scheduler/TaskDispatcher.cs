@@ -5,9 +5,9 @@
 /// </summary>
 public class TaskDispatcher
 {
-    private readonly TaskStateTransfer _taskStateTransfer;
+    private readonly TransitionTaskState _taskStateTransfer;
 
-    public TaskDispatcher(TaskStateTransfer taskStateTransfer)
+    public TaskDispatcher(TransitionTaskState taskStateTransfer)
     {
         _taskStateTransfer = taskStateTransfer;
     }

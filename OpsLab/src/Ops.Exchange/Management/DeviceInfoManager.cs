@@ -53,7 +53,7 @@ public class DeviceInfoManager
         deviceInfo.Id = IdGenerator.NextId();
         deviceInfos.Add(deviceInfo);
 
-        return (true, "");
+        return (true, string.Empty);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class DeviceInfoManager
             deviceInfos.Add(deviceInfo);
         }
 
-        return (true, "");
+        return (true, string.Empty);
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class DeviceInfoManager
             return new List<DeviceInfo>(0);
         }
 
-        // TODO: 文件解析失败如何处理 ？
+        // TODO: 文件解析失败如何处理？
         var content = await File.ReadAllTextAsync(path);
         var deviceInfos = JsonSerializer.Deserialize<List<DeviceInfo>>(content);
         return deviceInfos;

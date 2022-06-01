@@ -145,7 +145,7 @@ public sealed class LimitingScheduler
             var lockTaken = false;
             try
             {
-                System.Threading.Monitor.TryEnter(_tasks, ref lockTaken);
+                Monitor.TryEnter(_tasks, ref lockTaken);
                 if (lockTaken)
                 {
                     return _tasks.ToArray();
@@ -156,7 +156,7 @@ public sealed class LimitingScheduler
             {
                 if (lockTaken)
                 {
-                    System.Threading.Monitor.Exit(_tasks);
+                    Monitor.Exit(_tasks);
                 }
             }
         }

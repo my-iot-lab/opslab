@@ -39,7 +39,7 @@ internal class NetworkConnectionPoolManager
 
     private readonly Timer _heartBeatTimer;
 
-    private readonly ConcurrentDictionary<NetworkConnectionKey, NetworkConnectionPool> _pools;
+    private readonly ConcurrentDictionary<NetworkConnectionKey, NetworkConnectionPool> _pools = new();
 
     public NetworkConnectionPoolManager()
     {

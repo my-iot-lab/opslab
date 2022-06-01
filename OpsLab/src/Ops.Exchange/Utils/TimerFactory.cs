@@ -6,7 +6,7 @@
 internal class TimerFactory
 {
     /// <summary>
-    /// 创建一个新的定时器
+    /// 创建一个新的定时器，该定时器基于线程池。
     /// </summary>
     /// <param name="callback">回调函数</param>
     /// <param name="state">回调函数参数</param>
