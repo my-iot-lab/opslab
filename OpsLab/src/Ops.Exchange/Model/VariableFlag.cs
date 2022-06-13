@@ -1,9 +1,9 @@
 ﻿namespace Ops.Exchange.Model;
 
 /// <summary>
-/// 地址标识
+/// 变量标识
 /// </summary>
-public enum AddressFlag
+public enum VariableFlag
 {
     /// <summary>
     /// 常规地址。
@@ -23,7 +23,7 @@ public enum AddressFlag
     Heartbeat = 2,
 
     /// <summary>
-    /// 表示该地址数据会不间断发送。
+    /// 表示该地址数据会不间断发送，如警报。
     /// </summary>
     Interval = 3,
 }

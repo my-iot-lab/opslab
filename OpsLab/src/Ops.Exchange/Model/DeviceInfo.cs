@@ -10,10 +10,10 @@ public class DeviceInfo
     /// <summary>
     /// 设备 Schema 基础信息。
     /// </summary>
-    public DeviceSchema? Schema { get; set; }
+    public DeviceSchema Schema { get; set; }
 
     /// <summary>
-    /// 设备包含的地址集合。
+    /// 设备包含的地址变量集合。
     /// </summary>
-    public List<DeviceAddress> Addrs { get; set; } = new List<DeviceAddress>(0);
+    public List<DeviceVariable> Variables { get; set; } = new List<DeviceVariable>(0);
 }

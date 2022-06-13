@@ -21,7 +21,7 @@ internal sealed class PayloadData
     /// <summary>
     /// 地址变量类型
     /// </summary>
-    public AddressVarType VarType { get; set; }
+    public VariableType VarType { get; set; }
 
     /// <summary>
     /// 额外标志。

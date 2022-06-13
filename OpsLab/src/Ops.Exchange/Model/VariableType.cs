@@ -1,9 +1,9 @@
 ﻿namespace Ops.Exchange.Model;
 
 /// <summary>
-/// 地址变量类型
+/// 设备地址变量类型
 /// </summary>
-public enum AddressVarType
+public enum VariableType
 {
     /// <summary>
     /// bool
@@ -31,7 +31,7 @@ public enum AddressVarType
     Int,
 
     /// <summary>
-    /// long (32 bits)
+    /// int32 (32 bits)
     /// </summary>
     DInt,
 
@@ -49,24 +49,4 @@ public enum AddressVarType
     /// string (include S7String, S7WString）
     /// </summary>
     String,
-
-    /// <summary>
-    /// Timer variable type
-    /// </summary>
-    Timer,
-
-    /// <summary>
-    /// Counter
-    /// </summary>
-    Counter,
-
-    /// <summary>
-    /// DateTIme
-    /// </summary>
-    /// <summary>
-    DateTime,
-
-    /// DateTimeLong
-    /// </summary>
-    DateTimeLong,
 }

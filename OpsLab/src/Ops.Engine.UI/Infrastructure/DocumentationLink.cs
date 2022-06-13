@@ -3,8 +3,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Ops.Engine.UI.Utils;
 
-namespace Ops.Engine.UI.Domain;
+namespace Ops.Engine.UI.Infrastructure;
 
+/// <summary>
+/// 文档超链接
+/// </summary>
 public class DocumentationLink
 {
     public DocumentationLink(DocumentationLinkType type, string url)
@@ -73,7 +76,7 @@ public class DocumentationLink
 
         return new DocumentationLink(
             DocumentationLinkType.DemoPageSource,
-            $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/blob/master/MainDemo.Wpf/{(string.IsNullOrWhiteSpace(@namespace) ? "" : ("/" + @namespace + "/"))}{typeof(TDemoPage).Name}.{ext}",
+            $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/blob/master/MainDemo.Wpf/{(string.IsNullOrWhiteSpace(@namespace) ? "" : "/" + @namespace + "/")}{typeof(TDemoPage).Name}.{ext}",
             label ?? typeof(TDemoPage).Name);
     }
 
@@ -91,11 +94,14 @@ public class DocumentationLink
     }
 }
 
+/// <summary>
+/// 文档连接类型
+/// </summary>
 public enum DocumentationLinkType
 {
     Wiki,
     DemoPageSource,
     ControlSource,
     StyleSource,
-    Video
+    Video,
 }

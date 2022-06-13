@@ -73,7 +73,7 @@ public sealed class TransitionEventState
     /// <summary>
     /// 重置所有状态。
     /// </summary>
-    public void Reset()
+    public void Clear()
     {
         _states.Clear();
     }

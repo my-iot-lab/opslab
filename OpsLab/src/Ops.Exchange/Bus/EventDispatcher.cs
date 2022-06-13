@@ -1,7 +1,7 @@
 ﻿namespace Ops.Exchange.Bus;
 
 /// <summary>
-/// 事件派发器
+/// 事件派发器。
 /// </summary>
 internal sealed class EventDispatcher
 {

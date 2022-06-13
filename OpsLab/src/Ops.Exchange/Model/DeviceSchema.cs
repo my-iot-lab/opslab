@@ -34,7 +34,7 @@ public class DeviceSchema
     public string? Host { get; set; }
 
     /// <summary>
-    /// 设备网络端口（如 Modbus TCP 为 102 等）
+    /// 设备网络端口
     /// </summary>
     public int Port { get; set; }
 

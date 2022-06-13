@@ -1,7 +1,7 @@
 ﻿namespace Ops.Exchange.Bus;
 
 /// <summary>
-/// 事件上下文对象
+/// 事件上下文对象。
 /// </summary>
 internal sealed class EventContext
 {
@@ -14,7 +14,7 @@ internal sealed class EventContext
     /// <summary>
     /// 事件数据
     /// </summary>
-    public EventData Data { get; set; }
+    public EventData Data { get; }
 
     /// <summary>
     /// 事件模式

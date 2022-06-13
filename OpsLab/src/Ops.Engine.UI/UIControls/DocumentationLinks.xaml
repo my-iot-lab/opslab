@@ -4,17 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:domain="clr-namespace:Ops.Engine.UI.Domain"
+             xmlns:infra="clr-namespace:Ops.Engine.UI.Infrastructure"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance domain:DemoItem, IsDesignTimeCreatable=True }">
+             d:DataContext="{d:DesignInstance infra:DemoItem, IsDesignTimeCreatable=True }">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <DataTemplate DataType="{x:Type domain:DocumentationLink}">
+            <DataTemplate DataType="{x:Type infra:DocumentationLink}">
                 <Button x:Name="Root" ToolTip="Wiki Article" ToolTipService.InitialShowDelay="0"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         Command="{Binding Open}">

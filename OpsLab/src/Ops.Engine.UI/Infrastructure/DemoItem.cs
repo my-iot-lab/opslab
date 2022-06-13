@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Ops.Engine.UI.Domain;
+namespace Ops.Engine.UI.Infrastructure;
 
 public class DemoItem : ViewModelBase
 {
@@ -23,10 +23,23 @@ public class DemoItem : ViewModelBase
         Documentation = documentation;
     }
 
+    /// <summary>
+    /// 获取其名称。
+    /// </summary>
     public string Name { get; }
 
+    /// <summary>
+    /// 获取其文档连接对象。
+    /// </summary>
     public IEnumerable<DocumentationLink> Documentation { get; }
 
+    /// <summary>
+    /// 获取 Item 的内容。
+    /// <para>
+    /// 若初始化时 "dataContext" 不为 null，且 "contentType" 为 <see cref="FrameworkElement"/>，
+    /// 会将其 DataContext 属性设置 "dataContext" 值。
+    /// </para>
+    /// </summary>
     public object? Content => _content ??= CreateContent();
 
     public ScrollBarVisibility HorizontalScrollBarVisibilityRequirement

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Ops.Engine.UI.Domain;
+namespace Ops.Engine.UI.Infrastructure;
 
+/// <summary>
+/// <see cref="ICommand"/> 的简单实现。
+/// </summary>
 public class AnotherCommandImplementation : ICommand
 {
     private readonly Action<object?> _execute;
@@ -14,10 +17,11 @@ public class AnotherCommandImplementation : ICommand
 
     public AnotherCommandImplementation(Action<object?> execute, Func<object?, bool>? canExecute)
     {
-        if (execute is null) throw new ArgumentNullException(nameof(execute));
+        if (execute is null)
+            throw new ArgumentNullException(nameof(execute));
 
         _execute = execute;
-        _canExecute = canExecute ?? (x => true);
+        _canExecute = canExecute ?? (_ => true);
     }
 
     public bool CanExecute(object? parameter) => _canExecute(parameter);

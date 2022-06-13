@@ -1,19 +1,19 @@
 ﻿namespace Ops.Exchange.Model;
 
 /// <summary>
-/// 设备 PLC 地址
+/// 设备 PLC 地址变量
 /// </summary>
-public class DeviceAddress
+public class DeviceVariable
 {
     public long Id { get; set; }
 
     // <summary>
     /// 地址的标签名。注意：标签名在每个 PLC 地址中(或是每个 DB 块中)必须是唯一的。
     /// </summary>
-    public string? Tag { get; set; }
+    public string Tag { get; set; }
 
     /// <summary>
-    /// 变量地址 (字符串格式)。
+    /// 地址 (字符串格式)。
     /// </summary>
     public string? Address { get; set; }
 
@@ -26,7 +26,7 @@ public class DeviceAddress
     /// <summary>
     /// 地址变量类型
     /// </summary>
-    public AddressVarType VarType { get; set; }
+    public VariableType VarType { get; set; }
 
     /// <summary>
     /// 地址描述。
@@ -36,7 +36,7 @@ public class DeviceAddress
     /// <summary>
     /// 地址标识。
     /// </summary>
-    public AddressFlag Flag { get; set; }
+    public VariableFlag Flag { get; set; }
 
     /// <summary>
     /// 额外标志。
@@ -46,14 +46,14 @@ public class DeviceAddress
     /// <summary>
     /// 若是触发信号地址，会随触发信号一起发送。
     /// </summary>
-    public List<DeviceAddress> NormalAddrs { get; set; } = new List<DeviceAddress>(0);
+    public List<DeviceVariable> NormalVariables { get; set; } = new(0);
 
     /// <summary>
     /// 两者是否相等
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    public bool IsEqual(DeviceAddress other)
+    public bool IsEqual(DeviceVariable other)
     {
         return Tag.Equals(other.Tag, StringComparison.OrdinalIgnoreCase);
     }

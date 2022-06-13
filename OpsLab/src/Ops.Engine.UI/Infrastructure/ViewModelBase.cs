@@ -2,8 +2,11 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Ops.Engine.UI.Domain;
+namespace Ops.Engine.UI.Infrastructure;
 
+/// <summary>
+/// ViewModel 基类
+/// </summary>
 public class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;

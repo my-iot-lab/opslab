@@ -1,32 +1,20 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using MaterialDesignThemes.Wpf;
-using Ops.Engine.UI.Domain;
-using Ops.Engine.UI.UIControls;
 using Ops.Engine.UI.Domain.ViewModels;
 
 namespace Ops.Engine.UI;
 
 public partial class MainWindow : Window
 {
-    public static Snackbar Snackbar = new();
     public MainWindow()
     {
         InitializeComponent();
 
-        Task.Factory.StartNew(() => Thread.Sleep(2500)).ContinueWith(t =>
-        {
-            MainSnackbar.MessageQueue?.Enqueue("Welcome to Material Design In XAML Tookit");
-        }, TaskScheduler.FromCurrentSynchronizationContext());
-
-        //DataContext = new MainWindowViewModel(MainSnackbar.MessageQueue!);
         DataContext = App.Current.Services.GetService<MainViewModel>();
 
         var paletteHelper = new PaletteHelper();
@@ -39,8 +27,18 @@ public partial class MainWindow : Window
             themeManager.ThemeChanged += (_, e)
                 => DarkModeToggleButton.IsChecked = e.NewTheme?.GetBaseTheme() == BaseTheme.Dark;
         }
+    }
 
-        Snackbar = MainSnackbar;
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonDown(e);
+
+        // 重写，当窗体设置 WindowStyle=none 时可移动窗体。
+        // 窗体上按下鼠标左键，可拖拽。
+        if (WindowStyle == WindowStyle.None)
+        {
+            this.DragMove();
+        }
     }
 
     private void UIElement_OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -50,50 +48,43 @@ public partial class MainWindow : Window
 
         while (dependencyObject != null)
         {
-            if (dependencyObject is ScrollBar) return;
+            if (dependencyObject is ScrollBar)
+                return;
+
             dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
         }
 
         MenuToggleButton.IsChecked = false;
     }
 
-    private async void MenuPopupButton_OnClick(object sender, RoutedEventArgs e)
+    private void MaximizedButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var sampleMessageDialog = new SampleMessageDialog
+        if (WindowStyle == WindowStyle.None)
         {
-            Message = { Text = ((ButtonBase)sender).Content.ToString() }
-        };
-
-        await DialogHost.Show(sampleMessageDialog, "RootDialog");
-    }
-
-    private void OnCopy(object sender, ExecutedRoutedEventArgs e)
-    {
-        if (e.Parameter is string stringValue)
-        {
-            try
-            {
-                Clipboard.SetDataObject(stringValue);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.ToString());
-            }
+            WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.SingleBorderWindow;
         }
+        else if (WindowStyle == WindowStyle.SingleBorderWindow)
+        {
+            WindowState = WindowState.Maximized;
+            WindowStyle = WindowStyle.None;
+        }
+        
+        //AllowsTransparency = true; // 后台设置会导致程序崩溃
     }
 
-    private void MenuToggleButton_OnClick(object sender, RoutedEventArgs e)
-        => DemoItemsSearchBox.Focus();
+    private void MenuExitButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        this.Close();
+        Environment.Exit(0);
+    }
 
     private void MenuDarkModeButton_Click(object sender, RoutedEventArgs e)
-        => ModifyTheme(DarkModeToggleButton.IsChecked == true);
-
-    private static void ModifyTheme(bool isDarkTheme)
     {
         var paletteHelper = new PaletteHelper();
         var theme = paletteHelper.GetTheme();
 
-        theme.SetBaseTheme(isDarkTheme ? Theme.Dark : Theme.Light);
+        theme.SetBaseTheme(DarkModeToggleButton.IsChecked == true ? Theme.Dark : Theme.Light);
         paletteHelper.SetTheme(theme);
     }
 
