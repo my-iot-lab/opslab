@@ -41,6 +41,11 @@ public partial class MainWindow : Window
         }
     }
 
+    #region 事件
+
+    /// <summary>
+    /// 点检菜单栏（非滚动条）后自动显示界面内容。
+    /// </summary>
     private void UIElement_OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         //until we had a StaysOpen glag to Drawer, this will help with scroll bars
@@ -87,6 +92,8 @@ public partial class MainWindow : Window
         theme.SetBaseTheme(DarkModeToggleButton.IsChecked == true ? Theme.Dark : Theme.Light);
         paletteHelper.SetTheme(theme);
     }
+
+    #endregion
 
     private void OnSelectedItemChanged(object sender, DependencyPropertyChangedEventArgs e)
         => MainScrollViewer.ScrollToHome();

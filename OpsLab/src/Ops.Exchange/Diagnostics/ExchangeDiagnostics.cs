@@ -1,6 +1,6 @@
 ﻿namespace Ops.Exchange.Diagnostics;
 
-public sealed class BeforeDispatcherEventData : EventData
+public sealed class BeforeDispatcherEventData : DiagnosticsEventData
 {
     public const string EventName = EventNamespace + "BeforeDispatcher";
 
@@ -17,7 +17,7 @@ public sealed class BeforeDispatcherEventData : EventData
     };
 }
 
-public sealed class AfterDispatcherEventData : EventData
+public sealed class AfterDispatcherEventData : DiagnosticsEventData
 {
     public const string EventName = EventNamespace + "AfterDispatcher";
 

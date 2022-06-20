@@ -37,12 +37,6 @@
     <Folder Include="Api\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
   <!--是否启用服务器 GC-->
   <!--<PropertyGroup>
 	<ServerGarbageCollection>true</ServerGarbageCollection>

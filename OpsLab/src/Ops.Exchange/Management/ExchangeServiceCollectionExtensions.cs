@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
+using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Management;
+using Ops.Exchange.Stateless;
 
 namespace Ops.Exchange.DependencyInjection;
 
@@ -15,8 +18,14 @@ public static class ExchangeServiceCollectionExtensions
     {
         services.AddMemoryCache();
 
+        services.AddSingleton<EventBus>();
+
+        // EventHandler
+        services.AddSingleton<ReplyEventHandler>();
+
         // manager
         services.AddSingleton<DeviceInfoManager>();
+        services.AddSingleton<StateManager>();
 
         return services;
     }

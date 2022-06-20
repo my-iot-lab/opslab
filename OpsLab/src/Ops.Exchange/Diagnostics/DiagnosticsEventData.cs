@@ -3,9 +3,9 @@
 namespace Ops.Exchange.Diagnostics;
 
 /// <summary>
-/// 事件基类
+/// 表示诊断数据的基类。
 /// </summary>
-public abstract class EventData : IReadOnlyList<KeyValuePair<string, object>>
+public abstract class DiagnosticsEventData : IReadOnlyList<KeyValuePair<string, object>>
 {
     protected const string EventNamespace = "Ops.Exchange.";
 
@@ -25,13 +25,13 @@ public abstract class EventData : IReadOnlyList<KeyValuePair<string, object>>
 
     public struct Enumerator : IEnumerator<KeyValuePair<string, object>>
     {
-        private readonly EventData _eventData;
+        private readonly DiagnosticsEventData _eventData;
         private readonly int _count;
         private int _index;
 
         public KeyValuePair<string, object> Current { get; private set; }
 
-        internal Enumerator(EventData eventData)
+        internal Enumerator(DiagnosticsEventData eventData)
         {
             _eventData = eventData;
             _count = eventData.Count;

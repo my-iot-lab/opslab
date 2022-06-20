@@ -54,9 +54,9 @@ namespace Ops.Engine.UI
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            _host.Start();
-
             base.OnStartup(e);
+
+            _host.Start();
         }
 
         protected override void OnExit(ExitEventArgs e)
