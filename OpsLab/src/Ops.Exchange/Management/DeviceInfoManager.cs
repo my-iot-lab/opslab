@@ -44,7 +44,7 @@ public class DeviceInfoManager
     public async Task<(bool ok, string err)> AddAsync(DeviceInfo deviceInfo)
     {
         var deviceInfos = await GetAsync();
-        if (deviceInfos.Exists(s => s.Schema.IsEqual(deviceInfo.Schema)))
+        if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
         {
             return (false, "已存在相同的设备信息");
         }
@@ -65,7 +65,7 @@ public class DeviceInfoManager
         var deviceInfos = await GetAsync();
         if (deviceInfos.Any())
         {
-            if (deviceInfos.Exists(s => s.Schema.IsEqual(deviceInfo.Schema)))
+            if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
             {
                 return (false, "已存在相同的设备信息");
             }
@@ -116,12 +116,12 @@ public class DeviceInfoManager
         var path = Path.Combine(_config.DeviceDir, FileName);
         if (!File.Exists(path))
         {
-            return new List<DeviceInfo>(0);
+            return new();
         }
 
         // TODO: 文件解析失败如何处理？
         var content = await File.ReadAllTextAsync(path);
         var deviceInfos = JsonSerializer.Deserialize<List<DeviceInfo>>(content);
-        return deviceInfos;
+        return deviceInfos ?? new(0);
     }
 }

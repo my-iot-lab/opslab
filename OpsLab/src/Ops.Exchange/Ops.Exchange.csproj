@@ -36,9 +36,5 @@
 	
   <ItemGroup>
 	 <InternalsVisibleTo Include="Ops.Exchange.Tests" />
-  </ItemGroup>	
-	
-  <ItemGroup>
-    <Folder Include="Adapter\" />
   </ItemGroup>
 </Project>

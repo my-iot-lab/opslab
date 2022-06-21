@@ -29,7 +29,7 @@ internal sealed class PayloadData
     public string? ExtraFlag { get; set; }
 
     /// <summary>
-    /// 具体是数据
+    /// 具体的数据
     /// </summary>
     public object? Value { get; set; }
 }

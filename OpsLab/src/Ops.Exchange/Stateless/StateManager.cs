@@ -3,7 +3,7 @@
 namespace Ops.Exchange.Stateless;
 
 /// <summary>
-/// 状态管理d对象
+/// 状态管理对象
 /// </summary>
 public sealed class StateManager
 {
@@ -53,7 +53,7 @@ public sealed class StateManager
             _states.TryAdd(key, state3);
         }
 
-        return true;
+        return state == StateConstant.CanTransfer;
     }
 
     /// <summary>

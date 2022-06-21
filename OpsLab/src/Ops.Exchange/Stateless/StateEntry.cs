@@ -73,6 +73,8 @@ public sealed class StateEntry : IEquatable<StateEntry>
         return true;
     }
 
+    #region override
+
     public bool Equals(StateEntry? other)
     {
         return other != null && Tag == other.Tag;
@@ -80,11 +82,13 @@ public sealed class StateEntry : IEquatable<StateEntry>
 
     public override bool Equals(object? obj)
     {
-        return obj is StateEntry key && Equals(key);
+        return obj is StateEntry obj2 && Equals(obj2);
     }
 
     public override int GetHashCode()
     {
         return Tag.GetHashCode();
     }
+
+    #endregion
 }

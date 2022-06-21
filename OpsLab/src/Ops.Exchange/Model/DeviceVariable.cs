@@ -15,7 +15,7 @@ public class DeviceVariable
     /// <summary>
     /// 地址 (字符串格式)。
     /// </summary>
-    public string? Address { get; set; }
+    public string Address { get; set; }
 
     /// <summary>
     /// 变量长度。
@@ -44,7 +44,7 @@ public class DeviceVariable
     public string? ExtraFlag { get; set; }
 
     /// <summary>
-    /// 若是触发信号地址，会随触发信号一起发送。
+    /// 若本地址为 <see cref="VariableFlag.Trigger"/> 类型，该地址表示其负载数据的地址。
     /// </summary>
     public List<DeviceVariable> NormalVariables { get; set; } = new(0);
 

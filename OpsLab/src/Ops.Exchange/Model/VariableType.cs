@@ -46,7 +46,17 @@ public enum VariableType
     LReal,
 
     /// <summary>
-    /// string (include S7String, S7WString）
+    /// string
     /// </summary>
     String,
+
+    /// <summary>
+    /// 西门子 S7String
+    /// </summary>
+    S7String,
+
+    /// <summary>
+    /// 西门子 S7WString
+    /// </summary>
+    S7WString,
 }
