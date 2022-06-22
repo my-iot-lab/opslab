@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using Ops.Communication.Extensions;
 
@@ -52,7 +51,7 @@ public class SoftBasic
 	/// <param name="array">数组信息</param>
 	/// <param name="format">格式化的信息</param>
 	/// <returns>最终显示的信息</returns>
-	public static string ArrayFormat<T>(T[] array, string format)
+	public static string ArrayFormat<T>(T[]? array, string format)
 	{
 		if (array == null)
 		{
@@ -81,11 +80,6 @@ public class SoftBasic
 	/// <returns>新数组长度信息</returns>
 	public static T[] ArrayExpandToLength<T>(T[] data, int length)
 	{
-		if (data == null)
-		{
-			return new T[length];
-		}
-
 		if (data.Length == length)
 		{
 			return data;
@@ -104,11 +98,6 @@ public class SoftBasic
 	/// <returns>新数组长度信息</returns>
 	public static T[] ArrayExpandToLengthEven<T>(T[] data)
 	{
-		if (data == null)
-		{
-			return Array.Empty<T>();
-		}
-
 		if (data.Length % 2 == 1)
 		{
 			return ArrayExpandToLength(data, data.Length + 1);
@@ -125,11 +114,6 @@ public class SoftBasic
 	/// <returns>分割后结果内容</returns>
 	public static List<T[]> ArraySplitByLength<T>(T[] array, int length)
 	{
-		if (array == null)
-		{
-			return new List<T[]>();
-		}
-
 		var list = new List<T[]>();
 		int num = 0;
 		while (num < array.Length)
@@ -262,11 +246,6 @@ public class SoftBasic
 	/// <returns>返回的字符串</returns>
 	public static string ByteToHexString(byte[] InBytes, char segment, int newLineCount)
 	{
-		if (InBytes == null)
-		{
-			return string.Empty;
-		}
-
 		var stringBuilder = new StringBuilder();
 		long num = 0L;
 		foreach (byte b in InBytes)
@@ -347,10 +326,6 @@ public class SoftBasic
 	/// <returns>反转后的数据</returns>
 	public static byte[] BytesReverseByWord(byte[] inBytes)
 	{
-		if (inBytes == null)
-		{
-			return null;
-		}
 		if (inBytes.Length == 0)
 		{
 			return Array.Empty<byte>();
@@ -491,11 +466,6 @@ public class SoftBasic
 	/// <returns>转换后的字节数组</returns>
 	public static byte[] BoolArrayToByte(bool[] array)
 	{
-		if (array == null)
-		{
-			return null;
-		}
-
 		int num = ((array.Length % 8 == 0) ? (array.Length / 8) : (array.Length / 8 + 1));
 		byte[] array2 = new byte[num];
 		for (int i = 0; i < array.Length; i++)
@@ -516,11 +486,6 @@ public class SoftBasic
 	/// <returns>转换后的bool数组</returns>
 	public static bool[] ByteToBoolArray(byte[] InBytes, int length)
 	{
-		if (InBytes == null)
-		{
-			return null;
-		}
-
 		if (length > InBytes.Length * 8)
 		{
 			length = InBytes.Length * 8;
@@ -553,10 +518,6 @@ public class SoftBasic
 	/// <exception cref="RankException"></exception>
 	public static T[] ArrayRemoveDouble<T>(T[] value, int leftLength, int rightLength)
 	{
-		if (value == null)
-		{
-			return Array.Empty<T>();
-		}
 		if (value.Length <= leftLength + rightLength)
 		{
 			return Array.Empty<T>();
@@ -601,11 +562,6 @@ public class SoftBasic
 	/// <exception cref="IndexOutOfRangeException"></exception>
 	public static T[] ArraySelectMiddle<T>(T[] value, int index, int length)
 	{
-		if (value == null)
-		{
-			return Array.Empty<T>();
-		}
-
 		T[] array = new T[Math.Min(value.Length, length)];
 		Array.Copy(value, index, array, 0, array.Length);
 		return array;

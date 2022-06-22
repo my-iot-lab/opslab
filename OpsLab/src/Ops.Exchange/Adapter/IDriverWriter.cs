@@ -1,9 +1,9 @@
 ﻿namespace Ops.Exchange.Adapter;
 
 /// <summary>
-/// 设备写入数据
+/// 设备驱动写入数据
 /// </summary>
-public interface IDeviceWrite
+public interface IDriverWriter
 {
     Result Write(string address, byte[] value);
 

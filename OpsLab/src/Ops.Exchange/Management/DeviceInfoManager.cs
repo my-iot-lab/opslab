@@ -103,7 +103,7 @@ public class DeviceInfoManager
         var deviceInfos = await GetAsync();
         var content = JsonSerializer.Serialize(deviceInfos);
 
-        var path = Path.Combine(_config.DeviceDir, FileName);
+        var path = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir, FileName);
         await File.WriteAllTextAsync(path, content, cancellationToken);
     }
 
@@ -113,7 +113,7 @@ public class DeviceInfoManager
     /// <returns></returns>
     private async Task<List<DeviceInfo>> GetFromLocalAsync()
     {
-        var path = Path.Combine(_config.DeviceDir, FileName);
+        var path = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir, FileName);
         if (!File.Exists(path))
         {
             return new();

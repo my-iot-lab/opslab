@@ -1,5 +1,9 @@
 ﻿namespace Ops.Exchange.Adapter;
 
-public interface IEthernetClient : IDeviceRead, IDeviceWrite
+/// <summary>
+/// 
+/// </summary>
+public interface IEthernetClient : IDriverReader, IDriverWriter
 {
+
 }

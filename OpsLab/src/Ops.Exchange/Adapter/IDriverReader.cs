@@ -1,9 +1,9 @@
 ﻿namespace Ops.Exchange.Adapter;
 
 /// <summary>
-/// 设备读取数据
+/// 设备驱动读取数据
 /// </summary>
-public interface IDeviceRead
+public interface IDriverReader
 {
     Result<byte[]> Read(string address, ushort length);
 

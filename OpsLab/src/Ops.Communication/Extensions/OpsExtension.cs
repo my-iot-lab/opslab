@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using System.Net.Sockets;
 using Ops.Communication.Utils;
 
 namespace Ops.Communication.Extensions;
@@ -37,18 +35,6 @@ public static class OpsExtension
 	public static bool[] ToBoolArray(this byte[] InBytes, int length)
 	{
 		return SoftBasic.ByteToBoolArray(InBytes, length);
-	}
-
-	/// <summary>
-	/// 获取当前数组的倒序数组，这是一个新的实例，不改变原来的数组值
-	/// </summary>
-	/// <param name="value">输入的原始数组</param>
-	/// <returns>反转之后的数组信息</returns>
-	public static T[] ReverseNew<T>(this T[] value)
-	{
-		T[] array = value.CopyArray();
-		Array.Reverse((Array)array);
-		return array;
 	}
 
 	public static bool[] ToBoolArray(this byte[] InBytes)
@@ -134,46 +120,12 @@ public static class OpsExtension
 
 	public static T[] SpliceArray<T>(this T[] value, params T[][] arrays)
 	{
-		List<T[]> list = new(arrays.Length + 1);
-		list.Add(value);
-		list.AddRange(arrays);
+        List<T[]> list = new(arrays.Length + 1)
+        {
+            value
+        };
+        list.AddRange(arrays);
 		return SoftBasic.SpliceArray(list.ToArray());
-	}
-
-	/// <summary>
-	/// 将指定的数据添加到数组的每个元素上去，使用表达式树的形式实现，将会修改原数组。不适用byte类型
-	/// </summary>
-	/// <typeparam name="T">数组的类型</typeparam>
-	/// <param name="array">原始数据</param>
-	/// <param name="value">数据值</param>
-	/// <returns>返回的结果信息</returns>
-	public static T[] IncreaseBy<T>(this T[] array, T value)
-	{
-		if (typeof(T) == typeof(byte))
-		{
-			var parameterExpression = Expression.Parameter(typeof(int), "first");
-			var parameterExpression2 = Expression.Parameter(typeof(int), "second");
-			var body = Expression.Add(parameterExpression, parameterExpression2);
-			var expression = Expression.Lambda<Func<int, int, int>>(body, new ParameterExpression[2] { parameterExpression, parameterExpression2 });
-			Func<int, int, int> func = expression.Compile();
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i] = (T)(object)(byte)func(Convert.ToInt32(array[i]), Convert.ToInt32(value));
-			}
-		}
-		else
-		{
-			var parameterExpression3 = Expression.Parameter(typeof(T), "first");
-			var parameterExpression4 = Expression.Parameter(typeof(T), "second");
-			var body2 = Expression.Add(parameterExpression3, parameterExpression4);
-			var expression2 = Expression.Lambda<Func<T, T, T>>(body2, new ParameterExpression[2] { parameterExpression3, parameterExpression4 });
-			Func<T, T, T> func2 = expression2.Compile();
-			for (int j = 0; j < array.Length; j++)
-			{
-				array[j] = func2(array[j], value);
-			}
-		}
-		return array;
 	}
 
 	/// <summary>
@@ -205,149 +157,12 @@ public static class OpsExtension
 	}
 
 	/// <summary>
-	/// 将字符串数组转换为实际的数据数组。例如字符串格式[1,2,3,4,5]，可以转成实际的数组对象
-	/// </summary>
-	/// <typeparam name="T">类型对象</typeparam>
-	/// <param name="value">字符串数据</param>
-	/// <param name="selector">转换方法</param>
-	/// <returns>实际的数组</returns>
-	public static T[] ToStringArray<T>(this string value, Func<string, T> selector)
-	{
-		if (value.IndexOf('[') >= 0)
-		{
-			value = value.Replace("[", "");
-		}
-		if (value.IndexOf(']') >= 0)
-		{
-			value = value.Replace("]", "");
-		}
-		string[] source = value.Split(new char[2] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-		return source.Select(selector).ToArray();
-	}
-
-	/// <summary>
-	/// 将字符串数组转换为实际的数据数组。支持byte,sbyte,bool,short,ushort,int,uint,long,ulong,float,double，使用默认的十进制，
-	/// 例如字符串格式[1,2,3,4,5]，可以转成实际的数组对象
-	/// </summary>
-	/// <typeparam name="T">类型对象</typeparam>
-	/// <param name="value">字符串数据</param>
-	/// <returns>实际的数组</returns>
-	public static T[] ToStringArray<T>(this string value)
-	{
-		Type typeFromHandle = typeof(T);
-		if (typeFromHandle == typeof(byte))
-		{
-			return (T[])(object)value.ToStringArray(byte.Parse);
-		}
-		if (typeFromHandle == typeof(sbyte))
-		{
-			return (T[])(object)value.ToStringArray(sbyte.Parse);
-		}
-		if (typeFromHandle == typeof(bool))
-		{
-			return (T[])(object)value.ToStringArray(bool.Parse);
-		}
-		if (typeFromHandle == typeof(short))
-		{
-			return (T[])(object)value.ToStringArray(short.Parse);
-		}
-		if (typeFromHandle == typeof(ushort))
-		{
-			return (T[])(object)value.ToStringArray(ushort.Parse);
-		}
-		if (typeFromHandle == typeof(int))
-		{
-			return (T[])(object)value.ToStringArray(int.Parse);
-		}
-		if (typeFromHandle == typeof(uint))
-		{
-			return (T[])(object)value.ToStringArray(uint.Parse);
-		}
-		if (typeFromHandle == typeof(long))
-		{
-			return (T[])(object)value.ToStringArray(long.Parse);
-		}
-		if (typeFromHandle == typeof(ulong))
-		{
-			return (T[])(object)value.ToStringArray(ulong.Parse);
-		}
-		if (typeFromHandle == typeof(float))
-		{
-			return (T[])(object)value.ToStringArray(float.Parse);
-		}
-		if (typeFromHandle == typeof(double))
-		{
-			return (T[])(object)value.ToStringArray(double.Parse);
-		}
-		if (typeFromHandle == typeof(DateTime))
-		{
-			return (T[])(object)value.ToStringArray(DateTime.Parse);
-		}
-		if (typeFromHandle == typeof(string))
-		{
-			return (T[])(object)value.ToStringArray((string m) => m);
-		}
-		throw new Exception("use ToArray<T>(Func<string,T>) method instead");
-	}
-
-	/// <summary>
-	/// 启动接收数据，需要传入回调方法，传递对象
-	/// </summary>
-	/// <param name="socket">socket对象</param>
-	/// <param name="callback">回调方法</param>
-	/// <param name="obj">数据对象</param>
-	/// <returns>是否启动成功</returns>
-	public static OperateResult BeginReceiveResult(this Socket socket, AsyncCallback callback, object obj)
-	{
-		try
-		{
-			socket.BeginReceive(new byte[0], 0, 0, SocketFlags.None, callback, obj);
-			return OperateResult.Ok();
-		}
-		catch (Exception ex)
-		{
-			socket?.Close();
-			return new OperateResult(ex.Message);
-		}
-	}
-
-	/// <summary>
-	/// 启动接收数据，需要传入回调方法，传递对象默认为socket本身
-	/// </summary>
-	/// <param name="socket">socket对象</param>
-	/// <param name="callback">回调方法</param>
-	/// <returns>是否启动成功</returns>
-	public static OperateResult BeginReceiveResult(this Socket socket, AsyncCallback callback)
-	{
-		return socket.BeginReceiveResult(callback, socket);
-	}
-
-	/// <summary>
-	/// 结束挂起的异步读取，返回读取的字节数，如果成功的情况。
-	/// </summary>
-	/// <param name="socket">socket对象</param>
-	/// <param name="ar">回调方法</param>
-	/// <returns>是否启动成功</returns>
-	public static OperateResult<int> EndReceiveResult(this Socket socket, IAsyncResult ar)
-	{
-		try
-		{
-			return OperateResult.Ok(socket.EndReceive(ar));
-		}
-		catch (Exception ex)
-		{
-			socket?.Close();
-			return new OperateResult<int>(ex.Message);
-		}
-	}
-
-	/// <summary>
 	/// 根据英文小数点进行切割字符串，去除空白的字符
 	/// </summary>
 	/// <param name="str">字符串本身</param>
 	/// <returns>切割好的字符串数组，例如输入 "100.5"，返回 "100", "5"</returns>
 	public static string[] SplitDot(this string str)
 	{
-		return str.Split(new char[1] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        return str.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 	}
 }

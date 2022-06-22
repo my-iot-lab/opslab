@@ -7,15 +7,11 @@ namespace Ops.Communication.Utils;
 /// </summary>
 public sealed class IncrementCount : IDisposable
 {
-	private long start = 0L;
-
-	private long current = 0L;
-
-	private long max = long.MaxValue;
-
-	private readonly SimpleHybirdLock hybirdLock;
-
-	private bool disposedValue = false;
+	private long _start = 0L;
+	private long _current = 0L;
+	private long _max = long.MaxValue;
+	private readonly SimpleHybirdLock _hybirdLock;
+	private bool _disposedValue = false;
 
 	/// <summary>
 	/// 增加的单元，如果设置为0，就是不增加。如果为小于0，那就是减少，会变成负数的可能。
@@ -25,7 +21,7 @@ public sealed class IncrementCount : IDisposable
 	/// <summary>
 	/// 获取当前的计数器的最大的设置值。
 	/// </summary>
-	public long MaxValue => max;
+	public long MaxValue => _max;
 
 	/// <summary>
 	/// 实例化一个自增信息的对象，包括最大值，初始值，增量值
@@ -35,11 +31,11 @@ public sealed class IncrementCount : IDisposable
 	/// <param name="tick">每次的增量值</param>
 	public IncrementCount(long max, long start = 0L, int tick = 1)
 	{
-		this.start = start;
-		this.max = max;
-		current = start;
+		this._start = start;
+		this._max = max;
+		_current = start;
 		IncreaseTick = tick;
-		hybirdLock = new SimpleHybirdLock();
+		_hybirdLock = new SimpleHybirdLock();
 	}
 
 	/// <summary>
@@ -48,18 +44,18 @@ public sealed class IncrementCount : IDisposable
 	/// <returns>计数自增后的值</returns>
 	public long GetCurrentValue()
 	{
-		hybirdLock.Enter();
-		long num = current;
-		current += IncreaseTick;
-		if (current > max)
+		_hybirdLock.Enter();
+		long num = _current;
+		_current += IncreaseTick;
+		if (_current > _max)
 		{
-			current = start;
+			_current = _start;
 		}
-		else if (current < start)
+		else if (_current < _start)
 		{
-			current = max;
+			_current = _max;
 		}
-		hybirdLock.Leave();
+		_hybirdLock.Leave();
 		return num;
 	}
 
@@ -69,16 +65,16 @@ public sealed class IncrementCount : IDisposable
 	/// <param name="max">最大值</param>
 	public void ResetMaxValue(long max)
 	{
-		hybirdLock.Enter();
-		if (max > start)
+		_hybirdLock.Enter();
+		if (max > _start)
 		{
-			if (max < current)
+			if (max < _current)
 			{
-				current = start;
+				_current = _start;
 			}
-			this.max = max;
+			this._max = max;
 		}
-		hybirdLock.Leave();
+		_hybirdLock.Leave();
 	}
 
 	/// <summary>
@@ -87,16 +83,16 @@ public sealed class IncrementCount : IDisposable
 	/// <param name="start">初始值</param>
 	public void ResetStartValue(long start)
 	{
-		hybirdLock.Enter();
-		if (start < max)
+		_hybirdLock.Enter();
+		if (start < _max)
 		{
-			if (current < start)
+			if (_current < start)
 			{
-				current = start;
+				_current = start;
 			}
-			this.start = start;
+			this._start = start;
 		}
-		hybirdLock.Leave();
+		_hybirdLock.Leave();
 	}
 
 	/// <summary>
@@ -104,9 +100,9 @@ public sealed class IncrementCount : IDisposable
 	/// </summary>
 	public void ResetCurrentValue()
 	{
-		hybirdLock.Enter();
-		current = start;
-		hybirdLock.Leave();
+		_hybirdLock.Enter();
+		_current = _start;
+		_hybirdLock.Leave();
 	}
 
 	/// <summary>
@@ -115,36 +111,36 @@ public sealed class IncrementCount : IDisposable
 	/// <param name="value">指定的数据值</param>
 	public void ResetCurrentValue(long value)
 	{
-		hybirdLock.Enter();
-		if (value > max)
+		_hybirdLock.Enter();
+		if (value > _max)
 		{
-			current = max;
+			_current = _max;
 		}
-		else if (value < start)
+		else if (value < _start)
 		{
-			current = start;
+			_current = _start;
 		}
 		else
 		{
-			current = value;
+			_current = value;
 		}
-		hybirdLock.Leave();
+		_hybirdLock.Leave();
 	}
 
 	public override string ToString()
 	{
-		return $"SoftIncrementCount[{current}]";
+		return $"SoftIncrementCount[{_current}]";
 	}
 
 	private void Dispose(bool disposing)
 	{
-		if (!disposedValue)
+		if (!_disposedValue)
 		{
 			if (disposing)
 			{
-				hybirdLock.Dispose();
+				_hybirdLock.Dispose();
 			}
-			disposedValue = true;
+			_disposedValue = true;
 		}
 	}
 

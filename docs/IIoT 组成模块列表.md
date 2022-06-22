@@ -13,3 +13,5 @@ SignalR -- 实时通信。
 InfluxDB （https://www.influxdata.com/）-- 开源时序性数据库。
 
 NetMQ --  ZeroMQ的C#移植版本。
+
+SQLite / LiteDB -- 嵌入式 DB，LiteDB 灵活度高。

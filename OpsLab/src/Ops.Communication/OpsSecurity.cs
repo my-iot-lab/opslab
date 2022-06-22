@@ -1,19 +1,14 @@
 namespace Ops.Communication;
 
-internal class OpsSecurity
+internal static class OpsSecurity
 {
 	/// <summary>
-	/// 加密方法，只对当前的程序集开放
+	/// 加密方法
 	/// </summary>
 	/// <param name="enBytes">等待加密的数据</param>
 	/// <returns>加密后的字节数据</returns>
 	internal static byte[] ByteEncrypt(byte[] enBytes)
 	{
-		if (enBytes == null)
-		{
-			return Array.Empty<byte>();
-		}
-
 		byte[] array = new byte[enBytes.Length];
 		for (int i = 0; i < enBytes.Length; i++)
 		{

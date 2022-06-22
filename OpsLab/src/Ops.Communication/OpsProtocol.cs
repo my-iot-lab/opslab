@@ -6,7 +6,7 @@ namespace Ops.Communication;
 /// <summary>
 /// 用于本程序集访问通信的暗号说明
 /// </summary>
-internal class OpsProtocol
+internal sealed class OpsProtocol
 {
 	/// <summary>
 	/// 规定所有的网络传输指令头都为32字节
@@ -254,11 +254,6 @@ internal class OpsProtocol
 	/// <returns>打包后的原始数据内容</returns>
 	internal static byte[] PackStringArrayToByte(string[] data)
 	{
-		if (data.Length == 0)
-		{
-			data = Array.Empty<string>();
-		}
-
 		var list = new List<byte>();
 		list.AddRange(BitConverter.GetBytes(data.Length));
 		for (int i = 0; i < data.Length; i++)

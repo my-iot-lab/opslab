@@ -1,14 +1,12 @@
 ﻿namespace Ops.Communication.Infrastructure.ConnectPool;
 
 /// <summary>
-/// 一个连接池管理器，负责维护多个可用的连接，并且自动清理，扩容，用于快速读写服务器或是PLC时使用。<br />
+/// 一个连接池管理器，负责维护多个可用的连接，并且自动清理，扩容，用于快速读写服务器或是PLC时使用。
+/// <para>
 /// 关于连接池管理，可参考 <see cref="SocketsHttpHandler"/> 中引用的 <see cref="System.Net.Http.HttpConnectionPoolManager"/> 对象。
+/// </para>
 /// </summary>
 /// <typeparam name="TConnector">管理的连接类，需要支持IConnector接口</typeparam>
-/// <remarks>
-/// 需要先实现 <see cref="IConnector" /> 接口的对象，然后就可以实现真正的连接池了，理论上可以实现任意的连接对象，
-/// 包括modbus连接对象，各种PLC连接对象，数据库连接对象，redis连接对象，SimplifyNet连接对象等等。
-/// </remarks>
 public class ConnectPool<TConnector> where TConnector : IConnector
 {
 	private readonly Func<TConnector> _createConnector;

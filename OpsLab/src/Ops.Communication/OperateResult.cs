@@ -1,7 +1,7 @@
 namespace Ops.Communication;
 
 /// <summary>
-/// 操作结果的类，只带有成功标志和错误信息<br />
+/// 操作结果的类，只带有成功标志和错误信息
 /// </summary>
 /// <remarks>
 /// 当 <see cref="IsSuccess" /> 为 True 时，忽略 <see cref="Message" /> 及 <see cref="ErrorCode" /> 的值

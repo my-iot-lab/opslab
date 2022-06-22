@@ -8,16 +8,16 @@ internal sealed class PayloadContext
     /// <summary>
     /// 从设备中读取的数据。
     /// </summary>
-    public PayloadRequest? Request { get; }
+    public PayloadRequest Request { get; }
 
     /// <summary>
     /// 应用程序端数据，要写入到设备中。
     /// </summary>
-    public PayloadResponse? Response { get; }
+    public PayloadResponse Response { get; }
 
-    public PayloadContext(PayloadRequest request, PayloadResponse response)
+    public PayloadContext()
     {
-        Request = request;
-        Response = response;
+        Request = new();
+        Response = new();
     }
 }

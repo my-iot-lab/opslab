@@ -9,20 +9,14 @@ namespace Ops.Communication;
 /// <remarks>
 /// 本类自动启动一个静态线程来处理
 /// </remarks>
-public class OpsTimeOut
+public sealed class OpsTimeOut
 {
 	private static long hslTimeoutId = 0L;
-
 	private static readonly List<OpsTimeOut> WaitHandleTimeOut = new(128);
-
 	private static readonly object listLock = new();
-
 	private static Thread threadCheckTimeOut;
-
 	private static long threadUniqueId = 0L;
-
 	private static DateTime threadActiveTime;
-
 	private static int activeDisableCount = 0;
 
 	/// <summary>
@@ -36,7 +30,8 @@ public class OpsTimeOut
 	public DateTime StartTime { get; set; }
 
 	/// <summary>
-	/// 操作是否成功，当操作完成的时候，需要设置为<c>True</c>，超时检测自动结束。如果一直为<c>False</c>，超时检测到超时，设置<see cref="IsTimeout" />为<c>True</c>
+	/// 操作是否成功，当操作完成的时候，需要设置为<c>True</c>，超时检测自动结束。如果一直为<c>False</c>，
+	/// 超时检测到超时，设置 <see cref="IsTimeout" /> 为 <c>True</c>
 	/// </summary>
 	public bool IsSuccessful { get; set; }
 
@@ -86,10 +81,9 @@ public class OpsTimeOut
 		return DateTime.Now - StartTime;
 	}
 
-	/// <inheritdoc />
 	public override string ToString()
 	{
-		return $"TimeOut[{DelayTime}]";
+		return $"TimeOut [{DelayTime}]";
 	}
 
 	/// <summary>
