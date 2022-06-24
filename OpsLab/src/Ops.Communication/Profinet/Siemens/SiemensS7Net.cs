@@ -10,111 +10,14 @@ using Ops.Communication.Utils;
 namespace Ops.Communication.Profinet.Siemens;
 
 /// <summary>
-/// 一个西门子的客户端类，使用S7协议来进行数据交互，对于s300,s400需要关注<see cref="Slot" />
-/// 和<see cref="Rack" />的设置值，
-/// 对于s200，需要关注<see cref="LocalTSAP" />
-/// 和<see cref="DestTSAP" />的设置值，详细参考demo的设置。 <br />
-/// <remarks>
-/// 暂时不支持bool[]的批量写入操作，请使用 Write(string, byte[]) 替换。<br />
-/// <note type="important">对于200smartPLC的V区，就是DB1.X，例如，V100=DB1.100，当然了你也可以输入V100</note>
-/// </remarks>
-/// <example>
-/// 地址支持的列表如下：
-/// <list type="table">
-///   <listheader>
-///     <term>地址名称</term>
-///     <term>地址代号</term>
-///     <term>示例</term>
-///     <term>地址进制</term>
-///     <term>字操作</term>
-///     <term>位操作</term>
-///     <term>备注</term>
-///   </listheader>
-///   <item>
-///     <term>中间寄存器</term>
-///     <term>M</term>
-///     <term>M100,M200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输入寄存器</term>
-///     <term>I</term>
-///     <term>I100,I200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输出寄存器</term>
-///     <term>Q</term>
-///     <term>Q100,Q200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>DB块寄存器</term>
-///     <term>DB</term>
-///     <term>DB1.100,DB1.200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>V寄存器</term>
-///     <term>V</term>
-///     <term>V100,V200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term>V寄存器本质就是DB块1</term>
-///   </item>
-///   <item>
-///     <term>定时器的值</term>
-///     <term>T</term>
-///     <term>T100,T200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term>仅在200smart测试通过</term>
-///   </item>
-///   <item>
-///     <term>计数器的值</term>
-///     <term>C</term>
-///     <term>C100,C200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term>仅在200smart测试通过</term>
-///   </item>
-///   <item>
-///     <term>智能输入寄存器</term>
-///     <term>AI</term>
-///     <term>AI100,AI200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>智能输出寄存器</term>
-///     <term>AQ</term>
-///     <term>AQ100,AQ200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-/// </list>
-/// <note type="important">对于200smartPLC的V区，就是DB1.X，例如，V100=DB1.100</note>
-/// 假设起始地址为M100，M100存储了温度，100.6℃值为1006，M102存储了压力，1.23Mpa值为123，M104，M105，M106，M107存储了产量计数，读取如下：
-/// </example>
+/// 一个西门子的客户端类，使用S7协议来进行数据交互，对于s300,s400需要关注<see cref="Slot" />和<see cref="Rack" />的设置值，
+/// 对于s200，需要关注<see cref="LocalTSAP" />和<see cref="DestTSAP" />的设置值，详细参考demo的设置
+/// <para>
+/// 暂时不支持bool[]的批量写入操作，请使用 Write(string, byte[]) 替换。
+/// 对于200smartPLC的V区，就是DB1.X，例如，V100=DB1.100，当然了你也可以输入V100.
+/// </para>
+/// <para>对于200smartPLC的V区，就是DB1.X，例如，V100=DB1.100</para>
+/// </summary>
 public class SiemensS7Net : NetworkDeviceBase
 {
 	private byte[] plcHead1 = new byte[22]
