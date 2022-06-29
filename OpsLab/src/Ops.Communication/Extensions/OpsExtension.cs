@@ -1,4 +1,5 @@
 using Ops.Communication.Utils;
+using System.Net.Sockets;
 
 namespace Ops.Communication.Extensions;
 
@@ -164,5 +165,28 @@ public static class OpsExtension
 	public static string[] SplitDot(this string str)
 	{
         return str.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+	}
+
+	/// <summary>
+	/// 设置客户端的Socket的心跳时间信息
+	/// </summary>
+	/// <param name="socket"></param>
+	/// <param name="keepAliveTime"></param>
+	/// <param name="keepAliveInterval"></param>
+	/// <returns></returns>
+	public static int SetKeepAlive(this Socket socket, int keepAliveTime, int keepAliveInterval)
+	{
+		byte[] array = new byte[12];
+		BitConverter.GetBytes((keepAliveTime >= 0) ? 1 : 0).CopyTo(array, 0);
+		BitConverter.GetBytes(keepAliveTime).CopyTo(array, 4);
+		BitConverter.GetBytes(keepAliveInterval).CopyTo(array, 8);
+		try
+		{
+			return socket.IOControl(IOControlCode.KeepAliveValues, array, null);
+		}
+		catch
+		{
+			return 0;
+		}
 	}
 }

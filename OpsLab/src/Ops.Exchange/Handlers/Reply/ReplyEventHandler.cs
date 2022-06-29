@@ -19,7 +19,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         _logger = logger;
     }
 
-    public Task HandleAsync(ReplyEventData eventData, CancellationToken cancellationToken)
+    public Task HandleAsync(ReplyEventData eventData, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Entry ... {eventData.Schema.Station}-{eventData.Tag}_{eventData.State}");
 

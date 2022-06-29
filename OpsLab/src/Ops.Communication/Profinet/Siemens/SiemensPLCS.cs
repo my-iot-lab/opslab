@@ -6,9 +6,14 @@ namespace Ops.Communication.Profinet.Siemens;
 public enum SiemensPLCS
 {
 	/// <summary>
+	/// 1500系列PLC
+	/// </summary>
+	S1500 = 1,
+
+	/// <summary>
 	/// 1200系列
 	/// </summary>
-	S1200 = 1,
+	S1200,
 
 	/// <summary>
 	/// 300系列
@@ -19,11 +24,6 @@ public enum SiemensPLCS
 	/// 400系列
 	/// </summary>
 	S400,
-
-	/// <summary>
-	/// 1500系列PLC
-	/// </summary>
-	S1500,
 
 	/// <summary>
 	/// 200的smart系列

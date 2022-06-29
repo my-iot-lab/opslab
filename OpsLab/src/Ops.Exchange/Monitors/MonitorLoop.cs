@@ -9,7 +9,7 @@ public sealed class MonitorLoop
 {
     private readonly IBackgroundTaskQueue _taskQueue;
     private readonly ILogger<MonitorLoop> _logger;
-    private readonly CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken = new();
 
     public MonitorLoop(IBackgroundTaskQueue taskQueue, ILogger<MonitorLoop> logger)
     {

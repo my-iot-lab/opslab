@@ -11,7 +11,7 @@ internal sealed class ReplyEventData : EventData
     /// <summary>
     /// 设备 Schema 基础信息。
     /// </summary>
-    public DeviceSchema Schema { get; set; }
+    public DeviceSchema Schema { get; }
 
     /// <summary>
     /// 事件标签 Tag（唯一）
@@ -27,8 +27,9 @@ internal sealed class ReplyEventData : EventData
     /// </summary>
     public int State { get; }
 
-    public ReplyEventData(string tag, int state)
+    public ReplyEventData(DeviceSchema schema, string tag, int state)
     {
+        Schema = schema;
         Tag = tag;
         State = state;
     }

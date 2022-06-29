@@ -387,14 +387,14 @@ public interface IReadWriteNet
 	OperateResult WriteCustomer<T>(string address, T value) where T : IDataTransfer, new();
 
 	/// <summary>
-	/// 读取支持Hsl特性的数据内容，该特性为<see cref="HslDeviceAddressAttribute" />，详细参考api文档说明。
+	/// 读取支持特性的数据内容，该特性为<see cref="DeviceAddressAttribute" />，详细参考api文档说明。
 	/// </summary>
 	/// <typeparam name="T">自定义的数据类型对象</typeparam>
 	/// <returns>包含是否成功的结果对象</returns>
 	OperateResult<T> Read<T>() where T : class, new();
 
 	/// <summary>
-	/// 写入支持Hsl特性的数据，返回是否写入成功，该特性为<see cref="HslDeviceAddressAttribute" />，详细参考api文档说明。
+	/// 写入支持特性的数据，返回是否写入成功，该特性为<see cref="DeviceAddressAttribute" />，详细参考api文档说明。
 	/// </summary>
 	/// <typeparam name="T">自定义的数据类型对象</typeparam>
 	/// <returns>包含是否成功的结果对象</returns>

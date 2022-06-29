@@ -17,5 +17,5 @@ public interface IEventHandler<TEventData> : IEventHandler
     /// 事件处理器实现该方法来处理事件。
     /// </summary>
     /// <param name="eventData">要处理的事件数据</param>
-    Task HandleAsync(TEventData eventData, CancellationToken cancellationToken);
+    Task HandleAsync(TEventData eventData, CancellationToken cancellationToken = default);
 }

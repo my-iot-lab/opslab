@@ -10,7 +10,7 @@ namespace Ops.Exchange.Management;
 /// <summary>
 /// 设备信息管理者
 /// </summary>
-public class DeviceInfoManager
+public sealed class DeviceInfoManager
 {
     private const string CacheKey = "Cache.Ops.DeviceInfo";
     private const string FileName = "deviceinfo.json";
@@ -28,7 +28,7 @@ public class DeviceInfoManager
     /// 获取所有设备信息
     /// </summary>
     /// <returns></returns>
-    public async Task<List<DeviceInfo>> GetAsync()
+    public async Task<List<DeviceInfo>> GetAllAsync()
     {
         return await _cache.GetOrCreateAsync(CacheKey, async cacheEntry =>
         {
@@ -43,7 +43,7 @@ public class DeviceInfoManager
     /// <param name="deviceInfo">要添加的设备信息</param>
     public async Task<(bool ok, string err)> AddAsync(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAsync();
+        var deviceInfos = await GetAllAsync();
         if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
         {
             return (false, "已存在相同的设备信息");
@@ -62,7 +62,7 @@ public class DeviceInfoManager
     /// <param name="deviceInfo">要更新的设备信息</param>
     public async Task<(bool ok, string err)> UpdateAsync(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAsync();
+        var deviceInfos = await GetAllAsync();
         if (deviceInfos.Any())
         {
             if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
@@ -83,7 +83,7 @@ public class DeviceInfoManager
     /// <param name="deviceInfo"></param>
     public async Task RemoveAsync(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAsync();
+        var deviceInfos = await GetAllAsync();
         if (deviceInfos.Any())
         {
             deviceInfos.RemoveAll(s => s.Id == deviceInfo.Id);
@@ -100,7 +100,7 @@ public class DeviceInfoManager
     /// </summary>
     public async Task FlushAsync(CancellationToken cancellationToken = default)
     {
-        var deviceInfos = await GetAsync();
+        var deviceInfos = await GetAllAsync();
         var content = JsonSerializer.Serialize(deviceInfos);
 
         var path = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir, FileName);

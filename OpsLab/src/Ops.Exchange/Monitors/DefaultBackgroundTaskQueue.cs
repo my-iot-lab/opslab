@@ -35,5 +35,4 @@ internal sealed class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
 
         return workItem;
     }
-
 }

@@ -8,7 +8,7 @@ public class DeviceVariable
     public long Id { get; set; }
 
     // <summary>
-    /// 地址的标签名。注意：标签名在每个 PLC 地址中(或是每个 DB 块中)必须是唯一的。
+    /// 地址的标签名。注意：标签名在每个 PLC 地址中(或是每个工站中)必须是唯一的（在不同的DB块中不一定唯一）。
     /// </summary>
     public string Tag { get; set; }
 
@@ -34,7 +34,7 @@ public class DeviceVariable
     public string? Desc { get; set; }
 
     /// <summary>
-    /// 地址标识。
+    /// 变量类型标识。
     /// </summary>
     public VariableFlag Flag { get; set; }
 

@@ -61,7 +61,7 @@ public sealed class EventBus
     /// </summary>
     /// <typeparam name="TEventData"></typeparam>
     /// <param name="eventData"></param>
-    public async Task Trigger<TEventData>(TEventData eventData, CancellationToken cancellationToken)
+    public async Task Trigger<TEventData>(TEventData eventData, CancellationToken cancellationToken = default)
         where TEventData : IEventData
     {
         if (_eventAndHandlerMapping.TryGetValue(typeof(TEventData), out var handlerTypes))

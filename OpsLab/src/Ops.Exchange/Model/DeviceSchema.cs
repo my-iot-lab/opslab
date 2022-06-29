@@ -39,9 +39,9 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
     public int Port { get; set; }
 
     /// <summary>
-    /// 设备类型（如西门子1200、西门子1500、三菱等）
+    /// 设备驱动类型
     /// </summary>
-    public string? DeviceModel { get; set; }
+    public DriverModel DriverModel { get; set; }
 
     #region override
 

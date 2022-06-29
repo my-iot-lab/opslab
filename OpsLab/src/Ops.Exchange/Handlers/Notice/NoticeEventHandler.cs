@@ -8,7 +8,7 @@ namespace Ops.Exchange.Handlers.Notice;
 /// </summary>
 internal class NoticeEventHandler : IEventHandler<NoticeEventData>
 {
-    public Task HandleAsync(NoticeEventData eventData, CancellationToken cancellationToken)
+    public Task HandleAsync(NoticeEventData eventData, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }

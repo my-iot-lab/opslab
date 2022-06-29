@@ -155,22 +155,27 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	}
 
 	/// <summary>
-	/// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。<br />
+	/// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
 	/// </summary>
 	public int SleepTime { get; set; }
 
 	/// <summary>
-	/// 获取或设置绑定的本地的IP地址和端口号信息，如果端口设置为0，代表任何可用的端口<br />
+	/// 获取或设置绑定的本地的IP地址和端口号信息，如果端口设置为0，代表任何可用的端口
 	/// </summary>
 	public IPEndPoint LocalBinding { get; set; }
 
 	/// <summary>
-	/// 当前的异形连接对象，如果设置了异形连接的话，仅用于异形模式的情况使用<br />
+	/// 当前的异形连接对象，如果设置了异形连接的话，仅用于异形模式的情况使用
 	/// </summary>
 	/// <remarks>
 	/// 具体的使用方法请参照Demo项目中的异形modbus实现。
 	/// </remarks>
 	public AlienSession AlienSession { get; set; }
+
+	/// <summary>
+	/// 获取或设置客户端的Socket的心跳时间信息
+	/// </summary>
+	public int SocketKeepAliveTime { get; set; } = -1;
 
 	/// <summary>
 	/// 默认的无参构造函数 <br />
@@ -200,7 +205,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	}
 
 	/// <summary>
-	/// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" /><br />
+	/// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" />
 	/// </summary>
 	/// <returns>返回PING的结果</returns>
 	public IPStatus IpAddressPing()
@@ -225,6 +230,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 
 		CoreSocket = operateResult.Content;
+		if (SocketKeepAliveTime > 0)
+		{
+			CoreSocket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
+		}
 		Logger?.LogDebug(ToString() + " -- NetEngineStart");
 		return operateResult;
 	}
