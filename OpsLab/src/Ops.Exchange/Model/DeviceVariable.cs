@@ -3,7 +3,7 @@
 /// <summary>
 /// 设备 PLC 地址变量
 /// </summary>
-public class DeviceVariable
+public class DeviceVariable : IEquatable<DeviceVariable>
 {
     public long Id { get; set; }
 
@@ -44,17 +44,32 @@ public class DeviceVariable
     public string? ExtraFlag { get; set; }
 
     /// <summary>
+    /// 变量监控轮询时间间隔，单位 ms。
+    /// </summary>
+    public int PollingInterval { get; set; }
+
+    /// <summary>
     /// 若本地址为 <see cref="VariableFlag.Trigger"/> 类型，该地址表示其负载数据的地址。
     /// </summary>
     public List<DeviceVariable> NormalVariables { get; set; } = new(0);
 
-    /// <summary>
-    /// 两者是否相等
-    /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public bool IsEqual(DeviceVariable other)
+    #region override
+
+    public bool Equals(DeviceVariable? other)
     {
-        return Tag.Equals(other.Tag, StringComparison.OrdinalIgnoreCase);
+        return other != null &&
+            Tag.Equals(other.Tag, StringComparison.OrdinalIgnoreCase);
     }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is DeviceVariable obj2 && Equals(obj2);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Tag);
+    }
+
+    #endregion
 }

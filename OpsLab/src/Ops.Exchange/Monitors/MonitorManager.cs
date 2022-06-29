@@ -11,6 +11,7 @@ using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
+using Ops.Exchange.Stateless;
 
 namespace Ops.Exchange.Monitors;
 
@@ -79,7 +80,7 @@ public sealed class MonitorManager : IDisposable
                 {
                     while (!_cts.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(100);
+                        await Task.Delay(heartbeatDevInfo.PollingInterval, _cts.Token);
 
                         var result = await driver.Value.ReadInt32Async(heartbeatDevInfo.Address);
                         if (result.IsSuccess && result.Content == 1)
@@ -92,35 +93,92 @@ public sealed class MonitorManager : IDisposable
             }
 
             var triggerDevInfos = deviceInfo.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
-            if (triggerDevInfos.Any())
+            foreach (var triggerDevInfo in triggerDevInfos)
             {
                 _ = Task.Run(async () =>
                 {
                     while (!_cts.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(100);
+                        await Task.Delay(triggerDevInfo.PollingInterval, _cts.Token);
 
-                        foreach (var intervalDevInfo in triggerDevInfos)
+                        var result = await driver.Value.ReadInt32Async(triggerDevInfo.Address);
+                        if (result.IsSuccess && result.Content == StateConstant.CanTransfer)
                         {
-                            var eventData = new ReplyEventData(deviceInfo.Schema, intervalDevInfo.Tag, 1);
+                            var normalVariables = triggerDevInfo.NormalVariables;
+                            if (normalVariables.Any())
+                            {
+                                foreach (var normalVariable in normalVariables)
+                                {
+                                    switch (normalVariable.VarType)
+                                    {
+                                        case VariableType.Bit:
+                                            var resultBit21 = await driver.Value.ReadBoolAsync(normalVariable.Address);
+                                            if (normalVariable.Length > 0)
+                                            {
+                                                var resultBit22 = await driver.Value.ReadBoolAsync(normalVariable.Address, (ushort)normalVariable.Length);
+                                            }
+                                            break;
+                                        case VariableType.Byte:
+                                            break;
+                                        case VariableType.Word:
+                                            var resultWord21 = await driver.Value.ReadUInt16Async(normalVariable.Address);
+                                            if (normalVariable.Length > 0)
+                                            {
+                                                var resultWord22 = await driver.Value.ReadUInt16Async(normalVariable.Address, (ushort)normalVariable.Length);
+                                            }
+                                            break;
+                                        case VariableType.DWord:
+                                            break;
+                                        case VariableType.Int:
+                                            var resultInt21 = await driver.Value.ReadInt16Async(normalVariable.Address);
+                                            if (normalVariable.Length > 0)
+                                            {
+                                                var resultInt22 = await driver.Value.ReadInt16Async(normalVariable.Address, (ushort)normalVariable.Length);
+                                            }
+                                            break;
+                                        case VariableType.DInt:
+                                            var resultDInt21 = await driver.Value.ReadInt32Async(normalVariable.Address);
+                                            if (normalVariable.Length > 0)
+                                            {
+                                                var resultDInt22 = await driver.Value.ReadInt32Async(normalVariable.Address, (ushort)normalVariable.Length);
+                                            }
+                                            break;
+                                        case VariableType.Real:
+                                            break;
+                                        case VariableType.LReal:
+                                            break;
+                                        case VariableType.String:
+                                            break;
+                                        case VariableType.S7String:
+                                            break;
+                                        case VariableType.S7WString:
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+
+                            var eventData = new ReplyEventData(deviceInfo.Schema, triggerDevInfo.Tag, result.Content, Array.Empty<object>());
                             await _eventBus.Trigger(eventData, _cts.Token);
                         }
                     }
                 });
             }
 
-            var intervalDevInfos = deviceInfo.Variables.Where(s => s.Flag == VariableFlag.Interval).ToList();
-            if (intervalDevInfos.Any())
+            var noticeDevInfos = deviceInfo.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
+            foreach (var noticeDevInfo in noticeDevInfos)
             {
                 _ = Task.Run(async () =>
                 {
                     while (!_cts.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(100);
+                        await Task.Delay(noticeDevInfo.PollingInterval, _cts.Token);
 
-                        foreach (var intervalDevInfo in intervalDevInfos)
+                        var result = await driver.Value.ReadInt32Async(noticeDevInfo.Address);
+                        if (result.IsSuccess)
                         {
-                            var eventData = new NoticeEventData(deviceInfo.Schema, intervalDevInfo.Tag);
+                            var eventData = new NoticeEventData(deviceInfo.Schema, noticeDevInfo.Tag, result.Content);
                             await _eventBus.Trigger(eventData, _cts.Token);
                         }
                     }
@@ -132,6 +190,7 @@ public sealed class MonitorManager : IDisposable
     public void Stop()
     {
         _cts.Cancel();
+        _logger.LogInformation("监控停止");
     }
 
     public void Dispose()

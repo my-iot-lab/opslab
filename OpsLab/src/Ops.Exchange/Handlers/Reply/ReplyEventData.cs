@@ -27,10 +27,13 @@ internal sealed class ReplyEventData : EventData
     /// </summary>
     public int State { get; }
 
-    public ReplyEventData(DeviceSchema schema, string tag, int state)
+    public object[] Values { get; }
+
+    public ReplyEventData(DeviceSchema schema, string tag, int state, object[] values)
     {
         Schema = schema;
         Tag = tag;
         State = state;
+        Values = values;
     }
 }

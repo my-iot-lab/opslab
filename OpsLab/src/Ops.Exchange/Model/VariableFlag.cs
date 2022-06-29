@@ -25,5 +25,5 @@ public enum VariableFlag
     /// <summary>
     /// 表示该地址数据会不间断发送，如警报。
     /// </summary>
-    Interval = 3,
+    Notice = 3,
 }

@@ -16,17 +16,17 @@ public enum VariableType
     Byte,
 
     /// <summary>
-    /// ushort (16 bits)
+    /// uint16 (16 bits)
     /// </summary>
     Word,
 
     /// <summary>
-    /// Double Word, ulong  (64 bits)
+    /// uint32 (32 bits)
     /// </summary>
     DWord,
 
     /// <summary>
-    /// ushort (16 bits)
+    /// int16 (16 bits)
     /// </summary>
     Int,
 
@@ -41,7 +41,7 @@ public enum VariableType
     Real,
 
     /// <summary>
-    /// Double (64 bits)
+    /// double (64 bits)
     /// </summary>
     LReal,
 
