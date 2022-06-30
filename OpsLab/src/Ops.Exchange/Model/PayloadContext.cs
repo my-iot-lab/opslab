@@ -3,7 +3,7 @@
 /// <summary>
 /// 要传输的数据上下文对象。
 /// </summary>
-internal sealed class PayloadContext
+public sealed class PayloadContext
 {
     /// <summary>
     /// 从设备中读取的数据。
@@ -15,9 +15,9 @@ internal sealed class PayloadContext
     /// </summary>
     public PayloadResponse Response { get; }
 
-    public PayloadContext()
+    public PayloadContext(PayloadRequest request)
     {
-        Request = new();
+        Request = request;
         Response = new();
     }
 }

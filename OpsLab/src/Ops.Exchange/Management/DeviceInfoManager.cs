@@ -3,7 +3,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Model;
-using Ops.Exchange.Utils;
 
 namespace Ops.Exchange.Management;
 
@@ -12,8 +11,8 @@ namespace Ops.Exchange.Management;
 /// </summary>
 public sealed class DeviceInfoManager
 {
-    private const string CacheKey = "Cache.Ops.DeviceInfo";
-    private const string FileName = "deviceinfo.json";
+    private const string CacheKey = "_cache.ops.deviceinfo";
+    private const string FileName = "_deviceinfo.json";
 
     private readonly OpsConfig _config;
     private readonly IMemoryCache _cache;
@@ -38,6 +37,17 @@ public sealed class DeviceInfoManager
     }
 
     /// <summary>
+    /// 获取指定的设备信息
+    /// </summary>
+    /// <param name="id">设备 Id</param>
+    /// <returns></returns>
+    public async Task<DeviceInfo?> GetAsync(long id)
+    {
+        var deviceInfos = await GetAllAsync();
+        return deviceInfos.SingleOrDefault(s => s.Id == id);
+    }
+
+    /// <summary>
     /// 添加设备
     /// </summary>
     /// <param name="deviceInfo">要添加的设备信息</param>
@@ -49,8 +59,8 @@ public sealed class DeviceInfoManager
             return (false, "已存在相同的设备信息");
         }
 
-        var id = deviceInfos.Max(s => s.Id);
-        deviceInfo.Id = IdGenerator.NextId();
+        var id = deviceInfos.Count == 0 ? 1 : deviceInfos.Max(s => s.Id);
+        deviceInfo.Id = id;
         deviceInfos.Add(deviceInfo);
 
         return (true, string.Empty);

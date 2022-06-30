@@ -21,11 +21,6 @@ internal sealed class DefaultBackgroundTaskQueue : IBackgroundTaskQueue
 
     public async ValueTask QueueBackgroundWorkItemAsync(Func<CancellationToken, ValueTask> workItem)
     {
-        if (workItem is null)
-        {
-            throw new ArgumentNullException(nameof(workItem));
-        }
-
         await _queue.Writer.WriteAsync(workItem);
     }
 

@@ -2,8 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
+using Ops.Exchange.Handlers.Heartbeat;
+using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Management;
+using Ops.Exchange.Monitors;
 using Ops.Exchange.Stateless;
 
 namespace Ops.Exchange.DependencyInjection;
@@ -20,12 +23,18 @@ public static class ExchangeServiceCollectionExtensions
 
         services.AddSingleton<EventBus>();
 
-        // EventHandler
-        services.AddSingleton<ReplyEventHandler>();
+        services.AddSingleton<CallbackTaskQueue>();
 
-        // manager
-        services.AddSingleton<DeviceInfoManager>();
+        // EventHandlers
+        services.AddSingleton<HeartbeatEventHandler>();
+        services.AddSingleton<ReplyEventHandler>();
+        services.AddSingleton<NoticeEventHandler>();
+
+        // Managers
         services.AddSingleton<StateManager>();
+        services.AddSingleton<DriverConnectorManager>();
+        services.AddSingleton<DeviceInfoManager>();
+        services.AddSingleton<MonitorManager>();
 
         return services;
     }

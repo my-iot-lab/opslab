@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Ops.Communication.Core;
-using Ops.Communication.Core.Net;
-using Ops.Communication.Modbus;
-using Ops.Communication.Profinet.AllenBradley;
-using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Handlers.Heartbeat;
@@ -20,184 +16,418 @@ namespace Ops.Exchange.Monitors;
 /// </summary>
 public sealed class MonitorManager : IDisposable
 {
-    private readonly Dictionary<long, IReadWriteNet> _drivers = new();
     private readonly CancellationTokenSource _cts = new();
+    private bool _isRunning;
 
     private readonly DeviceInfoManager _deviceInfoManager;
+    private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
+    private readonly CallbackTaskQueue _callbackTaskQueue;
     private readonly ILogger _logger;
 
-    public MonitorManager(DeviceInfoManager deviceInfoManager, EventBus eventBus, ILogger<MonitorManager> logger)
+    public MonitorManager(DeviceInfoManager deviceInfoManager,
+        DriverConnectorManager driverConnectorManager,
+        EventBus eventBus,
+        CallbackTaskQueue callbackTaskQueue,
+        ILogger<MonitorManager> logger)
     {
         _deviceInfoManager = deviceInfoManager;
+        _driverConnectorManager = driverConnectorManager;
         _eventBus = eventBus;
+        _callbackTaskQueue = callbackTaskQueue;
         _logger = logger;
+
+        _eventBus.Register<HeartbeatEventData, HeartbeatEventHandler>();
+        _eventBus.Register<NoticeEventData, NoticeEventHandler>();
+        _eventBus.Register<ReplyEventData, ReplyEventHandler>();
     }
 
     /// <summary>
     /// 启动监听
     /// </summary>
-    public async Task Start()
+    public async Task StartAsync()
     {
-        var deviceInfos = await _deviceInfoManager.GetAllAsync();
-        foreach (var deviceInfo in deviceInfos)
+        if (_isRunning)
         {
-            var schema = deviceInfo.Schema;
-            NetworkDeviceBase driverNet = schema.DriverModel switch
-            {
-                DriverModel.ModbusTcp => new ModbusTcpNet(schema.Host),
-                DriverModel.S7_1500 => new SiemensS7Net(SiemensPLCS.S1500, schema.Host),
-                DriverModel.S7_1200 => new SiemensS7Net(SiemensPLCS.S1200, schema.Host),
-                DriverModel.S7_400 => new SiemensS7Net(SiemensPLCS.S400, schema.Host),
-                DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, schema.Host),
-                DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, schema.Host),
-                DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, schema.Host),
-                DriverModel.Omron_FinsTcp => new OmronFinsNet(schema.Host, schema.Port),
-                DriverModel.AllenBradley_CIP => new AllenBradleyNet(schema.Host),
-                _ => throw new NotImplementedException(),
-            };
-
-            // 设置 SocketKeepAliveTime 心跳时间
-            driverNet.SocketKeepAliveTime = 60_000;
-            _drivers.Add(deviceInfo.Id, driverNet);
+            return;
         }
+        _isRunning = true;
 
-        foreach (var driver in _drivers)
-        {
-            await (driver.Value as NetworkDeviceBase)!.ConnectServerAsync();
-        }
+        await _driverConnectorManager.LoadAsync();
+        await _driverConnectorManager.ConnectServerAsync();
 
         // 每个工站启用
-        foreach (var driver in _drivers)
+        foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
-            var deviceInfo = deviceInfos.Single(s => s.Id == driver.Key);
+            // 心跳数据监控器
+            _ = HeartbeatMonitorAsync(connector);
 
-            // 心跳只有一个标志位
-            var heartbeatDevInfo = deviceInfo.Variables.FirstOrDefault(s => s.Flag == VariableFlag.Heartbeat);
-            if (heartbeatDevInfo != null)
-            {
-                _ = Task.Run(async () =>
-                {
-                    while (!_cts.Token.IsCancellationRequested)
-                    {
-                        await Task.Delay(heartbeatDevInfo.PollingInterval, _cts.Token);
+            // 触发数据监控器
+            _ = TriggerMonitorAsync(connector);
 
-                        var result = await driver.Value.ReadInt32Async(heartbeatDevInfo.Address);
-                        if (result.IsSuccess && result.Content == 1)
-                        {
-                            var eventData = new HeartbeatEventData(deviceInfo.Schema, heartbeatDevInfo.Tag, result.Content);
-                            await _eventBus.Trigger(eventData, _cts.Token);
-                        }
-                    }
-                });
-            }
-
-            var triggerDevInfos = deviceInfo.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
-            foreach (var triggerDevInfo in triggerDevInfos)
-            {
-                _ = Task.Run(async () =>
-                {
-                    while (!_cts.Token.IsCancellationRequested)
-                    {
-                        await Task.Delay(triggerDevInfo.PollingInterval, _cts.Token);
-
-                        var result = await driver.Value.ReadInt32Async(triggerDevInfo.Address);
-                        if (result.IsSuccess && result.Content == StateConstant.CanTransfer)
-                        {
-                            var normalVariables = triggerDevInfo.NormalVariables;
-                            if (normalVariables.Any())
-                            {
-                                foreach (var normalVariable in normalVariables)
-                                {
-                                    switch (normalVariable.VarType)
-                                    {
-                                        case VariableType.Bit:
-                                            var resultBit21 = await driver.Value.ReadBoolAsync(normalVariable.Address);
-                                            if (normalVariable.Length > 0)
-                                            {
-                                                var resultBit22 = await driver.Value.ReadBoolAsync(normalVariable.Address, (ushort)normalVariable.Length);
-                                            }
-                                            break;
-                                        case VariableType.Byte:
-                                            break;
-                                        case VariableType.Word:
-                                            var resultWord21 = await driver.Value.ReadUInt16Async(normalVariable.Address);
-                                            if (normalVariable.Length > 0)
-                                            {
-                                                var resultWord22 = await driver.Value.ReadUInt16Async(normalVariable.Address, (ushort)normalVariable.Length);
-                                            }
-                                            break;
-                                        case VariableType.DWord:
-                                            break;
-                                        case VariableType.Int:
-                                            var resultInt21 = await driver.Value.ReadInt16Async(normalVariable.Address);
-                                            if (normalVariable.Length > 0)
-                                            {
-                                                var resultInt22 = await driver.Value.ReadInt16Async(normalVariable.Address, (ushort)normalVariable.Length);
-                                            }
-                                            break;
-                                        case VariableType.DInt:
-                                            var resultDInt21 = await driver.Value.ReadInt32Async(normalVariable.Address);
-                                            if (normalVariable.Length > 0)
-                                            {
-                                                var resultDInt22 = await driver.Value.ReadInt32Async(normalVariable.Address, (ushort)normalVariable.Length);
-                                            }
-                                            break;
-                                        case VariableType.Real:
-                                            break;
-                                        case VariableType.LReal:
-                                            break;
-                                        case VariableType.String:
-                                            break;
-                                        case VariableType.S7String:
-                                            break;
-                                        case VariableType.S7WString:
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                            }
-
-                            var eventData = new ReplyEventData(deviceInfo.Schema, triggerDevInfo.Tag, result.Content, Array.Empty<object>());
-                            await _eventBus.Trigger(eventData, _cts.Token);
-                        }
-                    }
-                });
-            }
-
-            var noticeDevInfos = deviceInfo.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
-            foreach (var noticeDevInfo in noticeDevInfos)
-            {
-                _ = Task.Run(async () =>
-                {
-                    while (!_cts.Token.IsCancellationRequested)
-                    {
-                        await Task.Delay(noticeDevInfo.PollingInterval, _cts.Token);
-
-                        var result = await driver.Value.ReadInt32Async(noticeDevInfo.Address);
-                        if (result.IsSuccess)
-                        {
-                            var eventData = new NoticeEventData(deviceInfo.Schema, noticeDevInfo.Tag, result.Content);
-                            await _eventBus.Trigger(eventData, _cts.Token);
-                        }
-                    }
-                });
-            }
+            // 通知数据监控器
+            _ = NoticeMonitorAsync(connector);
         }
+
+        // 数据回写，如心跳和触发数据（触发点和对应数据）
+        _ = CallbackMonitorAsync();
+    }
+
+    private async Task HeartbeatMonitorAsync(DriverConnector connector)
+    {
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var variable = deviceInfo!.Variables.FirstOrDefault(s => s.Flag == VariableFlag.Heartbeat);
+        if (variable == null)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            while (!_cts.Token.IsCancellationRequested)
+            {
+                await Task.Delay(variable.PollingInterval, _cts.Token);
+
+                var result = await connector.Driver.ReadInt16Async(variable.Address);
+                if (result.IsSuccess && result.Content == 1)
+                {
+                    var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                    var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
+                    await _eventBus.Trigger(eventData, _cts.Token);
+                }
+            }
+        });
+    }
+
+    private async Task TriggerMonitorAsync(DriverConnector connector)
+    {
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
+        foreach (var variable in variables)
+        {
+            _ = Task.Run(async () =>
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(variable.PollingInterval, _cts.Token);
+
+                    var result = await connector.Driver.ReadInt16Async(variable.Address);
+                    if (result.IsSuccess && result.Content == StateConstant.CanTransfer)
+                    {
+                        var normalVariables = variable.NormalVariables;
+                        List<PayloadData> datas = new(normalVariables.Count);
+
+                        foreach (var normalVariable in normalVariables)
+                        {
+                            var (ok, data, _) = await ReadDataAsync(connector.Driver, normalVariable);
+                            if (ok)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+
+                        var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                        var eventData = new ReplyEventData(context, variable.Tag, result.Content, datas.ToArray());
+                        await _eventBus.Trigger(eventData, _cts.Token);
+                    }
+                }
+            });
+        }
+    }
+
+    private async Task NoticeMonitorAsync(DriverConnector connector)
+    {
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
+        foreach (var variable in variables)
+        {
+            _ = Task.Run(async () =>
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(variable.PollingInterval, _cts.Token);
+
+                    var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
+                    if (ok)
+                    {
+                        var eventData = new NoticeEventData(deviceInfo.Schema, variable.Tag, data);
+                        await _eventBus.Trigger(eventData, _cts.Token);
+                    }
+                }
+            });
+        }
+    }
+
+    private Task CallbackMonitorAsync()
+    {
+        return Task.Run(async () =>
+        {
+            while (!_cts.Token.IsCancellationRequested)
+            {
+                var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync(_cts.Token);
+                if (!ok)
+                {
+                    break;
+                }
+
+                // 若连接驱动不处于连接状态，会循环等待。
+                var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Schema.Id];
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    if (connector.Status == ConnectingStatus.Connected)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(1000, _cts.Token);
+                    connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Schema.Id];
+                }
+
+                foreach (var value in ctx.Response.Values)
+                {
+                    await WriteDataAsync(connector.Driver, value);
+                }
+            }
+        });
     }
 
     public void Stop()
     {
+        if (!_isRunning)
+        {
+            return;
+        }
+        _isRunning = false;
+
         _cts.Cancel();
         _logger.LogInformation("监控停止");
     }
 
     public void Dispose()
     {
-        foreach (var driver in _drivers)
+        Stop();
+    }
+
+    private async Task<(bool ok, PayloadData data, string err)> ReadDataAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
+    {
+        var data = PayloadData.From(deviceVariable);
+
+        switch (deviceVariable.VarType)
         {
-            (driver.Value as NetworkDeviceBase)!.Dispose();
+            case VariableType.Bit:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultBit2 = await driver.ReadBoolAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultBit2, data);
+                }
+                else
+                {
+                    var resultBit1 = await driver.ReadBoolAsync(deviceVariable.Address);
+                    SetValue(resultBit1, data);
+                }
+                break;
+            case VariableType.Byte:
+                break;
+            case VariableType.Word:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultWord2 = await driver.ReadUInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultWord2, data);
+                }
+                else
+                {
+                    var resultWord1 = await driver.ReadUInt16Async(deviceVariable.Address);
+                    SetValue(resultWord1, data);
+                }
+                break;
+            case VariableType.DWord:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultUInt2 = await driver.ReadUInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultUInt2, data);
+                }
+                else
+                {
+                    var resultUInt1 = await driver.ReadUInt32Async(deviceVariable.Address);
+                    SetValue(resultUInt1, data);
+                }
+                break;
+            case VariableType.Int:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultInt2 = await driver.ReadInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultInt2, data);
+                }
+                else
+                {
+                    var resultInt1 = await driver.ReadInt16Async(deviceVariable.Address);
+                    SetValue(resultInt1, data);
+                }
+                break;
+            case VariableType.DInt:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultDInt2 = await driver.ReadInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultDInt2, data);
+                }
+                else
+                {
+                    var resultDInt1 = await driver.ReadInt32Async(deviceVariable.Address);
+                    SetValue(resultDInt1, data);
+                }
+                break;
+            case VariableType.Real:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultReal2 = await driver.ReadFloatAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultReal2, data);
+                }
+                else
+                {
+                    var resultReal1 = await driver.ReadFloatAsync(deviceVariable.Address);
+                    SetValue(resultReal1, data);
+                }
+                break;
+            case VariableType.LReal:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultLReal2 = await driver.ReadDoubleAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultLReal2, data);
+                }
+                else
+                {
+                    var resultLReal1 = await driver.ReadDoubleAsync(deviceVariable.Address);
+                    SetValue(resultLReal1, data);
+                }
+                break;
+            case VariableType.String or VariableType.S7String:
+                var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                SetValue(resultString2, data);
+                break;
+            case VariableType.S7WString:
+                if (driver is SiemensS7Net driver2)
+                {
+                    var resultWString2 = await driver2.ReadWStringAsync(deviceVariable.Address);
+                    SetValue(resultWString2, data);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return (true, data, "");
+
+        static void SetValue<T>(Communication.OperateResult<T> result, PayloadData data)
+        {
+            if (result.IsSuccess)
+            {
+                data.Value = result.Content!;
+            }
+        }
+    }
+
+    private async Task WriteDataAsync(IReadWriteNet driver, PayloadData data)
+    {
+        switch (data.VarType)
+        {
+            case VariableType.Bit:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (bool[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (bool)data.Value);
+                }
+                break;
+            case VariableType.Byte:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (byte[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (byte)data.Value);
+                }
+                break;
+            case VariableType.Word:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (ushort[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (ushort)data.Value);
+                }
+                break;
+            case VariableType.DWord:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (uint[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (uint)data.Value);
+                }
+                break;
+            case VariableType.Int:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (short[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (short)data.Value);
+                }
+                break;
+            case VariableType.DInt:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (int[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (int)data.Value);
+                }
+                break;
+            case VariableType.Real:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (float[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (float)data.Value);
+                }
+                break;
+            case VariableType.LReal:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (double[])data.Value);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (double)data.Value);
+                }
+                break;
+            case VariableType.String or VariableType.S7String:
+                if (data.Length > 0)
+                {
+                    await driver.WriteAsync(data.Address, (string)data.Value, data.Length);
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, (string)data.Value);
+                }
+                break;
+            case VariableType.S7WString:
+                if (driver is SiemensS7Net driver2)
+                {
+                    await driver2.WriteWStringAsync(data.Address, (string)data.Value);
+                }
+                break;
+            default:
+                break;
         }
     }
 }

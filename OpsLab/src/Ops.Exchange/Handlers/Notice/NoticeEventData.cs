@@ -21,9 +21,9 @@ internal sealed class NoticeEventData : EventData
     /// <summary>
     /// 要通知的数据。
     /// </summary>
-    public object Value { get; }
+    public PayloadData Value { get; }
 
-    public NoticeEventData(DeviceSchema schema, string tag, object value)
+    public NoticeEventData(DeviceSchema schema, string tag, PayloadData value)
     {
         Schema = schema;
         Tag = tag;

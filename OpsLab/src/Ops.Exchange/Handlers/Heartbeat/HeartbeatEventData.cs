@@ -9,9 +9,9 @@ namespace Ops.Exchange.Handlers.Heartbeat;
 internal class HeartbeatEventData : EventData
 {
     /// <summary>
-    /// 设备 Schema 基础信息。
+    /// 请求的数据上下文
     /// </summary>
-    public DeviceSchema Schema { get; }
+    public PayloadContext Context { get; }
 
     /// <summary>
     /// 事件标签 Tag（唯一）
@@ -27,9 +27,9 @@ internal class HeartbeatEventData : EventData
     /// </summary>
     public int State { get; }
 
-    public HeartbeatEventData(DeviceSchema schema, string tag, int state)
+    public HeartbeatEventData(PayloadContext context, string tag, int state)
     {
-        Schema = schema;
+        Context = context;
         Tag = tag;
         State = state;
     }

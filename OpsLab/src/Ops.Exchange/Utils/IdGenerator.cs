@@ -5,7 +5,7 @@
 /// </summary>
 public sealed class IdGenerator
 {
-    //机器ID
+    // 机器ID
     private readonly long _workerId;
     private static readonly long twepoch = 687888001020L; // 唯一时间，这是一个避免重复的随机量，自行设定不要大于当前时间戳
     private static long sequence = 0L;
