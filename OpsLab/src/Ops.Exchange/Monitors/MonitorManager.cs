@@ -1,13 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Ops.Communication.Core;
 using Ops.Communication.Profinet.Siemens;
 using Ops.Exchange.Bus;
+using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
-using Ops.Exchange.Stateless;
+using Ops.Exchange.Utils;
 
 namespace Ops.Exchange.Monitors;
 
@@ -22,19 +24,22 @@ public sealed class MonitorManager : IDisposable
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
-    private readonly CallbackTaskQueue _callbackTaskQueue;
+    private readonly CallbackTaskQueueManager _callbackTaskQueue;
+    private readonly OpsConfig _opsCofig;
     private readonly ILogger _logger;
 
     public MonitorManager(DeviceInfoManager deviceInfoManager,
         DriverConnectorManager driverConnectorManager,
         EventBus eventBus,
-        CallbackTaskQueue callbackTaskQueue,
+        CallbackTaskQueueManager callbackTaskQueue,
+        IOptions<OpsConfig> opsConfig,
         ILogger<MonitorManager> logger)
     {
         _deviceInfoManager = deviceInfoManager;
         _driverConnectorManager = driverConnectorManager;
         _eventBus = eventBus;
         _callbackTaskQueue = callbackTaskQueue;
+        _opsCofig = opsConfig.Value;
         _logger = logger;
 
         _eventBus.Register<HeartbeatEventData, HeartbeatEventHandler>();
@@ -84,9 +89,10 @@ public sealed class MonitorManager : IDisposable
 
         _ = Task.Run(async () =>
         {
+            int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
             while (!_cts.Token.IsCancellationRequested)
             {
-                await Task.Delay(variable.PollingInterval, _cts.Token);
+                await Task.Delay(pollingInterval, _cts.Token);
 
                 var result = await connector.Driver.ReadInt16Async(variable.Address);
                 if (result.IsSuccess && result.Content == 1)
@@ -107,12 +113,13 @@ public sealed class MonitorManager : IDisposable
         {
             _ = Task.Run(async () =>
             {
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(variable.PollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token);
 
                     var result = await connector.Driver.ReadInt16Async(variable.Address);
-                    if (result.IsSuccess && result.Content == StateConstant.CanTransfer)
+                    if (result.IsSuccess && result.Content == ExStatusCode.Trigger)
                     {
                         var normalVariables = variable.NormalVariables;
                         List<PayloadData> datas = new(normalVariables.Count);
@@ -127,7 +134,10 @@ public sealed class MonitorManager : IDisposable
                         }
 
                         var context = new PayloadContext(new PayloadRequest(deviceInfo));
-                        var eventData = new ReplyEventData(context, variable.Tag, result.Content, datas.ToArray());
+                        var eventData = new ReplyEventData(context, variable.Tag, result.Content, datas.ToArray())
+                        {
+                            HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                        };
                         await _eventBus.Trigger(eventData, _cts.Token);
                     }
                 }
@@ -143,14 +153,18 @@ public sealed class MonitorManager : IDisposable
         {
             _ = Task.Run(async () =>
             {
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(variable.PollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token);
 
                     var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
                     if (ok)
                     {
-                        var eventData = new NoticeEventData(deviceInfo.Schema, variable.Tag, data);
+                        var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, data)
+                        {
+                            HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                        };
                         await _eventBus.Trigger(eventData, _cts.Token);
                     }
                 }
@@ -179,7 +193,7 @@ public sealed class MonitorManager : IDisposable
                         break;
                     }
 
-                    await Task.Delay(1000, _cts.Token);
+                    await Task.Delay(1000, _cts.Token); // 延迟1s
                     connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Schema.Id];
                 }
 
@@ -187,6 +201,8 @@ public sealed class MonitorManager : IDisposable
                 {
                     await WriteDataAsync(connector.Driver, value);
                 }
+
+                ctx.Response.LastAction?.Invoke();
             }
         });
     }
@@ -200,6 +216,11 @@ public sealed class MonitorManager : IDisposable
         _isRunning = false;
 
         _cts.Cancel();
+
+        // 阻塞 500ms
+        Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult();
+        _driverConnectorManager.Reset();
+
         _logger.LogInformation("监控停止");
     }
 

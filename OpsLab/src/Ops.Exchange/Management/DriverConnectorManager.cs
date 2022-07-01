@@ -3,6 +3,7 @@ using Ops.Communication.Core;
 using Ops.Communication.Core.Net;
 using Ops.Communication.Modbus;
 using Ops.Communication.Profinet.AllenBradley;
+using Ops.Communication.Profinet.Melsec;
 using Ops.Communication.Profinet.Omron;
 using Ops.Communication.Profinet.Siemens;
 using Ops.Exchange.Model;
@@ -116,6 +117,10 @@ public sealed class DriverConnectorManager : IDisposable
                 DriverModel.S7_300 => new SiemensS7Net(SiemensPLCS.S300, schema.Host),
                 DriverModel.S7_S200 => new SiemensS7Net(SiemensPLCS.S200, schema.Host),
                 DriverModel.S7_S200Smart => new SiemensS7Net(SiemensPLCS.S200Smart, schema.Host),
+                DriverModel.Melsec_CIP => new MelsecCipNet(schema.Host),
+                DriverModel.Melsec_A1E => new MelsecA1ENet(schema.Host, schema.Port),
+                DriverModel.Melsec_MC => new MelsecMcNet(schema.Host, schema.Port),
+                DriverModel.Melsec_MCR => new MelsecMcRNet(schema.Host, schema.Port),
                 DriverModel.Omron_FinsTcp => new OmronFinsNet(schema.Host, schema.Port),
                 DriverModel.AllenBradley_CIP => new AllenBradleyNet(schema.Host),
                 _ => throw new NotImplementedException(),
@@ -144,12 +149,22 @@ public sealed class DriverConnectorManager : IDisposable
         _isConnectServer = true;
     }
 
-    public void Dispose()
+    /// <summary>
+    /// 连接重置。会断开并清空所有连接。
+    /// </summary>
+    public void Reset()
     {
         foreach (var connector in _drivers.Values)
         {
             (connector.Driver as NetworkDeviceBase)!.Dispose();
             connector.Status = ConnectingStatus.Disconnected;
         }
+
+        _drivers.Clear();
+    }
+
+    public void Dispose()
+    {
+        Reset();
     }
 }

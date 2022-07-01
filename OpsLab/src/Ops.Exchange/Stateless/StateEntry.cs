@@ -49,12 +49,12 @@ public sealed class StateEntry : IEquatable<StateEntry>
     }
 
     /// <summary>
-    /// 变更状态。
+    /// 检查状态，若可变更，则进行状态变更。
     /// 当 <see cref="CanChange"/> 为 true 时才会进行更改。
     /// </summary>
     /// <param name="newState">变更后的状态</param>
     /// <returns>true 表示可更改，否则为 false</returns>
-    public bool Change(int newState)
+    public bool CheckAndChange(int newState)
     {
         UpdatedAt = DateTime.Now;
 
@@ -63,14 +63,23 @@ public sealed class StateEntry : IEquatable<StateEntry>
             return false;
         }
 
-        var oldState = State;
-
-        State = newState;
-        ChangedAt = DateTime.Now;
-
-        OnChanged?.Invoke(new StateChangedEventArgs(Tag, oldState, newState));
+        Change(newState);
 
         return true;
+    }
+
+    /// <summary>
+    /// 变更状态。
+    /// </summary>
+    /// <param name="newState">变更后的状态</param>
+    public void Change(int newState)
+    {
+        var oldState = State;
+        State = newState;
+        ChangedAt = DateTime.Now;
+        UpdatedAt = ChangedAt;
+
+        OnChanged?.Invoke(new StateChangedEventArgs(Tag, oldState, newState));
     }
 
     #region override

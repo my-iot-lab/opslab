@@ -29,6 +29,11 @@ internal sealed class ReplyEventData : EventData
 
     public PayloadData[] Values { get; }
 
+    /// <summary>
+    /// 处理任务超时时间，毫秒
+    /// </summary>
+    public int HandleTimeout { get; set; }
+
     public ReplyEventData(PayloadContext context, string tag, int state, PayloadData[] values)
     {
         Context = context;

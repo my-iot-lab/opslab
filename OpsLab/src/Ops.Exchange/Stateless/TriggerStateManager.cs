@@ -3,9 +3,9 @@
 namespace Ops.Exchange.Stateless;
 
 /// <summary>
-/// 状态管理对象
+/// 触发状态管理对象
 /// </summary>
-public sealed class StateManager
+public sealed class TriggerStateManager
 {
     private readonly ConcurrentDictionary<StateKey, StateTable> _states = new();
 
@@ -36,7 +36,7 @@ public sealed class StateManager
             var entry = map[key.Tag];
             if (entry != null)
             {
-                return entry.Change(state);
+                return entry.CheckAndChange(state);
             }
             else
             {
@@ -53,7 +53,24 @@ public sealed class StateManager
             _states.TryAdd(key, state3);
         }
 
-        return state == StateConstant.CanTransfer;
+        return state == ExStatusCode.Trigger;
+    }
+
+    /// <summary>
+    /// 更改为指定的状态
+    /// </summary>
+    /// <param name="key">Key值</param>
+    /// <param name="newState">新状态</param>
+    public void Change(StateKey key, int newState)
+    {
+        if (_states.TryGetValue(key, out var map))
+        {
+            var entry = map[key.Tag];
+            if (entry != null)
+            {
+                entry.Change(newState);
+            }
+        }
     }
 
     /// <summary>
@@ -78,7 +95,7 @@ public sealed class StateManager
         var entry0 = new StateEntry(tag, initState, (entry, newState) =>
         {
             // 新旧状态不等，且新状态值为 1。
-            return entry.State != newState && newState == StateConstant.CanTransfer;
+            return entry.State != newState && newState == ExStatusCode.Trigger;
         });
 
         entry0.OnChanged = arg =>

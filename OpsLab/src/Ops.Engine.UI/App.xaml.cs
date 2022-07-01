@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Ops.Engine.UI.Domain.ViewModels;
 using Ops.Engine.UI.BackgroundServices;
+using Ops.Exchange.DependencyInjection;
+using Ops.Engine.UI.Forwarders;
 
 namespace Ops.Engine.UI
 {
@@ -36,9 +39,9 @@ namespace Ops.Engine.UI
 
         static IHostBuilder CreateHostBuilder(string[]? args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureServices((_, services) =>
+                .ConfigureServices((builder, services) =>
                 {
-                    ConfigureServices(services);
+                    ConfigureServices(services, builder.Configuration);
                 })
                 .UseSerilog();
 
@@ -69,8 +72,14 @@ namespace Ops.Engine.UI
             base.OnExit(e);
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddOpsExchange(configuration, options =>
+            {
+                options.AddNoticeForword<OpsNoticeForwarder>();
+                options.AddReplyForword<OpsReplyForwarder>();
+            });
+
             // 注册后台服务
             services.AddHostedService<Worker>();
 

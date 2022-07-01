@@ -6,5 +6,13 @@
 /// </summary>
 public sealed class PayloadResponse
 {
+    /// <summary>
+    /// 响应的数据，该数据回写给设备。
+    /// </summary>
     public List<PayloadData> Values { get; } = new();
+
+    /// <summary>
+    /// 数据回写完后的执行方法
+    /// </summary>
+    public Action? LastAction { get; set; }
 }

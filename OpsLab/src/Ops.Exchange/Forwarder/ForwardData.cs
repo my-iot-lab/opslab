@@ -1,12 +1,11 @@
-﻿using Ops.Exchange.Bus;
-using Ops.Exchange.Model;
+﻿using Ops.Exchange.Model;
 
-namespace Ops.Exchange.Handlers.Notice;
+namespace Ops.Exchange.Forwarder;
 
 /// <summary>
-/// 通知事件数据。
+/// 要派发的数据
 /// </summary>
-internal sealed class NoticeEventData : EventData
+public sealed class ForwardData
 {
     /// <summary>
     /// 请求的 Id，可用于追踪数据。
@@ -24,20 +23,15 @@ internal sealed class NoticeEventData : EventData
     public string Tag { get; }
 
     /// <summary>
-    /// 要通知的数据。
+    /// 附加的数据
     /// </summary>
-    public PayloadData Value { get; }
+    public PayloadData[] Values { get; }
 
-    /// <summary>
-    /// 处理任务超时时间，毫秒
-    /// </summary>
-    public int HandleTimeout { get; set; }
-
-    public NoticeEventData(string requestId, DeviceSchema schema, string tag, PayloadData value)
+    public ForwardData(string requestId, DeviceSchema schema, string tag, PayloadData[] values)
     {
         RequestId = requestId;
         Schema = schema;
         Tag = tag;
-        Value = value;
+        Values = values;
     }
 }

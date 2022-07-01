@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ops.Exchange.DependencyInjection;
+using Ops.Test.ConsoleApp.Forwarder;
 using Ops.Test.ConsoleApp.Suits;
 using Serilog;
 
@@ -31,29 +33,22 @@ catch (Exception ex)
 
 static IHostBuilder CreateHostBuilder(string[]? args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureServices((_, services) =>
+                .ConfigureServices((builder, services) =>
                 {
-                    ConfigureServices(services);
+                    ConfigureServices(services, builder.Configuration);
                 })
                 .UseSerilog();
 
-static void ConfigureServices(IServiceCollection services)
+static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
     // 注册后台服务
     //services.AddHostedService<Worker>();
 
-    // 注入 Services
-
-    // 注入 ViewModels
-    // 示例如下：
-    // public ContactsView()
-    // {
-    //    this.InitializeComponent();
-    //    this.DataContext = App.Current.Services.GetService<ContactsViewModel>();
-    // }
-    //
-
-    services.AddOpsExchange();
+    services.AddOpsExchange(configuration, options =>
+    {
+        options.AddNoticeForword<MyNoticeForwarder>();
+        options.AddReplyForword<MyReplyForwarder>();
+    });
 
     services.AddTransient<ModbusTcpSuit>();
 }

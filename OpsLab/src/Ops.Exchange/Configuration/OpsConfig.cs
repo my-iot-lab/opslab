@@ -11,7 +11,7 @@ public class OpsConfig
     public string DeviceDir { get; set; } = "devices";
 
     /// <summary>
-    /// 轮询监听时间间隔，单位毫秒。考虑每站轮询时间各有差异。
+    /// 轮询监控参数
     /// </summary>
-    public int PollingInterval { get; set; }
+    public MonitorOptions Monitor { get; set; } = new();
 }

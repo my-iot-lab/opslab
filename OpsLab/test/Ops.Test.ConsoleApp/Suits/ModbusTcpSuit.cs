@@ -36,62 +36,62 @@ public sealed class ModbusTcpSuit : IDisposable
 
         List<DeviceVariable> variables = new()
         {
-            //new DeviceVariable
-            //{
-            //     Id = 1,
-            //     Tag = "Heartbeat",
-            //     Address = "s=1;x=3;2", // 设备号1，功能能码03，地址2（基地址为0）
-            //     Length = 0,
-            //     VarType = VariableType.Int,
-            //     Desc = "心跳",
-            //     Flag = VariableFlag.Heartbeat,
-            //     PollingInterval = 500,
-            //},
+            new DeviceVariable
+            {
+                 Id = 1,
+                 Tag = "Heartbeat",
+                 Address = "s=1;x=3;2", // 设备号1，功能能码03，地址2（基地址为0）
+                 Length = 0,
+                 VarType = VariableType.Int,
+                 Desc = "心跳",
+                 Flag = VariableFlag.Heartbeat,
+                 PollingInterval = 500,
+            },
 
-            //new DeviceVariable
-            //{
-            //     Id = 2,
-            //     Tag = "Notice1",
-            //     Address = "s=1;x=3;10",
-            //     Length = 0,
-            //     VarType = VariableType.Int,
-            //     Desc = "通知1",
-            //     Flag = VariableFlag.Notice,
-            //     PollingInterval = 2000,
-            //},
-            //new DeviceVariable
-            //{
-            //     Id = 3,
-            //     Tag = "Notice2",
-            //     Address = "s=1;x=3;11",
-            //     Length = 0,
-            //     VarType = VariableType.Int,
-            //     Desc = "通知2",
-            //     Flag = VariableFlag.Notice,
-            //     PollingInterval = 3000,
-            //},
-            //new DeviceVariable
-            //{
-            //     Id = 4,
-            //     Tag = "Notice3",
-            //     Address = "s=1;x=3;12",
-            //     Length = 0,
-            //     VarType = VariableType.Int,
-            //     Desc = "通知3",
-            //     Flag = VariableFlag.Notice,
-            //     PollingInterval = 4000,
-            //},
-            //new DeviceVariable
-            //{
-            //     Id = 5,
-            //     Tag = "Notice4",
-            //     Address = "s=1;x=3;13",
-            //     Length = 0,
-            //     VarType = VariableType.Int,
-            //     Desc = "通知4",
-            //     Flag = VariableFlag.Notice,
-            //     PollingInterval = 5000,
-            //},
+            new DeviceVariable
+            {
+                 Id = 2,
+                 Tag = "Notice1",
+                 Address = "s=1;x=3;10",
+                 Length = 0,
+                 VarType = VariableType.Int,
+                 Desc = "通知1",
+                 Flag = VariableFlag.Notice,
+                 PollingInterval = 2000,
+            },
+            new DeviceVariable
+            {
+                 Id = 3,
+                 Tag = "Notice2",
+                 Address = "s=1;x=3;11",
+                 Length = 0,
+                 VarType = VariableType.Int,
+                 Desc = "通知2",
+                 Flag = VariableFlag.Notice,
+                 PollingInterval = 3000,
+            },
+            new DeviceVariable
+            {
+                 Id = 4,
+                 Tag = "Notice3",
+                 Address = "s=1;x=3;12",
+                 Length = 0,
+                 VarType = VariableType.Int,
+                 Desc = "通知3",
+                 Flag = VariableFlag.Notice,
+                 PollingInterval = 4000,
+            },
+            new DeviceVariable
+            {
+                 Id = 5,
+                 Tag = "Notice4",
+                 Address = "s=1;x=3;13",
+                 Length = 0,
+                 VarType = VariableType.Int,
+                 Desc = "通知4",
+                 Flag = VariableFlag.Notice,
+                 PollingInterval = 5000,
+            },
 
             new DeviceVariable
             {
@@ -136,6 +136,37 @@ public sealed class ModbusTcpSuit : IDisposable
                          Flag = VariableFlag.Normal,
                      },
                  },
+            },
+
+            new DeviceVariable
+            {
+                Id = 91,
+                Tag = "Normal_1",
+                Address = "s=1;x=3;90",
+                Length = 0,
+                VarType = VariableType.Int,
+                Desc = "普通数据1",
+                Flag = VariableFlag.Normal,
+            },
+            new DeviceVariable
+            {
+                Id = 91,
+                Tag = "Normal_2",
+                Address = "s=1;x=3;91",
+                Length = 0,
+                VarType = VariableType.Int,
+                Desc = "普通数据2",
+                Flag = VariableFlag.Normal,
+            },
+            new DeviceVariable
+            {
+                Id = 91,
+                Tag = "Normal_3",
+                Address = "s=1;x=3;92",
+                Length = 0,
+                VarType = VariableType.Int,
+                Desc = "普通数据3",
+                Flag = VariableFlag.Normal,
             },
         };
 

@@ -19,6 +19,14 @@ public enum DriverModel
 
     S7_S200Smart,
 
+    Melsec_A1E,
+
+    Melsec_CIP,
+
+    Melsec_MC,
+
+    Melsec_MCR,
+
     Omron_FinsTcp,
 
     AllenBradley_CIP,
