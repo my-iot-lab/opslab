@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.5" />
+    <PackageReference Include="WalkingTec.Mvvm.Mvc" Version="6.2.5" />
+   <ProjectReference Include="..\Ops.Engine.App.Client\Ops.Engine.App.Client.csproj" />
+   <ProjectReference Include="..\Ops.Engine.App.Shared\Ops.Engine.App.Shared.csproj" />
+    <ProjectReference Include="..\Ops.Engine.App.DataAccess\Ops.Engine.App.DataAccess.csproj" />
+</ItemGroup>
+</Project>
+

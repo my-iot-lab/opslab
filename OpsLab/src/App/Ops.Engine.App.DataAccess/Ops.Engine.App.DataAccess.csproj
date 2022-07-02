@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+ </PropertyGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ops.Engine.App.Model\Ops.Engine.App.Model.csproj" />
+  </ItemGroup >
+</Project>
+
