@@ -34,7 +34,7 @@ public abstract class BasePage : ComponentBase
         set;
     }
 
-    private object _userinfo;
+    public object _userinfo;
 
     [CascadingParameter(Name = "BodyContext")]
     public object UserInfoForDialog

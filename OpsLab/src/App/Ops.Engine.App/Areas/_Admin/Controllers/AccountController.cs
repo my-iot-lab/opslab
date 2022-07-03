@@ -32,7 +32,6 @@ public class AccountController : BaseApiController
     [HttpPost("[action]")]
     public async Task<IActionResult> Login([FromForm] string account, [FromForm] string password, [FromForm] string tenant = null, [FromForm] bool rememberLogin = false)
     {
-
         var user = Wtm.DoLogin(account, password, tenant);
         if (user == null)
         {
@@ -145,10 +144,8 @@ public class AccountController : BaseApiController
         {
             return BadRequest();
         }
-        else
-        {
-            return Ok(rv);
-        }
+
+        return Ok(rv);
     }
 
     [AllRights]
@@ -159,33 +156,35 @@ public class AccountController : BaseApiController
         {
             return BadRequest();
         }
+
+        var forapi = Wtm.LoginUserInfo;
+        if (IsApi)
+        {
+            forapi.SetAttributesForApi(Wtm);
+        }
+
+        forapi.DataPrivileges = null;
+        forapi.FunctionPrivileges = null;
+        if (forapi.Attributes == null)
+        {
+            forapi.Attributes = new Dictionary<string, object>();
+        }
+
+        if (forapi.Attributes.ContainsKey("IsMainHost"))
+        {
+            forapi.Attributes.Remove("IsMainHost");
+        }
+
+        if (ConfigInfo.HasMainHost && string.IsNullOrEmpty(Wtm.LoginUserInfo.TenantCode))
+        {
+            forapi.Attributes.Add("IsMainHost", true);
+        }
         else
         {
-            var forapi = Wtm.LoginUserInfo;
-            if (IsApi)
-            {
-                forapi.SetAttributesForApi(Wtm);
-            }
-            forapi.DataPrivileges = null;
-            forapi.FunctionPrivileges = null;
-            if (forapi.Attributes == null)
-            {
-                forapi.Attributes = new Dictionary<string, object>();
-            }
-            if (forapi.Attributes.ContainsKey("IsMainHost"))
-            {
-                forapi.Attributes.Remove("IsMainHost");
-            }
-            if (ConfigInfo.HasMainHost && string.IsNullOrEmpty(Wtm.LoginUserInfo.TenantCode) == true)
-            {
-                forapi.Attributes.Add("IsMainHost", true);
-            }
-            else
-            {
-                forapi.Attributes.Add("IsMainHost", false);
-            }
-            return Ok(forapi);
+            forapi.Attributes.Add("IsMainHost", false);
         }
+
+        return Ok(forapi);
     }
 
 
@@ -197,23 +196,19 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm).Result;
         }
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState.GetErrorJson());
         }
-        else
+
+        vm.DoChange();
+        if (!ModelState.IsValid)
         {
-            vm.DoChange();
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.GetErrorJson());
-            }
-            else
-            {
-                return Ok();
-            }
+            return BadRequest(ModelState.GetErrorJson());
         }
 
+        return Ok();
     }
 
     [Public]
@@ -225,12 +220,10 @@ public class AccountController : BaseApiController
             await Wtm.CallAPI<string>("mainhost", "/api/_account/logout", HttpMethodEnum.GET, new { }, 10);
             return Ok(ConfigInfo.MainHost);
         }
-        else
-        {
-            HttpContext.Session.Clear();
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok("/");
-        }
+
+        HttpContext.Session.Clear();
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok("/");
     }
 
     [HttpGet("GetFrameworkRoles")]
@@ -254,6 +247,7 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm, "/api/_account/GetFrameworkGroups").Result;
         }
+
         return Ok(DC.Set<FrameworkGroup>().GetSelectListItems(Wtm, x => x.GroupName, x => x.GroupCode));
     }
 
@@ -266,6 +260,7 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm, "/api/_account/GetFrameworkGroupsTree").Result;
         }
+
         return Ok(DC.Set<FrameworkGroup>().GetTreeSelectListItems(Wtm, x => x.GroupName, x => x.GroupCode));
     }
 
@@ -278,6 +273,7 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm, "/api/_account/GetUserById").Result;
         }
+
         var users = DC.Set<FrameworkUser>().Where(x => x.ITCode.ToLower().StartsWith(keywords.ToLower())).GetSelectListItems(Wtm, x => x.Name + "(" + x.ITCode + ")", x => x.ITCode);
         return Ok(users);
     }
@@ -290,6 +286,7 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm, "/api/_account/GetUserByGroup").Result;
         }
+
         var users = DC.Set<FrameworkUserGroup>().Where(x => x.GroupCode == keywords).Select(x => x.UserCode).ToList();
         return Ok(users);
     }
@@ -302,16 +299,18 @@ public class AccountController : BaseApiController
         {
             return Request.RedirectCall(Wtm, "/api/_account/GetUserByRole").Result;
         }
+
         var users = DC.Set<FrameworkUserRole>().Where(x => x.RoleCode == keywords).Select(x => x.UserCode).ToList();
         return Ok(users);
     }
-
 }
 
 public class SimpleLogin
 {
     public string Account { get; set; }
+
     public string Password { get; set; }
+
     public string Tenant { get; set; }
 
     public string RemoteToken { get; set; }

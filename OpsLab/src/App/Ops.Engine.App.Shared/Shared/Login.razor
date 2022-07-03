@@ -30,18 +30,20 @@
 @code {
     [Parameter]
     public bool? LoginSuccess { get; set; }
+
     [Parameter]
     public EventCallback<bool?> LoginSuccessChanged { get; set; }
+
     [Parameter]
     public EventCallback OnUserInfoSet { get; set; }
 
     private int bgnumber;
-    private LoginVM Model = new LoginVM();
+    private LoginVM Model = new();
 
     protected override void OnInitialized()
     {
         bgnumber = new Random().Next(1, 6);
-        if (WtmBlazor.ConfigInfo.IsQuickDebug == true)
+        if (WtmBlazor.ConfigInfo.IsQuickDebug)
         {
             Model.ITCode = "admin";
             Model.Password = "000000";
@@ -51,7 +53,7 @@
 
     private async Task Submit(EditContext context)
     {
-        var rv = await WtmBlazor.Api.CallAPI<DynamicData>("/api/_account/loginjwt", HttpMethodEnum.POST, new { Account = Model.ITCode, Password = Model.Password , Tenant = Model.Tenant});
+        var rv = await WtmBlazor.Api.CallAPI<DynamicData>("/api/_account/loginjwt", HttpMethodEnum.POST, new { Account = Model.ITCode, Password = Model.Password, Tenant = Model.Tenant });
         if (rv.StatusCode == System.Net.HttpStatusCode.OK)
         {
             var token = rv.Data.Fields["access_token"].ToString();
@@ -69,7 +71,6 @@
             {
                 await WtmBlazor.Toast.Error(WtmBlazor.Localizer["Sys.Error"], rv.Errors.Message[0]);
             }
-
         }
         else
         {

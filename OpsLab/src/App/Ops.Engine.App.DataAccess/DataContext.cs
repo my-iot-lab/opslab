@@ -37,7 +37,7 @@ public class DataContext : FrameworkContext
         }
         catch { }
 
-        if (state == true || emptydb == true)
+        if (state || emptydb)
         {
             //when state is true, means it's the first time EF create database, do data init here
             //当state是true的时候，表示这是第一次创建数据库，可以在这里进行数据初始化
