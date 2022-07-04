@@ -2,46 +2,54 @@
 
 /// <summary>
 /// 设备地址。
-/// Line + Station。西门子 PLC，一台伺服可能会挂载多个工站。
+/// Line + Station。一台伺服可能会挂载多个工站，如西门子 PLC。
 /// </summary>
 public sealed class DeviceSchema : IEquatable<DeviceSchema>
 {
-    public long Id { get; set; }
-
     /// <summary>
     /// 线体编号
     /// </summary>
-    public string Line { get; set; }
+    public string Line { get; }
 
     /// <summary>
     /// 线体名称
     /// </summary>
-    public string? LineName { get; set; }
+    public string LineName { get; }
 
     /// <summary>
-    /// 工站编号
+    /// 工站编号，每条产线工站编号唯一。
     /// </summary>
-    public string Station { get; set; }
+    public string Station { get; }
 
     /// <summary>
     /// 工站名称
     /// </summary>
-    public string? StationName { get; set; }
+    public string StationName { get; }
 
     /// <summary>
-    /// 设备主机（主机名称或IP地址）
+    /// 设备主机（IP地址）。
     /// </summary>
-    public string Host { get; set; }
+    public string Host { get; }
 
     /// <summary>
-    /// 设备网络端口
+    /// 设备网络端口，0 表示会按驱动默认端口设置。
     /// </summary>
     public int Port { get; set; }
 
     /// <summary>
     /// 设备驱动类型
     /// </summary>
-    public DriverModel DriverModel { get; set; }
+    public DriverModel DriverModel { get; }
+
+    public DeviceSchema(string line, string lineName, string station, string stationName, string host, DriverModel driverModel)
+    {
+        Line = line;
+        LineName = lineName;
+        Station = station;
+        StationName = stationName;
+        Host = host;
+        DriverModel = driverModel;
+    }
 
     #region override
 

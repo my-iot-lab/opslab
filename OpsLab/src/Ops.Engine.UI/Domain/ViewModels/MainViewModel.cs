@@ -122,7 +122,19 @@ public class MainViewModel : ObservableObject
             ),
             new DemoItem(
                 "首页2",
-                typeof(Home),
+                typeof(Home2),
+                new[]
+                {
+                    new DocumentationLink(
+                        DocumentationLinkType.Wiki,
+                        $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/wiki",
+                        "WIKI"),
+                    DocumentationLink.DemoPageLink<Home2>()
+                }
+            ),
+            new DemoItem(
+                "地址变量",
+                typeof(Address),
                 new[]
                 {
                     new DocumentationLink(
@@ -131,7 +143,7 @@ public class MainViewModel : ObservableObject
                         "WIKI"),
                     DocumentationLink.DemoPageLink<Home>()
                 }
-            )
+            ),
         });
     }
 

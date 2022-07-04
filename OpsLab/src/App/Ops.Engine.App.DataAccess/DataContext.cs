@@ -55,7 +55,7 @@ public class DataContext : FrameworkContext
                 RoleCode = "001"
             };
 
-            var adminmenus = Set<FrameworkMenu>().Where(x => x.Url != null && x.Url.StartsWith("/api") == false).ToList();
+            var adminmenus = Set<FrameworkMenu>().Where(x => x.Url != null && !x.Url.StartsWith("/api")).ToList();
             foreach (var item in adminmenus)
             {
                 item.Url = "/_admin" + item.Url;

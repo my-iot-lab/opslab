@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Ops.Engine.UI.Domain.ViewModels;
-using Ops.Engine.UI.BackgroundServices;
 using Ops.Exchange.DependencyInjection;
 using Ops.Engine.UI.Forwarders;
 
@@ -41,6 +40,7 @@ namespace Ops.Engine.UI
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((builder, services) =>
                 {
+                    services.AddHttpClient();
                     ConfigureServices(services, builder.Configuration);
                 })
                 .UseSerilog();
@@ -80,22 +80,10 @@ namespace Ops.Engine.UI
                 options.AddReplyForword<OpsReplyForwarder>();
             });
 
-            // 注册后台服务
-            services.AddHostedService<Worker>();
-
-            // 注入 Services
-
-            // 注入 ViewModels
-            // 示例如下：
-            // public ContactsView()
-            // {
-            //    this.InitializeComponent();
-            //    this.DataContext = App.Current.Services.GetService<ContactsViewModel>();
-            // }
-            //
             services.AddTransient<MainViewModel>();
-            services.AddTransient<HomeViewModel>();
+            services.AddTransient<Home2ViewModel>();
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<AddressViewModel>();
         }
     }
 }

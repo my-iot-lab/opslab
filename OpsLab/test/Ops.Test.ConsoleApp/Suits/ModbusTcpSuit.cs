@@ -20,155 +20,31 @@ public sealed class ModbusTcpSuit : IDisposable
 
     public async Task InitAsync()
     {
-        var deviceInfo = new DeviceInfo(new DeviceSchema
-        {
-            Id = 1,
-            Line = "L1",
-            LineName = "L1控制线",
-            Station = "OP001",
-            StationName = "上线装配站",
-            Host = "127.0.0.1",
-            DriverModel = DriverModel.ModbusTcp,
-        })
-        {
-            Id = 1
-        };
+        var deviceInfo = new DeviceInfo("L1_OP001", new DeviceSchema("L1", "L1控制线", "OP001", "上线装配站", "127.0.0.1", DriverModel.ModbusTcp));
 
         List<DeviceVariable> variables = new()
-        {
-            new DeviceVariable
             {
-                 Id = 1,
-                 Tag = "Heartbeat",
-                 Address = "s=1;x=3;2", // 设备号1，功能能码03，地址2（基地址为0）
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "心跳",
-                 Flag = VariableFlag.Heartbeat,
-                 PollingInterval = 500,
-            },
+                new DeviceVariable("Heartbeat", "s=1;x=3;2", 0, VariableType.Int, "心跳", VariableFlag.Heartbeat, 500),
 
-            new DeviceVariable
-            {
-                 Id = 2,
-                 Tag = "Notice1",
-                 Address = "s=1;x=3;10",
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "通知1",
-                 Flag = VariableFlag.Notice,
-                 PollingInterval = 2000,
-            },
-            new DeviceVariable
-            {
-                 Id = 3,
-                 Tag = "Notice2",
-                 Address = "s=1;x=3;11",
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "通知2",
-                 Flag = VariableFlag.Notice,
-                 PollingInterval = 3000,
-            },
-            new DeviceVariable
-            {
-                 Id = 4,
-                 Tag = "Notice3",
-                 Address = "s=1;x=3;12",
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "通知3",
-                 Flag = VariableFlag.Notice,
-                 PollingInterval = 4000,
-            },
-            new DeviceVariable
-            {
-                 Id = 5,
-                 Tag = "Notice4",
-                 Address = "s=1;x=3;13",
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "通知4",
-                 Flag = VariableFlag.Notice,
-                 PollingInterval = 5000,
-            },
+                new DeviceVariable("Notice1", "s=1;x=3;10", 0, VariableType.Int, "通知1", VariableFlag.Notice, 2000),
+                new DeviceVariable("Notice2", "s=1;x=3;11", 0, VariableType.Int, "通知2", VariableFlag.Notice, 3000),
+                new DeviceVariable("Notice3", "s=1;x=3;12", 0, VariableType.Int, "通知3", VariableFlag.Notice, 4000),
+                new DeviceVariable("Notice4", "s=1;x=3;13", 0, VariableType.Int, "通知4", VariableFlag.Notice, 5000),
 
-            new DeviceVariable
-            {
-                 Id = 6,
-                 Tag = "Trigger1",
-                 Address = "s=1;x=3;20",
-                 Length = 0,
-                 VarType = VariableType.Int,
-                 Desc = "触发1",
-                 Flag = VariableFlag.Trigger,
-                 PollingInterval = 500,
-                 NormalVariables = new()
-                 {
-                     new DeviceVariable
+                new DeviceVariable("Trigger1", "s=1;x=3;20", 0, VariableType.Int, "触发1", VariableFlag.Trigger, 500)
+                {
+                     NormalVariables = new()
                      {
-                         Id = 61,
-                         Tag = "Trigger1_Data1",
-                         Address = "s=1;x=3;21",
-                         Length = 0,
-                         VarType = VariableType.Int,
-                         Desc = "数据1",
-                         Flag = VariableFlag.Normal,
+                         new DeviceVariable("Trigger1_Data1", "s=1;x=3;21", 0, VariableType.Int, "数据1", VariableFlag.Normal),
+                         new DeviceVariable("Trigger1_Data2", "s=1;x=3;22", 0, VariableType.Int, "数据2", VariableFlag.Normal),
+                         new DeviceVariable("Trigger1_Data3", "s=1;x=3;23", 0, VariableType.Int, "数据3", VariableFlag.Normal),
                      },
-                     new DeviceVariable
-                     {
-                         Id = 62,
-                         Tag = "Trigger1_Data2",
-                         Address = "s=1;x=3;22",
-                         Length = 0,
-                         VarType = VariableType.Int,
-                         Desc = "数据1",
-                         Flag = VariableFlag.Normal,
-                     },
-                     new DeviceVariable
-                     {
-                         Id = 63,
-                         Tag = "Trigger1_Data3",
-                         Address = "s=1;x=3;23",
-                         Length = 0,
-                         VarType = VariableType.Int,
-                         Desc = "数据1",
-                         Flag = VariableFlag.Normal,
-                     },
-                 },
-            },
+                },
 
-            new DeviceVariable
-            {
-                Id = 91,
-                Tag = "Normal_1",
-                Address = "s=1;x=3;90",
-                Length = 0,
-                VarType = VariableType.Int,
-                Desc = "普通数据1",
-                Flag = VariableFlag.Normal,
-            },
-            new DeviceVariable
-            {
-                Id = 91,
-                Tag = "Normal_2",
-                Address = "s=1;x=3;91",
-                Length = 0,
-                VarType = VariableType.Int,
-                Desc = "普通数据2",
-                Flag = VariableFlag.Normal,
-            },
-            new DeviceVariable
-            {
-                Id = 91,
-                Tag = "Normal_3",
-                Address = "s=1;x=3;92",
-                Length = 0,
-                VarType = VariableType.Int,
-                Desc = "普通数据3",
-                Flag = VariableFlag.Normal,
-            },
-        };
+                new DeviceVariable("Normal_1", "s=1;x=3;90", 0, VariableType.Int, "普通数据1", VariableFlag.Normal),
+                new DeviceVariable("Normal_2", "s=1;x=3;91", 0, VariableType.Int, "普通数据2", VariableFlag.Normal),
+                new DeviceVariable("Normal_3", "s=1;x=3;92", 0, VariableType.Int, "普通数据3", VariableFlag.Normal),
+            };
 
         deviceInfo.AddVariables(variables);
 

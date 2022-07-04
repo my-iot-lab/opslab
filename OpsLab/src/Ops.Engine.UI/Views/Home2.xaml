@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Ops.Engine.UI.Views.Home"
+﻿<UserControl x:Class="Ops.Engine.UI.Views.Home2"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -247,5 +247,60 @@
                 </StackPanel>
             </Grid>
         </ScrollViewer>
+
+        <materialDesign:PopupBox
+            Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="32"
+            Grid.Row="1">
+            <StackPanel>
+                <Button
+                    ToolTip="GitHub"
+                    Command="{Binding GitHubCommand}"
+                    Content="{materialDesign:PackIcon Kind=Github, Size=20}"/>
+
+                <Button
+                    ToolTip="Twitter"
+                    Command="{Binding TwitterCommand}"
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                    Content="{materialDesign:PackIcon Kind=Twitter, Size=20}"/>
+
+                <Button
+                    ToolTip="Chat"
+                    Command="{Binding ChatCommand}"
+                    Content="{materialDesign:PackIcon Kind=Message, Size=20}">
+                    <!-- mix up the colours by bringing in a named palette (see merged dictionaries at top) -->
+                    <Button.Background>
+                        <SolidColorBrush Color="{StaticResource GreenPrimary500}"/>
+                    </Button.Background>
+
+                    <Button.Foreground>
+                        <SolidColorBrush Color="{StaticResource GreenPrimary500Foreground}"/>
+                    </Button.Foreground>
+                </Button>
+
+                <Button
+                    ToolTip="Email"
+                    Command="{Binding EmailCommand}"
+                    Background="{DynamicResource SecondaryHueMidBrush}"
+                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                    Content="{materialDesign:PackIcon Kind=Email, Size=20}"/>
+
+                <Button
+                    ToolTip="Feel like you want to make a donation?  It would be gratefully received.  Click the button to donate via Pledgie." 
+                    Command="{Binding DonateCommand}"
+                    Content="{materialDesign:PackIcon Kind=Gift, Size=20}">
+                    <Button.Background>
+                        <SolidColorBrush Color="{StaticResource GreenPrimary200}"/>
+                    </Button.Background>
+
+                    <Button.Foreground>
+                        <SolidColorBrush Color="{StaticResource GreenPrimary200Foreground}"/>
+                    </Button.Foreground>
+                </Button>
+            </StackPanel>
+        </materialDesign:PopupBox>
     </Grid>
 </UserControl>

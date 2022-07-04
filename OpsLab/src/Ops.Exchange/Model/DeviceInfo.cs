@@ -5,7 +5,10 @@
 /// </summary>
 public class DeviceInfo
 {
-    public long Id { get; set; }
+    /// <summary>
+    /// 设备唯一编号，建议以 "[产线]_[工站]" 方式命名。
+    /// </summary>
+    public string Name { get; }
 
     /// <summary>
     /// 设备 Schema 基础信息。
@@ -15,10 +18,11 @@ public class DeviceInfo
     /// <summary>
     /// 设备包含的地址变量集合。
     /// </summary>
-    public List<DeviceVariable> Variables { get; } = new List<DeviceVariable>(0);
+    public List<DeviceVariable> Variables { get; set; } = new(0);
 
-    public DeviceInfo(DeviceSchema schema)
+    public DeviceInfo(string name, DeviceSchema schema)
     {
+        Name = name;
         Schema = schema;
     }
 
@@ -32,15 +36,29 @@ public class DeviceInfo
         return Variables.FirstOrDefault(s => string.Equals(s.Tag, tag, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// 添加设备变量，若已存在，则不会再添加
+    /// </summary>
+    /// <param name="variable">要添加的变量</param>
     public void AddVariable(DeviceVariable variable)
     {
-        // 校验
+        if (Variables.Any(s => s == variable))
+        {
+            return;
+        }
+
         Variables.Add(variable);
     }
 
+    /// <summary>
+    /// 添加设备变量集合，若已存在，则不会再添加
+    /// </summary>
+    /// <param name="variables">要添加的变量集合</param>
     public void AddVariables(IEnumerable<DeviceVariable> variables)
     {
-        // 校验
-        Variables.AddRange(variables);
+        foreach (var variable in variables)
+        {
+            AddVariable(variable);
+        }
     }
 }

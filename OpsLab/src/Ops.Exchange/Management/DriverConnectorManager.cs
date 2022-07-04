@@ -34,9 +34,9 @@ public enum ConnectingStatus
 public sealed class DriverConnector
 {
     /// <summary>
-    /// 连接ID, 与设备 Id 一致
+    /// 连接ID, 与设备编号 一致
     /// </summary>
-    public long Id { get; }
+    public string Id { get; }
 
     /// <summary>
     /// 连接驱动
@@ -48,7 +48,7 @@ public sealed class DriverConnector
     /// </summary>
     public ConnectingStatus Status { get; set; } = ConnectingStatus.Wait;
 
-    public DriverConnector(long id, IReadWriteNet driver)
+    public DriverConnector(string id, IReadWriteNet driver)
     {
         Id = id;
         Driver = driver;
@@ -60,7 +60,7 @@ public sealed class DriverConnector
 /// </summary>
 public sealed class DriverConnectorManager : IDisposable
 {
-    private readonly Dictionary<long, DriverConnector> _drivers = new(); // Key 为 device Id
+    private readonly Dictionary<string, DriverConnector> _drivers = new(); // Key 为设备编号
     private bool _isConnectServer;
 
     private readonly DeviceInfoManager _deviceInfoManager;
@@ -77,14 +77,14 @@ public sealed class DriverConnectorManager : IDisposable
     /// </summary>
     /// <param name="id">设备Id</param>
     /// <returns></returns>
-    public DriverConnector this[long id] => _drivers[id];
+    public DriverConnector this[string id] => _drivers[id];
 
     /// <summary>
     /// 获取指定的连接驱动
     /// </summary>
     /// <param name="id">设备Id</param>
     /// <returns></returns>
-    public IReadWriteNet GetDriver(long id)
+    public IReadWriteNet GetDriver(string id)
     {
         var connector = _drivers[id];
         return connector.Driver;
@@ -128,7 +128,7 @@ public sealed class DriverConnectorManager : IDisposable
 
             // 设置 SocketKeepAliveTime 心跳时间
             driverNet.SocketKeepAliveTime = 60_000;
-            _drivers.Add(deviceInfo.Id, new DriverConnector(deviceInfo.Id, driverNet));
+            _drivers.Add(deviceInfo.Name, new DriverConnector(deviceInfo.Name, driverNet));
         }
     }
 

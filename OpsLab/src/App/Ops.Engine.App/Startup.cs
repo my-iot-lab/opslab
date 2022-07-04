@@ -20,7 +20,7 @@ public class Startup
 {
     public IConfiguration ConfigRoot { get; }
 
-    public Startup(IWebHostEnvironment env, IConfiguration config)
+    public Startup(IConfiguration config)
     {
         ConfigRoot = config;
     }
@@ -157,10 +157,9 @@ public class Startup
     /// <returns>data privileges list</returns>
     public List<IDataPrivilege> DataPrivilegeSettings()
     {
-        List<IDataPrivilege> pris = new();
         //Add data privilege to specific type
         //指定哪些模型需要数据权限
-        return pris;
+        return new(0);
     }
 
     /// <summary>

@@ -185,7 +185,7 @@ public sealed class MonitorManager : IDisposable
                 }
 
                 // 若连接驱动不处于连接状态，会循环等待。
-                var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Schema.Id];
+                var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                 while (!_cts.Token.IsCancellationRequested)
                 {
                     if (connector.Status == ConnectingStatus.Connected)
@@ -194,7 +194,7 @@ public sealed class MonitorManager : IDisposable
                     }
 
                     await Task.Delay(1000, _cts.Token); // 延迟1s
-                    connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Schema.Id];
+                    connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                 }
 
                 foreach (var value in ctx.Response.Values)

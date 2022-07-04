@@ -12,7 +12,6 @@ namespace Ops.Exchange.Management;
 public sealed class DeviceInfoManager
 {
     private const string CacheKey = "_cache.ops.deviceinfo";
-    private const string FileName = "_deviceinfo.json";
 
     private readonly OpsConfig _config;
     private readonly IMemoryCache _cache;
@@ -37,14 +36,26 @@ public sealed class DeviceInfoManager
     }
 
     /// <summary>
-    /// 获取指定的设备信息
+    /// 获取指定的设备信息。
     /// </summary>
     /// <param name="id">设备 Id</param>
     /// <returns></returns>
-    public async Task<DeviceInfo?> GetAsync(long id)
+    public async Task<DeviceInfo?> GetAsync(string code)
     {
         var deviceInfos = await GetAllAsync();
-        return deviceInfos.SingleOrDefault(s => s.Id == id);
+        return deviceInfos.SingleOrDefault(s => s.Name == code);
+    }
+
+    /// <summary>
+    /// 获取指定的设备信息。
+    /// </summary>
+    /// <param name="line">产线编号</param>
+    /// <param name="station">设备工站编号</param>
+    /// <returns></returns>
+    public async Task<DeviceInfo?> GetAsync(string line, string station)
+    {
+        var deviceInfos = await GetAllAsync();
+        return deviceInfos.SingleOrDefault(s => s.Schema.Line == line && s.Schema.Station == station);
     }
 
     /// <summary>
@@ -59,8 +70,6 @@ public sealed class DeviceInfoManager
             return (false, "已存在相同的设备信息");
         }
 
-        var id = deviceInfos.Count == 0 ? 1 : deviceInfos.Max(s => s.Id);
-        deviceInfo.Id = id;
         deviceInfos.Add(deviceInfo);
 
         return (true, string.Empty);
@@ -80,7 +89,7 @@ public sealed class DeviceInfoManager
                 return (false, "已存在相同的设备信息");
             }
 
-            deviceInfos.RemoveAll(s => s.Id == deviceInfo.Id);
+            deviceInfos.RemoveAll(s => s.Name == deviceInfo.Name);
             deviceInfos.Add(deviceInfo);
         }
 
@@ -96,7 +105,7 @@ public sealed class DeviceInfoManager
         var deviceInfos = await GetAllAsync();
         if (deviceInfos.Any())
         {
-            deviceInfos.RemoveAll(s => s.Id == deviceInfo.Id);
+            deviceInfos.RemoveAll(s => s.Name == deviceInfo.Name);
         }
     }
 
@@ -111,9 +120,19 @@ public sealed class DeviceInfoManager
     public async Task FlushAsync(CancellationToken cancellationToken = default)
     {
         var deviceInfos = await GetAllAsync();
-        var content = JsonSerializer.Serialize(deviceInfos);
+        foreach (var deviceInfo in deviceInfos)
+        {
+            await FlushAsync(deviceInfo, cancellationToken);
+        }
+    }
 
-        var path = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir, FileName);
+    public async Task FlushAsync(DeviceInfo deviceInfo, CancellationToken cancellationToken = default)
+    {
+        var dir = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir);
+        var fileName = $"{deviceInfo.Name}.json";
+
+        var content = JsonSerializer.Serialize(deviceInfo, new JsonSerializerOptions { WriteIndented = true });
+        var path = Path.Combine(dir, fileName);
         await File.WriteAllTextAsync(path, content, cancellationToken);
     }
 
@@ -121,17 +140,24 @@ public sealed class DeviceInfoManager
     /// 从本地存储获取设备信息。
     /// </summary>
     /// <returns></returns>
-    private async Task<List<DeviceInfo>> GetFromLocalAsync()
+    private Task<List<DeviceInfo>> GetFromLocalAsync()
     {
-        var path = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir, FileName);
-        if (!File.Exists(path))
+        var dir = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir);
+        if (!Directory.Exists(dir))
         {
-            return new();
+            Directory.CreateDirectory(dir);
+            return Task.FromResult(new List<DeviceInfo>());
         }
 
-        // TODO: 文件解析失败如何处理？
-        var content = await File.ReadAllTextAsync(path);
-        var deviceInfos = JsonSerializer.Deserialize<List<DeviceInfo>>(content);
-        return deviceInfos ?? new(0);
+        var filePaths = Directory.GetFiles(dir);
+        List<DeviceInfo> deviceInfos = new(filePaths.Length);
+        foreach (var filePath in filePaths)
+        {
+            var content = File.ReadAllText(filePath);
+            var deviceInfo = JsonSerializer.Deserialize<DeviceInfo>(content);
+            deviceInfos.Add(deviceInfo!);
+        }
+
+        return Task.FromResult(deviceInfos);
     }
 }
