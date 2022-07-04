@@ -3,9 +3,9 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using Ops.Engine.UI.Utils;
 
-namespace Ops.Engine.UI.Domain.ViewModels;
+namespace Ops.Engine.UI.ViewModels;
 
-public class HomeViewModel : ObservableObject
+public class Home2ViewModel : ObservableObject
 {
     public ICommand GitHubCommand { get; } = new RelayCommand(()
         => Link.OpenInBrowser("https://github.com/ButchersBoy/MaterialDesignInXamlToolkit"));

@@ -2,23 +2,29 @@
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
+using Microsoft.Extensions.Options;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using Ops.Engine.UI.Config;
 using Ops.Engine.UI.Infrastructure;
 using Ops.Engine.UI.Views;
 
-namespace Ops.Engine.UI.Domain.ViewModels;
+namespace Ops.Engine.UI.ViewModels;
 
 public class MainViewModel : ObservableObject
 {
     private readonly ICollectionView _menuItemsView;
-    private DemoItem? _selectedItem;
+    private ListItem? _selectedItem;
     private int _selectedIndex;
     private string? _searchKeyword;
     private bool _controlsEnabled = true;
 
-    public MainViewModel()
+    private readonly OpsUIOptions _opsUIOption;
+
+    public MainViewModel(IOptions<OpsUIOptions> opsUIOption)
     {
+        _opsUIOption = opsUIOption.Value;
+
         MenuItems = GetMenuItems();
         _menuItemsView = CollectionViewSource.GetDefaultView(MenuItems);
         _menuItemsView.Filter = MenuFilter;
@@ -48,7 +54,9 @@ public class MainViewModel : ObservableObject
 
     #region 绑定属性
 
-    public ObservableCollection<DemoItem> MenuItems { get; }
+    public string Title => _opsUIOption.Title ?? "SCADA";
+
+    public ObservableCollection<ListItem> MenuItems { get; }
 
     public string? SearchKeyword
     {
@@ -62,7 +70,7 @@ public class MainViewModel : ObservableObject
         }
     }
 
-    public DemoItem? SelectedItem
+    public ListItem? SelectedItem
     {
         get => _selectedItem;
         set => SetProperty(ref _selectedItem, value);
@@ -101,49 +109,16 @@ public class MainViewModel : ObservableObject
             return true;
         }
 
-        return obj is DemoItem item && item.Name.ToLower().Contains(_searchKeyword!.ToLower());
+        return obj is ListItem item && item.Name.ToLower().Contains(_searchKeyword!.ToLower());
     }
 
-    private ObservableCollection<DemoItem> GetMenuItems()
+    private ObservableCollection<ListItem> GetMenuItems()
     {
-        return new ObservableCollection<DemoItem>(new[]
+        return new ObservableCollection<ListItem>(new[]
         {
-            new DemoItem(
-                "首页",
-                typeof(Home),
-                new[]
-                {
-                    new DocumentationLink(
-                        DocumentationLinkType.Wiki,
-                        $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/wiki",
-                        "WIKI"),
-                    DocumentationLink.DemoPageLink<Home>()
-                }
-            ),
-            new DemoItem(
-                "首页2",
-                typeof(Home2),
-                new[]
-                {
-                    new DocumentationLink(
-                        DocumentationLinkType.Wiki,
-                        $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/wiki",
-                        "WIKI"),
-                    DocumentationLink.DemoPageLink<Home2>()
-                }
-            ),
-            new DemoItem(
-                "地址变量",
-                typeof(Address),
-                new[]
-                {
-                    new DocumentationLink(
-                        DocumentationLinkType.Wiki,
-                        $"https://github.com/ButchersBoy/MaterialDesignInXamlToolkit/wiki",
-                        "WIKI"),
-                    DocumentationLink.DemoPageLink<Home>()
-                }
-            ),
+            new ListItem("首页", typeof(Home)),
+            new ListItem("首页2", typeof(Home2)),
+            new ListItem("地址变量", typeof(Address)),
         });
     }
 

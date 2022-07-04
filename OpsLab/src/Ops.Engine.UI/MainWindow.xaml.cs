@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using MaterialDesignThemes.Wpf;
-using Ops.Engine.UI.Domain.ViewModels;
+using Ops.Engine.UI.ViewModels;
 
 namespace Ops.Engine.UI;
 

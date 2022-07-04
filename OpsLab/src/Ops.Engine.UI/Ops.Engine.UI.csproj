@@ -28,21 +28,13 @@
   <ItemGroup>
     <Resource Include="Resources\*.jpg" />
     <Resource Include="Resources\*.png" />
-    <Compile Remove="Api\**" />
-    <EmbeddedResource Remove="Api\**" />
-    <None Remove="Api\**" />
-    <Page Remove="Api\**" />
 	<Resource Include="Resources\favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domain\Models\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Views\Home2.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!--是否启用服务器 GC-->

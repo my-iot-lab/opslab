@@ -19,43 +19,32 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="120"/>
         </Grid.RowDefinitions>
 
         <Grid
-            HorizontalAlignment="Center"
-            VerticalAlignment="Top"
-            Margin="16">
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Margin="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Image
-                Source="../Resources/ms-icon-310x310.png"
-                Stretch="Uniform"
-                Width="100"
-                Height="100"/>
-
-            <StackPanel
-                Grid.Column="1"
-                Margin="24 0 0 0"
+            <StackPanel Orientation="Horizontal"
+                Grid.Column="0"
+                Margin="8 0 0 0"
                 VerticalAlignment="Center">
-                <TextBlock
-                    Style="{StaticResource MaterialDesignHeadline4TextBlock}"
-                    TextWrapping="Wrap"
-                    Text="Welcome to Material Design In XAML Toolkit"/>
-
-                <Button
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}"
-                    CommandParameter="{x:Static Dock.Left}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Binoculars"/>
-                        <TextBlock Margin="8 0 0 0" Text="EXPLORE"/>
-                    </StackPanel>
-                </Button>
+                <Button Grid.Column="1" Content="停止" IsEnabled="True" Background="Red"
+                        Width="80" Margin="8 0 8 0"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"
+                        Command="{Binding StopCommand}" />
+                <Button Grid.Column="1" Content="启动" IsEnabled="True" Background="Green"
+                        Width="80" Margin="8 0 8 0"
+                        VerticalAlignment="Center" HorizontalAlignment="Right" 
+                        Command="{Binding StartCommand}" />
             </StackPanel>
         </Grid>
 
@@ -63,189 +52,48 @@
             Grid.Row="1"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Disabled"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            Margin="0 0 0 32">
-            <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:Card
-                        Width="420"
-                        Margin="4 2 8 16"
-                        Height="270">
-                        <Grid VerticalAlignment="Stretch" >
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Image
-                                Source="../Resources/Contact.png"
-                                Grid.RowSpan="5"
-                                StretchDirection="Both"
-                                VerticalAlignment="Stretch"
-                                Stretch="UniformToFill"/>
-
-                            <TextBlock
-                                Grid.Column="1"
-                                Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                Margin="16 16 16 2"
-                                Text="Get In Touch"/>
-
-                            <TextBlock
-                                Grid.Column="1"
-                                Grid.Row="1"
-                                TextWrapping="Wrap"
-                                Margin="16 0 16 8"
-                                Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                VerticalAlignment="Center"
-                                Text="Say hello, make a feature request, or raise a bug through one of these channels:"/>
-
-                            <Border
-                                Grid.Column="1"
-                                Grid.Row="2"
-                                BorderThickness="0 1 0 0"
-                                BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                Margin="0 8 0 0">
-                                <Grid Margin="8">
-                                    <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        HorizontalAlignment="Left"
-                                        Command="{Binding GitHubCommand}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Github"/>
-                                            <TextBlock
-                                                Margin="8 0 0 0"
-                                                VerticalAlignment="Center"
-                                                Text="GitHub"/>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding TwitterCommand}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Twitter"/>
-                                            <TextBlock
-                                                Margin="8 0 0 0"
-                                                VerticalAlignment="Center"
-                                                Text="Twitter"/>
-                                        </StackPanel>
-                                    </Button>
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="0 16 0 4">
+            <StackPanel Orientation="Horizontal">
+                <ListBox ItemsSource="{Binding Devices}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Width="200" Background="#03a9f4" 
+                                                 Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}" 
+                                                 Padding="0">
+                                <Grid VerticalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Margin="16 16 16 4"
+                                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                        Text="{Binding Station}" />
+                                    <Separator Grid.Row="1" Style="{StaticResource MaterialDesignLightSeparator}" />
+                                    <TextBlock Grid.Row="2" Margin="16 0 16 8" 
+                                               VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                               Text="{Binding Line}" />
                                 </Grid>
-                            </Border>
-
-                            <Border
-                                Grid.Column="1"
-                                Grid.Row="3"
-                                BorderThickness="0 1 0 0"
-                                BorderBrush="{DynamicResource MaterialDesignDivider}">
-                                <Grid Margin="8">
-                                    <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        HorizontalAlignment="Left"
-                                        Command="{Binding ChatCommand}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Message"/>
-                                            <TextBlock
-                                                Margin="8 0 0 0"
-                                                VerticalAlignment="Center"
-                                                Text="Chat"/>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding EmailCommand}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Email"/>
-                                            <TextBlock
-                                                Margin="8 0 0 0"
-                                                VerticalAlignment="Center"
-                                                Text="Email"/>
-                                        </StackPanel>
-                                    </Button>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </materialDesign:Card>
-
-                    <materialDesign:Card
-                        Width="420"
-                        Margin="8 2 4 16"
-                        Height="270">
-                        <Grid VerticalAlignment="Stretch">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <materialDesign:PackIcon
-                                Kind="Github"
-                                Width="160"
-                                Height="160"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"/>
-
-                            <StackPanel Grid.Column="1">
-                                <TextBlock
-                                    Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                    Margin="16 16 16 8"
-                                    Text="Open Source"/>
-
-                                <TextBlock
-                                    TextWrapping="Wrap"
-                                    Margin="16 0 16 8"
-                                    Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                    VerticalAlignment="Top"
-                                    Text="This project is completely open source. If you like it and want to say thanks you could hit the GitHub Star button, tweet or post about it, or tell your mum about it!"/>
-                            </StackPanel>
-
-                            <Border
-                                Grid.Row="1"
-                                Grid.ColumnSpan="2"
-                                BorderThickness="0 1 0 0"
-                                BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                Padding="8">
-                                <DockPanel>
-                                    <Button
-                                        Style="{StaticResource MaterialDesignFlatButton}" 
-                                        DockPanel.Dock="Right"
-                                        Command="{Binding DonateCommand}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Gift"/>
-                                            <TextBlock
-                                                Margin="8 0 0 0"
-                                                VerticalAlignment="Center"
-                                                Text="Donate"/>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <TextBlock
-                                        Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                        TextWrapping="Wrap"
-                                        Margin="16"
-                                        VerticalAlignment="Center"
-                                        Text="Feel like you want to make a donation?  It would be gratefully received.  Click the button to donate via Open Collective."/>
-                                </DockPanel>
-                            </Border>
-                        </Grid>
-                    </materialDesign:Card>
-                </StackPanel>
-            </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
         </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <ListBox ItemsSource="{Binding MessageLogs}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Message}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </Grid>
 </UserControl>

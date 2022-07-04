@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using Ops.Engine.UI.Domain.ViewModels;
+using Ops.Engine.UI.ViewModels;
 
 namespace Ops.Engine.UI.Views;
 

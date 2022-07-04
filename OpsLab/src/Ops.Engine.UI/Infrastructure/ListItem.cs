@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Ops.Engine.UI.Infrastructure;
 
-public class DemoItem : ViewModelBase
+public class ListItem : ViewModelBase
 {
     private readonly Type _contentType;
     private readonly object? _dataContext;
@@ -15,23 +14,17 @@ public class DemoItem : ViewModelBase
     private ScrollBarVisibility _verticalScrollBarVisibilityRequirement = ScrollBarVisibility.Auto;
     private Thickness _marginRequirement = new(16);
 
-    public DemoItem(string name, Type contentType, IEnumerable<DocumentationLink> documentation, object? dataContext = null)
+    public ListItem(string name, Type contentType, object? dataContext = null)
     {
         Name = name;
         _contentType = contentType;
         _dataContext = dataContext;
-        Documentation = documentation;
     }
 
     /// <summary>
     /// 获取其名称。
     /// </summary>
     public string Name { get; }
-
-    /// <summary>
-    /// 获取其文档连接对象。
-    /// </summary>
-    public IEnumerable<DocumentationLink> Documentation { get; }
 
     /// <summary>
     /// 获取 Item 的内容。

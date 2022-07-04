@@ -4,7 +4,7 @@ using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace Ops.Engine.UI.Domain.ViewModels;
+namespace Ops.Engine.UI.ViewModels;
 
 public class LoginViewModel : ObservableObject
 {

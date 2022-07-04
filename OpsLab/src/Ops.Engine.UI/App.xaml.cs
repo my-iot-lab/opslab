@@ -4,9 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Ops.Engine.UI.Domain.ViewModels;
 using Ops.Exchange.DependencyInjection;
 using Ops.Engine.UI.Forwarders;
+using Ops.Engine.UI.Config;
+using Ops.Engine.UI.ViewModels;
 
 namespace Ops.Engine.UI
 {
@@ -74,6 +75,9 @@ namespace Ops.Engine.UI
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            // options
+            services.Configure<OpsUIOptions>(configuration.GetSection("OpsUI"));
+
             services.AddOpsExchange(configuration, options =>
             {
                 options.AddNoticeForword<OpsNoticeForwarder>();
@@ -81,6 +85,7 @@ namespace Ops.Engine.UI
             });
 
             services.AddTransient<MainViewModel>();
+            services.AddTransient<HomeViewModel>();
             services.AddTransient<Home2ViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<AddressViewModel>();

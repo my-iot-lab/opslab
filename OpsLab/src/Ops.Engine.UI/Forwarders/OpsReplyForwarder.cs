@@ -1,28 +1,24 @@
 ﻿using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Ops.Engine.UI.Domain.Services;
 using Ops.Exchange.Forwarder;
 
 namespace Ops.Engine.UI.Forwarders;
 
 internal sealed class OpsReplyForwarder : IReplyForwarder
 {
-    private readonly IInboundService _inboundService;
-    private readonly IOutboundService _outboundService;
-    private readonly IMaterialScanningService _materialScanningService;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
 
     public OpsReplyForwarder(
-        IInboundService inboundService,
-        IOutboundService outboundService,
-        IMaterialScanningService materialScanningService,
+        IHttpClientFactory httpClientFactory,
         ILogger<OpsReplyForwarder> logger)
     {
-        _inboundService = inboundService;
-        _outboundService = outboundService;
-        _materialScanningService = materialScanningService;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -35,20 +31,37 @@ internal sealed class OpsReplyForwarder : IReplyForwarder
                 string.Join("; ", data.Values.Select(s => $"{s.Tag}={s.Value}")));
 
         // 派发数据
-        return data.Tag switch
+        var action = data.Tag switch
         {
-            OpsSymbol.PLC_Sign_Inbound => await _inboundService.ExecuteAsync(data, cancellationToken),
-            OpsSymbol.PLC_Sign_Outbound => await _outboundService.ExecuteAsync(data, cancellationToken),
-            OpsSymbol.PLC_Sign_Critical_Material => await _materialScanningService.ScanCriticalAsync(data, cancellationToken),
-            OpsSymbol.PLC_Sign_Batch_Material => await _materialScanningService.ScanBatchAsync(data, cancellationToken),
+            OpsSymbol.PLC_Sign_Inbound => "",
+            OpsSymbol.PLC_Sign_Outbound => "",
+            OpsSymbol.PLC_Sign_Critical_Material => "",
+            OpsSymbol.PLC_Sign_Batch_Material => "",
             _ => throw new System.NotImplementedException(),
+        };
+
+        var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+        var httpClient = _httpClientFactory.CreateClient();
+        using var httpResponseMessage = await httpClient.PostAsync($"api/xxx/{action}", jsonContent, cancellationToken);
+        if (httpResponseMessage.IsSuccessStatusCode)
+        {
+            using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
+            var result = await JsonSerializer.DeserializeAsync<HttpResult<ReplyResult>>(contentStream);
+            if (result?.IsOk() == true)
+            {
+                return result.Data;
+            }
+
+            // 记录数据推送失败
+        }
+
+        return new()
+        {
+            Result = 4,
         };
     }
 
     public void Dispose()
     {
-        _inboundService.Dispose();
-        _outboundService.Dispose();
-        _materialScanningService.Dispose();
     }
 }

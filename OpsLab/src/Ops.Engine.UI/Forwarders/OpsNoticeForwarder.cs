@@ -1,22 +1,24 @@
 ﻿using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Ops.Engine.UI.Domain.Services;
 using Ops.Exchange.Forwarder;
 
 namespace Ops.Engine.UI.Forwarders;
 
 internal sealed class OpsNoticeForwarder : INoticeForwarder
 {
-    private readonly INoticeService _noticeService;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
 
     public OpsNoticeForwarder(
-        INoticeService noticeService,
+        IHttpClientFactory httpClientFactory,
         ILogger<OpsNoticeForwarder> logger)
     {
-        _noticeService = noticeService;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -28,12 +30,26 @@ internal sealed class OpsNoticeForwarder : INoticeForwarder
                 data.Tag,
                 string.Join("; ", data.Values.Select(s => $"{s.Tag}={s.Value}")));
 
-        // 执行通知
-        await _noticeService.ExecuteAsync(data, cancellationToken);
+        // 推送执行通知
+        var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+        var httpClient = _httpClientFactory.CreateClient();
+        using var httpResponseMessage = await httpClient.PostAsync("api/xxx", jsonContent, cancellationToken);
+        if (httpResponseMessage.IsSuccessStatusCode)
+        {
+            using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
+            var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream);
+            if (result?.IsOk() != true)
+            {
+                // 记录数据推送失败
+                return;
+            }
+        }
+
+        // 记录数据推送失败
     }
 
     public void Dispose()
     {
-        _noticeService.Dispose();
+        
     }
 }
