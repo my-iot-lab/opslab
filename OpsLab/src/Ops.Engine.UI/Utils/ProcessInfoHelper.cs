@@ -11,9 +11,21 @@ namespace Ops.Engine.UI.Utils;
 public static class ProcessInfoHelper
 {
     /// <summary>
+    /// 检查指定的进程是否有在运行。
+    /// </summary>
+    /// <param name="processName">指定的进程名称</param>
+    /// <returns></returns>
+    public static bool IsRunning(string processName)
+    {
+        var processes = Process.GetProcessesByName(processName);
+        return processes.Length > 0;
+    }
+
+    /// <summary>
     /// 调用某个应用程序。
     /// 如通过 dotnet 启动，可设置 Start("dotnet", "xxx.dll", AppContext.BaseDirectory)；
     /// 或是 Start("xxx.exe", "", AppContext.BaseDirectory)。
+    /// 注：需自定义处理错误代码。
     /// </summary>
     /// <param name="filename"></param>
     /// <param name="arguments"></param>
@@ -32,45 +44,47 @@ public static class ProcessInfoHelper
             CreateNoWindow = true,
         };
 
-        try
-        {
-            Process.Start(startInfo);
-        }
-        catch (Exception e) when (e is Win32Exception || e is FileNotFoundException)
-        {
-            //
-        }
+        Process.Start(startInfo);
     }
 
     /// <summary>
     /// 强制关闭进程。
+    /// 注：需自定义处理错误代码。
     /// </summary>
     /// <param name="processName">进程名称</param>
     /// <param name="isWindow">是否是窗体程序</param>
     public static void Kill(string processName, bool isWindow)
     {
         var processes = Process.GetProcessesByName(processName);
-
-        try
+        foreach (var ps in processes)
         {
-            foreach (var p in processes)
+            if (!ps.HasExited)
             {
-                if (!p.HasExited)
+                if (isWindow)
                 {
-                    if (isWindow)
-                    {
-                        p.CloseMainWindow();
-                    }
-                    else
-                    {
-                        p.Kill();
-                    }
+                    ps.CloseMainWindow();
+                }
+                else
+                {
+                    ps.Kill();
                 }
             }
         }
-        catch (Exception e) when (e is Win32Exception || e is InvalidOperationException)
+    }
+
+    public static void Kill(int processId, bool isWindow)
+    {
+        var ps = Process.GetProcessById(processId);
+        if (!ps.HasExited)
         {
-            //
+            if (isWindow)
+            {
+                ps.CloseMainWindow();
+            }
+            else
+            {
+                ps.Kill();
+            }
         }
     }
 }

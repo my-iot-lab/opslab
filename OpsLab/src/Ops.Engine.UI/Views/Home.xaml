@@ -37,11 +37,11 @@
                 Grid.Column="0"
                 Margin="8 0 0 0"
                 VerticalAlignment="Center">
-                <Button Grid.Column="1" Content="停止" IsEnabled="True" Background="Red"
+                <Button Grid.Column="1" Content="停止" IsEnabled="{Binding IsRunning}" Background="Red"
                         Width="80" Margin="8 0 8 0"
                         VerticalAlignment="Center" HorizontalAlignment="Right"
                         Command="{Binding StopCommand}" />
-                <Button Grid.Column="1" Content="启动" IsEnabled="True" Background="Green"
+                <Button Grid.Column="1" Content="启动" IsEnabled="{Binding IsStop}" Background="Green"
                         Width="80" Margin="8 0 8 0"
                         VerticalAlignment="Center" HorizontalAlignment="Right" 
                         Command="{Binding StartCommand}" />
@@ -85,15 +85,13 @@
         </ScrollViewer>
 
         <Grid Grid.Row="2">
-            <ListBox ItemsSource="{Binding MessageLogs}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Message}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <ListBox Name="MessageListBox"
+                Background="Gray" FontSize="11" Foreground="#DD142241"
+                ItemsSource="{Binding MessageLogs}" />
+
+            <materialDesign:Snackbar
+                Name="SnackbarTip"
+                MessageQueue="{materialDesign:MessageQueue}" />
         </Grid>
     </Grid>
 </UserControl>

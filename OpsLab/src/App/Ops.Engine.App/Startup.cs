@@ -43,7 +43,7 @@ public class Startup
         })
         .AddJsonOptions(options =>
         {
-            options.UseWtmJsonOptions();
+            options.UseWtmJsonOptions(); // 其中有设置 JsonNumberHandling.WriteAsString
         })
         .ConfigureApiBehaviorOptions(options =>
         {

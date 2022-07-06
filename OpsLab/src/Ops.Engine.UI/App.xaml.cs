@@ -13,28 +13,19 @@ namespace Ops.Engine.UI
 {
     public partial class App : Application
     {
-        private readonly IHost? _host;
+        private System.Threading.Mutex? _mutex;
+        private IHost? _host;
 
         public App()
         {
-            string logformat = @"{Timestamp:yyyy-MM-dd HH:mm:ss }[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+            string logformat = @"{Timestamp:yyyy-MM-dd HH:mm:ss:fff }[{Level:u3}] {Message:lj}{NewLine}{Exception}";
             Log.Logger = new LoggerConfiguration()
                           .Enrich.FromLogContext()
                           .MinimumLevel.Information()
                           .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
-                          .WriteTo.File("logs\\mlog.log", outputTemplate: logformat, rollingInterval: RollingInterval.Day)
+                          .WriteTo.File("logs\\mlog_.log", outputTemplate: logformat, rollingInterval: RollingInterval.Day)
                           .WriteTo.Seq("http://localhost:5341") // seq 日志平台，参考 https://docs.datalust.co/docs/using-serilog
                           .CreateLogger();
-
-            try
-            {
-                Log.Information("应用程序启动");
-                _host = CreateHostBuilder(null).Build();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Host terminated unexpectedly");
-            }
         }
 
         static IHostBuilder CreateHostBuilder(string[]? args) =>
@@ -58,7 +49,26 @@ namespace Ops.Engine.UI
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // 只允许开启一个
+            _mutex = new System.Threading.Mutex(true, "Ops.Engine.UI", out var createdNew);
+            if (!createdNew)
+            {
+                MessageBox.Show("已有一个程序在运行");
+                Environment.Exit(0);
+                return;
+            }
+
             base.OnStartup(e);
+
+            try
+            {
+                Log.Information("应用程序启动");
+                _host = CreateHostBuilder(null).Build();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            }
 
             _host.Start();
         }
@@ -66,7 +76,6 @@ namespace Ops.Engine.UI
         protected override void OnExit(ExitEventArgs e)
         {
             Log.Information("应用程序关闭退出");
-            //_host?.StopAsync().GetAwaiter().GetResult();
             _host?.Dispose();
             Log.CloseAndFlush();
 
@@ -80,8 +89,8 @@ namespace Ops.Engine.UI
 
             services.AddOpsExchange(configuration, options =>
             {
-                options.AddNoticeForword<OpsNoticeForwarder>();
-                options.AddReplyForword<OpsReplyForwarder>();
+                options.AddNoticeForword<OpsHttpNoticeForwarder>();
+                options.AddReplyForword<OpsHttpReplyForwarder>();
             });
 
             services.AddTransient<MainViewModel>();

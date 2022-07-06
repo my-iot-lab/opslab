@@ -2,10 +2,14 @@
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.IO;
 using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MaterialDesignThemes.Wpf;
 using Ops.Engine.UI.ViewModels;
+using Ops.Engine.UI.Utils;
+using Ops.Engine.UI.Config;
 
 namespace Ops.Engine.UI;
 
@@ -15,7 +19,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        DataContext = App.Current.Services.GetService<MainViewModel>();
+        DataContext = App.Current.Services.GetRequiredService<MainViewModel>();
 
         var paletteHelper = new PaletteHelper();
         var theme = paletteHelper.GetTheme();
@@ -93,8 +97,77 @@ public partial class MainWindow : Window
         paletteHelper.SetTheme(theme);
     }
 
+    public void MenuOpenWebServer_OnClick(object sender, RoutedEventArgs e)
+    {
+        var uiOptions = App.Current.Services.GetRequiredService<IOptions<OpsUIOptions>>().Value;
+        var(ok, err) = OpenWebServer(uiOptions.WebServerEntryPath);
+        if (!ok)
+        {
+            this.SnackbarTip.MessageQueue?.Enqueue(err, null, null, null, false, true, TimeSpan.FromSeconds(5));
+        }
+    }
+
+    public void MenuCloseWebServer_OnClick(object sender, RoutedEventArgs e)
+    {
+        var uiOptions = App.Current.Services.GetRequiredService<IOptions<OpsUIOptions>>().Value;
+        var (ok, err) = CloseWebServer(uiOptions.WebServerEntryPath);
+        if (!ok)
+        {
+            this.SnackbarTip.MessageQueue?.Enqueue(err, null, null, null, false, true, TimeSpan.FromSeconds(5));
+        }
+    }
+
     #endregion
 
     private void OnSelectedItemChanged(object sender, DependencyPropertyChangedEventArgs e)
         => MainScrollViewer.ScrollToHome();
+
+    /// <summary>
+    /// 打开后台
+    /// </summary>
+    private (bool ok, string err) OpenWebServer(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return (false, "没有配置服务路径");
+        }
+
+        try
+        {
+            var fullpath = Path.GetFullPath(path, AppContext.BaseDirectory);
+            var processName = Path.GetFileNameWithoutExtension(fullpath);
+            if (ProcessInfoHelper.IsRunning(processName))
+            {
+                return (false, "服务已在运行中");
+            }
+
+            ProcessInfoHelper.Start(fullpath, workingDirectory: Path.GetDirectoryName(fullpath)!);
+        }
+        catch (Exception)
+        {
+            return (false, $"服务启动失败");
+        }
+
+        return (true, "");
+    }
+
+    private (bool, string) CloseWebServer(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return (false, "没有配置服务路径");
+        }
+
+        try
+        {
+            var processName = Path.GetFileNameWithoutExtension(path);
+            ProcessInfoHelper.Kill(processName, false);
+        }
+        catch (Exception)
+        {
+            return (false, $"服务关闭失败");
+        }
+
+        return (true, "");
+    }
 }

@@ -94,43 +94,21 @@
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
-                                        <RowDefinition />
                                     </Grid.RowDefinitions>
                                     
                                     <TextBlock Text="Light" Margin="0 0 10 0"/>
                                     <ToggleButton Grid.Column="1" x:Name="DarkModeToggleButton" Click="MenuDarkModeButton_Click" />
                                     <TextBlock Grid.Column="2" Text="Dark" Margin="10 0 0 0" />
-                                    <TextBlock Grid.Row="1" Text="Enabled" Margin="0 10 10 0" />
-                                    <ToggleButton Grid.Row="1" Grid.Column="1" x:Name="ControlsEnabledToggleButton"
-                                        Margin="0 10 0 0"
-                                        IsChecked="{Binding ControlsEnabled}" />
                                 </Grid>
 
                                 <Separator/>
 
                                 <Button Content="最大化" Click="MaximizedButton_OnClick"/>
 
-                                <Button
-                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                                    Width="128"
-                                    Content="PASS VIEW">
-                                    <Button.CommandParameter>
-                                        <StackPanel Margin="16">
-                                            <ProgressBar
-                                                Style="{StaticResource MaterialDesignCircularProgressBar}"
-                                                HorizontalAlignment="Center" Margin="16"
-                                                IsIndeterminate="True"
-                                                Value="0" />
-                                            <Button
-                                                Style="{StaticResource MaterialDesignFlatButton}"
-                                                IsCancel="True" 
-                                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                CommandParameter="Sample2Cancel"
-                                                HorizontalAlignment="Center"
-                                                Content="CANCEL"/>
-                                        </StackPanel>
-                                    </Button.CommandParameter>
-                                </Button>
+                                <Separator/>
+                                
+                                <Button Content="开启服务" Click="MenuOpenWebServer_OnClick"/>
+                                <Button Content="关闭服务" Click="MenuCloseWebServer_OnClick"/>
 
                                 <Separator/>
 
@@ -184,6 +162,10 @@
                             <TextBlock Margin="0,0,10,0">ms</TextBlock>
                         </StackPanel>
                     </Grid>
+
+                    <materialDesign:Snackbar
+                            Name="SnackbarTip"
+                            MessageQueue="{materialDesign:MessageQueue}" />
                 </Grid>
             </DockPanel>
         </materialDesign:DrawerHost>

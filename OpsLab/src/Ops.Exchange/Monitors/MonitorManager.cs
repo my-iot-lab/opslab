@@ -18,7 +18,7 @@ namespace Ops.Exchange.Monitors;
 /// </summary>
 public sealed class MonitorManager : IDisposable
 {
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource? _cts = new();
     private bool _isRunning;
 
     private readonly DeviceInfoManager _deviceInfoManager;
@@ -42,6 +42,7 @@ public sealed class MonitorManager : IDisposable
         _opsCofig = opsConfig.Value;
         _logger = logger;
 
+        // TODO: 在其他地方注册
         _eventBus.Register<HeartbeatEventData, HeartbeatEventHandler>();
         _eventBus.Register<NoticeEventData, NoticeEventHandler>();
         _eventBus.Register<ReplyEventData, ReplyEventHandler>();
@@ -50,13 +51,20 @@ public sealed class MonitorManager : IDisposable
     /// <summary>
     /// 启动监听
     /// </summary>
-    public async Task StartAsync()
+    public async Task StartAsync(MonitorStartOptions? startOptions = null)
     {
         if (_isRunning)
         {
             return;
         }
         _isRunning = true;
+
+        _logger.LogInformation("[Monitor] 监控启动");
+
+        if (_cts == null)
+        {
+            _cts = new();
+        }
 
         await _driverConnectorManager.LoadAsync();
         await _driverConnectorManager.ConnectServerAsync();
@@ -65,20 +73,20 @@ public sealed class MonitorManager : IDisposable
         foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
             // 心跳数据监控器
-            _ = HeartbeatMonitorAsync(connector);
+            _ = HeartbeatMonitorAsync(connector, startOptions?.HeartbeatDelegate);
 
             // 触发数据监控器
-            _ = TriggerMonitorAsync(connector);
+            _ = TriggerMonitorAsync(connector, startOptions?.TriggerDelegate);
 
             // 通知数据监控器
-            _ = NoticeMonitorAsync(connector);
+            _ = NoticeMonitorAsync(connector, startOptions?.NoticeDelegate);
         }
 
         // 数据回写，如心跳和触发数据（触发点和对应数据）
         _ = CallbackMonitorAsync();
     }
 
-    private async Task HeartbeatMonitorAsync(DriverConnector connector)
+    private async Task HeartbeatMonitorAsync(DriverConnector connector, Action<HeartbeatEventData>? heartbeatDelegate = null)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variable = deviceInfo!.Variables.FirstOrDefault(s => s.Flag == VariableFlag.Heartbeat);
@@ -90,7 +98,7 @@ public sealed class MonitorManager : IDisposable
         _ = Task.Run(async () =>
         {
             int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
-            while (!_cts.Token.IsCancellationRequested)
+            while (!_cts!.Token.IsCancellationRequested)
             {
                 await Task.Delay(pollingInterval, _cts.Token);
 
@@ -99,13 +107,14 @@ public sealed class MonitorManager : IDisposable
                 {
                     var context = new PayloadContext(new PayloadRequest(deviceInfo));
                     var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
+                    heartbeatDelegate?.Invoke(eventData);
                     await _eventBus.Trigger(eventData, _cts.Token);
                 }
             }
         });
     }
 
-    private async Task TriggerMonitorAsync(DriverConnector connector)
+    private async Task TriggerMonitorAsync(DriverConnector connector, Action<ReplyEventData>? triggerDelegate = null)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
@@ -114,7 +123,7 @@ public sealed class MonitorManager : IDisposable
             _ = Task.Run(async () =>
             {
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
-                while (!_cts.Token.IsCancellationRequested)
+                while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
 
@@ -138,6 +147,7 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
+                        triggerDelegate?.Invoke(eventData);
                         await _eventBus.Trigger(eventData, _cts.Token);
                     }
                 }
@@ -145,7 +155,7 @@ public sealed class MonitorManager : IDisposable
         }
     }
 
-    private async Task NoticeMonitorAsync(DriverConnector connector)
+    private async Task NoticeMonitorAsync(DriverConnector connector, Action<NoticeEventData>? noticeDelegate = null)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
@@ -154,7 +164,7 @@ public sealed class MonitorManager : IDisposable
             _ = Task.Run(async () =>
             {
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
-                while (!_cts.Token.IsCancellationRequested)
+                while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
 
@@ -165,6 +175,7 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
+                        noticeDelegate?.Invoke(eventData);
                         await _eventBus.Trigger(eventData, _cts.Token);
                     }
                 }
@@ -176,7 +187,7 @@ public sealed class MonitorManager : IDisposable
     {
         return Task.Run(async () =>
         {
-            while (!_cts.Token.IsCancellationRequested)
+            while (!_cts!.Token.IsCancellationRequested)
             {
                 var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync(_cts.Token);
                 if (!ok)
@@ -197,12 +208,25 @@ public sealed class MonitorManager : IDisposable
                     connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                 }
 
-                foreach (var value in ctx.Response.Values)
+                PayloadData? value = null;
+                try
                 {
-                    await WriteDataAsync(connector.Driver, value);
-                }
+                    for (int i = 0; i < ctx.Response.Values.Count; i++)
+                    {
+                        value = ctx.Response.Values[i];
+                        await WriteDataAsync(connector.Driver, value);
+                    }
 
-                ctx.Response.LastAction?.Invoke();
+                    ctx.Response.LastAction?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
+                            ctx.Request.RequestId,
+                            ctx.Request.DeviceInfo.Schema.Station,
+                            value?.Tag ?? "",
+                            value?.Value ?? "");
+                }
             }
         });
     }
@@ -215,13 +239,18 @@ public sealed class MonitorManager : IDisposable
         }
         _isRunning = false;
 
-        _cts.Cancel();
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+        }
+        _cts = null;
 
         // 阻塞 500ms
         Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult();
         _driverConnectorManager.Reset();
 
-        _logger.LogInformation("监控停止");
+        _logger.LogInformation("[Monitor] 监控停止");
     }
 
     public void Dispose()
@@ -229,7 +258,7 @@ public sealed class MonitorManager : IDisposable
         Stop();
     }
 
-    private async Task<(bool ok, PayloadData data, string err)> ReadDataAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
+    private static async Task<(bool ok, PayloadData data, string err)> ReadDataAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
     {
         var data = PayloadData.From(deviceVariable);
 
@@ -347,108 +376,152 @@ public sealed class MonitorManager : IDisposable
         }
     }
 
-    private async Task WriteDataAsync(IReadWriteNet driver, PayloadData data)
+    private static async Task WriteDataAsync(IReadWriteNet driver, PayloadData data)
     {
         switch (data.VarType)
         {
             case VariableType.Bit:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (bool[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<bool>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (bool)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToBoolean(data.Value));
                 }
                 break;
             case VariableType.Byte:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (byte[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<byte>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (byte)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToByte(data.Value));
                 }
                 break;
             case VariableType.Word:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (ushort[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<ushort>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (ushort)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToUInt16(data.Value));
                 }
                 break;
             case VariableType.DWord:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (uint[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<uint>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (uint)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToUInt32(data.Value));
                 }
                 break;
             case VariableType.Int:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (short[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<short>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (short)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToInt16(data.Value));
                 }
                 break;
             case VariableType.DInt:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (int[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<int>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (int)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToInt32(data.Value));
                 }
                 break;
             case VariableType.Real:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (float[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<float>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (float)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToSingle(data.Value));
                 }
                 break;
             case VariableType.LReal:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (double[])data.Value);
+                    await driver.WriteAsync(data.Address, Object2Array<double>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (double)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToDouble(data.Value));
                 }
                 break;
             case VariableType.String or VariableType.S7String:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, (string)data.Value, data.Length);
+                    await driver.WriteAsync(data.Address, Convert.ToString(data.Value), data.Length);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, (string)data.Value);
+                    await driver.WriteAsync(data.Address, Convert.ToString(data.Value));
                 }
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
                 {
-                    await driver2.WriteWStringAsync(data.Address, (string)data.Value);
+                    await driver2.WriteWStringAsync(data.Address, Convert.ToString(data.Value));
                 }
                 break;
             default:
                 break;
         }
+    }
+
+    private static T[] Object2Array<T>(object obj)
+    {
+        if (obj is T[] obj2)
+        {
+            return obj2;
+        }
+
+        if (!obj.GetType().IsArray)
+        {
+            return Array.Empty<T>();
+        }
+
+        if (typeof(T) == typeof(bool))
+        {
+            var arr = (bool[])obj;
+            return arr.Cast<T>().ToArray();
+        }
+
+        // 从宽类型转换为窄类型
+        if (typeof(T) == typeof(byte) ||
+            typeof(T) == typeof(ushort) ||
+            typeof(T) == typeof(short) ||
+            typeof(T) == typeof(uint) ||
+            typeof(T) == typeof(int))
+        {
+            var arr = (int[])obj;
+            return arr.Cast<T>().ToArray();
+        }
+
+        if (typeof(T) == typeof(float))
+        {
+            var arr = (float[])obj;
+            return arr.Cast<T>().ToArray();
+        }
+
+        if (typeof(T) == typeof(double))
+        {
+            var arr = (double[])obj;
+            return arr.Cast<T>().ToArray();
+        }
+
+        return Array.Empty<T>();
     }
 }

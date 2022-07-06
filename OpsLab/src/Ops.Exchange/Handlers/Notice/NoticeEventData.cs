@@ -6,7 +6,7 @@ namespace Ops.Exchange.Handlers.Notice;
 /// <summary>
 /// 通知事件数据。
 /// </summary>
-internal sealed class NoticeEventData : EventData
+public sealed class NoticeEventData : EventData
 {
     /// <summary>
     /// 请求的 Id，可用于追踪数据。

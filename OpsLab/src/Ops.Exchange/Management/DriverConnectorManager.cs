@@ -161,6 +161,7 @@ public sealed class DriverConnectorManager : IDisposable
         }
 
         _drivers.Clear();
+        _isConnectServer = false;
     }
 
     public void Dispose()

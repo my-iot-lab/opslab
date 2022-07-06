@@ -6,7 +6,7 @@ namespace Ops.Exchange.Handlers.Reply;
 /// <summary>
 /// 请求/响应事件数据
 /// </summary>
-internal sealed class ReplyEventData : EventData
+public sealed class ReplyEventData : EventData
 {
     /// <summary>
     /// 请求的数据上下文

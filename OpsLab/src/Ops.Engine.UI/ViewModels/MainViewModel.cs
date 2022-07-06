@@ -117,7 +117,6 @@ public class MainViewModel : ObservableObject
         return new ObservableCollection<ListItem>(new[]
         {
             new ListItem("首页", typeof(Home)),
-            new ListItem("首页2", typeof(Home2)),
             new ListItem("地址变量", typeof(Address)),
         });
     }

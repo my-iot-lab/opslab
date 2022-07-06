@@ -2,7 +2,7 @@
 namespace Ops.Engine.UI.Forwarders;
 
 /// <summary>
-/// 主要变量地址符号定义
+/// 主要变量地址符号定义。
 /// </summary>
 public sealed class OpsSymbol
 {
@@ -72,7 +72,10 @@ public sealed class OpsSymbol
 
     #region MES To PLC
 
-    public const string MES_Sign_ProdReq_Exe = "PLC_Sys_Sign_ProdReq_Exe";
+    /// <summary>
+    /// MES 错误描述，用于将错误消息写给 PLC。
+    /// </summary>
+    public const string MES_Message_Error_Desc = nameof(MES_Message_Error_Desc);
 
     #endregion
 }

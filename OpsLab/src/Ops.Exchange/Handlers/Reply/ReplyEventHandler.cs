@@ -45,8 +45,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
             ForwardData forwardData = new(eventData.Context.Request.RequestId, schema, eventData.Tag, eventData.Values);
 
             // 采用 Scope 作用域
-            using var scope = _serviceProvider.CreateScope();
-            var replyForwarder = scope.ServiceProvider.GetRequiredService<IReplyForwarder>();
+            var replyForwarder = _serviceProvider.GetRequiredService<IReplyForwarder>();
 
             if (eventData.HandleTimeout > 0)
             {
@@ -80,7 +79,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         {
             newState = ExStatusCode.HandlerException;
 
-            _logger.LogError(ex, $"[ReplyEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError(ex, "[ReplyEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
                 eventData.Context.Request.RequestId,
                 schema.Station,
                 eventData.Tag);
