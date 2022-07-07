@@ -31,8 +31,7 @@
                     </div>
                 </nav>
             </div>
-
-            @if (tenants.Count > 0)
+            @if (tenants.Count() >0)
             {
                 <div class="header-right" style="width: 60px;">
                     <nav class="menu">
@@ -56,7 +55,6 @@
                     </nav>
                 </div>
             }
-
             <div class="header-right">
                 <nav class="menu">
                     <div class="navbar navbar-expand d-flex">
@@ -201,6 +199,7 @@
         await JSRuntime.InvokeVoidAsync("urlFuncs.redirect", dir.Data);
     }
 
+
     private async Task Show()
     {
         await wtmblazor.OpenDialog<Password>(wtmblazor.Localizer["Login.ChangePassword"], size: Size.Small, userinfo: UserInfo);
@@ -208,20 +207,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        List<BootstrapBlazor.Components.MenuItem> menus = new();
+        List<BootstrapBlazor.Components.MenuItem> menus = null;
+        menus = new List<BootstrapBlazor.Components.MenuItem> { };
         menus.Add(new BootstrapBlazor.Components.MenuItem() { Text = wtmblazor.Localizer["Sys.Home"], Icon = "fa fa-fw fa-home", Url = "/", Match = NavLinkMatch.All });
-        if (wtmblazor.ConfigInfo.IsQuickDebug)
+        if (wtmblazor.ConfigInfo.IsQuickDebug == true)
         {
             var pages = wtmblazor.GetAllPages();
             foreach (var item in pages)
             {
-                BootstrapBlazor.Components.MenuItem m = new()
+                BootstrapBlazor.Components.MenuItem m = new BootstrapBlazor.Components.MenuItem
                     {
                         Text = item.PageName,
                         Icon = item.Icon,
                         Url = item.Url
                     };
-
                 if (item.Children != null)
                 {
                     var items = new List<BootstrapBlazor.Components.MenuItem>();
@@ -255,15 +254,15 @@
                             PageName = item.Text,
                             Icon = item.Icon,
                             Url = item.Url,
-                            Children = new(),
+                            Children = new List<FrameworkMenu>()
                         });
                 }
                 else
                 {
-                    var parent = formatedmenu.FirstOrDefault(x => x.ID.ToString() == item.ParentId);
+                    var parent = formatedmenu.Where(x => x.ID.ToString() == item.ParentId).FirstOrDefault();
                     if (parent != null)
                     {
-                        parent.Children.Add(new()
+                        parent.Children.Add(new FrameworkMenu
                             {
                                 ID = new Guid(item.Id),
                                 PageName = item.Text,
@@ -274,10 +273,8 @@
                     }
                 }
             }
-
             GetMenuFromFrameworkMenu(formatedmenu).ForEach(x => menus.Add(x));
         }
-
         Menus = menus;
 
         tenants = await wtmblazor.Api.CallItemsApi($"/api/_frameworktenant/GetFrameworkTenants?parent={UserInfo.TenantCode}");
@@ -286,7 +283,7 @@
 
     private List<BootstrapBlazor.Components.MenuItem> GetMenuFromFrameworkMenu(List<FrameworkMenu> input)
     {
-        List<BootstrapBlazor.Components.MenuItem> rv = new();
+        List<BootstrapBlazor.Components.MenuItem> rv = new List<BootstrapBlazor.Components.MenuItem>();
         foreach (var item in input)
         {
             var m = new BootstrapBlazor.Components.MenuItem
@@ -297,13 +294,12 @@
                 };
             if (m.Url != null)
             {
-                if (m.Url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || m.Url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                if (m.Url.ToLower().StartsWith("http://") || m.Url.ToLower().StartsWith("https://"))
                 {
                     m.Url = "/Outside/" + System.Web.HttpUtility.UrlEncode(m.Url);
                     m.Match = NavLinkMatch.All;
                 }
             }
-
             if (item.Children?.Any() == true)
             {
                 m.Items = GetMenuFromFrameworkMenu(item.Children);
@@ -323,7 +319,8 @@
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
             var uri = await JSRuntime.InvokeAsync<string>("urlFuncs.getCurrentUrl");
-            var query = $"?culture={Uri.EscapeDataString(Value)}&redirect={Uri.EscapeDataString(uri)}";
+            var query = $"?culture={Uri.EscapeDataString(Value)}&" +
+                $"redirect={Uri.EscapeDataString(uri)}";
             NavigationManager.NavigateTo(wtmblazor.GetServerUrl() + "/_framework/SetLanguageForBlazor" + query, forceLoad: true);
         }
     }

@@ -4,68 +4,79 @@ using System.Linq;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Extensions;
 
-namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.ActionLogVMs;
-
-public class ActionLogListVM : BasePagedListVM<ActionLog, ActionLogSearcher>
+namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.ActionLogVMs
 {
-    protected override List<GridAction> InitGridAction()
+    public class ActionLogListVM : BasePagedListVM<ActionLog, ActionLogSearcher>
     {
-        var actions = new List<GridAction>
+        protected override List<GridAction> InitGridAction()
         {
-            this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.BatchDelete, "","_Admin", dialogWidth: 800),
-            this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.Details, "","_Admin", dialogWidth: 800).SetHideOnToolBar(true),
-            this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.ExportExcel, "","_Admin"),
-        };
-        return actions;
-    }
-
-    protected override IEnumerable<IGridColumn<ActionLog>> InitGridHeader()
-    {
-        var header = new List<GridColumn<ActionLog>>();
-
-        header.Add(this.MakeGridHeader(x => x.LogType, 100).SetForeGroundFunc((entity) =>
-        {
-            return entity.LogType == ActionLogTypesEnum.Exception ? "FF0000" : "";
-        }));
-        header.Add(this.MakeGridHeader(x => x.ModuleName, 120));
-        header.Add(this.MakeGridHeader(x => x.ActionName, 120));
-        header.Add(this.MakeGridHeader(x => x.ITCode, 120));
-        header.Add(this.MakeGridHeader(x => x.ActionUrl, 200));
-        header.Add(this.MakeGridHeader(x => x.ActionTime, 200).SetSort(true).SetFormat((a, b) => a.ActionTime.ToString("yyyy-MM-dd HH:mm:ss")));
-        header.Add(this.MakeGridHeader(x => x.Duration, 100).SetSort(true).SetForeGroundFunc((entity) =>
-        {
-            return entity.Duration switch
+            var actions = new List<GridAction>
             {
-                <= 1 => "008000",
-                <= 3 => "FFC90E",
-                _ => "FF0000"
+                this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.BatchDelete, "","_Admin", dialogWidth: 800),
+                this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.Details, "","_Admin", dialogWidth: 800).SetHideOnToolBar(true),
+                this.MakeStandardAction("ActionLog", GridActionStandardTypesEnum.ExportExcel, "","_Admin"),
             };
-        }).SetFormat((entity, v) => { return ((double)v).ToString("f2"); }));
-        header.Add(this.MakeGridHeader(x => x.IP, 120));
-        header.Add(this.MakeGridHeader(x => x.Remark).SetFormat((a, b) =>
+            return actions;
+        }
+
+        protected override IEnumerable<IGridColumn<ActionLog>> InitGridHeader()
         {
-            if (SearcherMode == ListVMSearchModeEnum.Search && a.Remark?.Length > 30)
-            {
-                a.Remark = a.Remark[..30] + "...";
-            }
-            return a.Remark;
-        }));
-        header.Add(this.MakeGridHeaderAction(width: 120));
+            var header = new List<GridColumn<ActionLog>>();
 
-        return header;
-    }
+            header.Add(this.MakeGridHeader(x => x.LogType, 100).SetForeGroundFunc((entity)=> {
+                if(entity.LogType == ActionLogTypesEnum.Exception)
+                {
+                    return "FF0000";
+                }
+                else
+                {
+                    return "";
+                }
+            }));
+            header.Add(this.MakeGridHeader(x => x.ModuleName, 120));
+            header.Add(this.MakeGridHeader(x => x.ActionName, 120));
+            header.Add(this.MakeGridHeader(x => x.ITCode, 120));
+            header.Add(this.MakeGridHeader(x => x.ActionUrl, 200));
+            header.Add(this.MakeGridHeader(x => x.ActionTime, 200).SetSort(true).SetFormat((a, b) => a.ActionTime.ToString("yyyy-MM-dd HH:mm:ss")));
+            header.Add(this.MakeGridHeader(x => x.Duration, 100).SetSort(true).SetForeGroundFunc((entity)=> {
+                if(entity.Duration <= 1)
+                {
+                    return "008000";
+                }
+                else if(entity.Duration <= 3)
+                {
+                    return "FFC90E";
+                }
+                else
+                {
+                    return "FF0000";
+                }
+            }).SetFormat((entity,v)=> { return ((double)v).ToString("f2"); }));
+            header.Add(this.MakeGridHeader(x => x.IP, 120));
+            header.Add(this.MakeGridHeader(x => x.Remark).SetFormat((a,b)=> {
+                if (SearcherMode == ListVMSearchModeEnum.Search && a.Remark?.Length > 30)
+                {
+                    a.Remark = a.Remark.Substring(0, 30) + "...";
+                }
+                return a.Remark;
+            }));
+            header.Add(this.MakeGridHeaderAction(width: 120));
 
-    public override IOrderedQueryable<ActionLog> GetSearchQuery()
-    {
-        var query = DC.Set<ActionLog>()
-            .CheckContain(Searcher.ITCode, x => x.ITCode)
-            .CheckContain(Searcher.ActionUrl, x => x.ActionUrl)
-            .CheckContain(Searcher.LogType, x => x.LogType)
-            .CheckContain(Searcher.IP, x => x.IP)
-            .CheckBetween(Searcher.ActionTime?.GetStartTime(), Searcher.ActionTime?.GetEndTime(), x => x.ActionTime, includeMax: false)
-            .CheckWhere(Searcher.Duration, x => x.Duration >= Searcher.Duration)
-            .OrderByDescending(x => x.ActionTime);
+            return header;
+        }
+        
+        public override IOrderedQueryable<ActionLog> GetSearchQuery()
+        {
+            var query = DC.Set<ActionLog>()
+                .CheckContain(Searcher.ITCode, x=>x.ITCode)
+                .CheckContain(Searcher.ActionUrl, x=>x.ActionUrl)
+                .CheckContain(Searcher.LogType, x=>x.LogType)
+                .CheckContain(Searcher.IP, x=>x.IP)
+                .CheckBetween(Searcher.ActionTime?.GetStartTime(), Searcher.ActionTime?.GetEndTime(), x=>x.ActionTime, includeMax:false)
+                .CheckWhere(Searcher.Duration,x=>x.Duration >= Searcher.Duration)
+                .OrderByDescending(x=>x.ActionTime);
 
-        return query;
+            return query;
+        }
     }
 }

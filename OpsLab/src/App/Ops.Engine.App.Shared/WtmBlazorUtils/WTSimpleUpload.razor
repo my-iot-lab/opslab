@@ -5,7 +5,6 @@
 @using System.Linq.Expressions;
 @using System.IO;
 @typeparam TValue
-
 <ButtonUpload @ref="uploader" Value="Value" ValueExpression="ValueExpression" ValueChanged="ValueChanged" Accept="*/*" IsSingle="true" ShowProgress="true" OnChange="@OnAvatarUpload" OnDelete="@OnAvatarDelete" DisplayText="@LabelText"  DefaultFileList="@dlist"></ButtonUpload>
 
 @code{
@@ -63,11 +62,11 @@
                 suc = true;
             }
         }
-
         if (suc == false)
         {
             await WtmBlazor.Toast.Error(content: WtmBlazor.Localizer["Sys.UploadFailed"]);
         }
+
     }
 
     private async Task<bool> OnAvatarDelete(UploadFile file)

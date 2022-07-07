@@ -1,5 +1,4 @@
 @inherits BasePage
-
 <div class="index">
     <div class="welcome container">
         <div class="form-inline">
@@ -18,7 +17,9 @@
                                 国内Java一家独大原因很多，有BAT的示范效应，也有微软自己战略的失误。好在微软这两年终于想明白了，<code>dotnet core</code>的横空出世和收购github都是非常正确的方向。当然要想达到java一样的生态还有很长的路要走，那我就贡献一点绵薄之力吧。
                             </p>
                         </div>
+
                     </div>
+
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="welcome-header">
@@ -200,9 +201,11 @@
             </div>
         </div>
     </div>
-</div>
 
-@code {
-    [Parameter]
-    public Index.githubpoco model { get; set; } = new Index.githubpoco();
-}
+    </div>
+    @code {
+
+        [Parameter]
+        public Index.githubpoco model { get; set; } = new Index.githubpoco();
+
+   }

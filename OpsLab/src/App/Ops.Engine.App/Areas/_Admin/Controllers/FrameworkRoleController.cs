@@ -25,14 +25,16 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Request.RedirectCall(Wtm).Result;
             }
-
             if (ModelState.IsValid)
             {
                 var vm = Wtm.CreateVM<FrameworkRoleListVM>(passInit: true);
                 vm.Searcher = searcher;
                 return Content(vm.GetJson());
             }
-            return BadRequest(ModelState.GetErrorJson());
+            else
+            {
+                return BadRequest(ModelState.GetErrorJson());
+            }
         }
 
         [ActionDescription("Sys.Get")]
@@ -60,14 +62,18 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            await vm.DoChangeAsync();
-            if (!ModelState.IsValid)
+            else
             {
-                return BadRequest(ModelState.GetErrorJson());
+                await vm.DoChangeAsync();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState.GetErrorJson());
+                }
+                else
+                {
+                    return Ok(vm.Entity);
+                }
             }
-
-            return Ok(vm.Entity);
         }
 
         [ActionDescription("Sys.Create")]
@@ -78,19 +84,23 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            vm.DoAdd();
-            if (!ModelState.IsValid)
+            else
             {
-                return BadRequest(ModelState.GetErrorJson());
+                vm.DoAdd();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState.GetErrorJson());
+                }
+                else
+                {
+                    return Ok(vm.Entity);
+                }
             }
 
-            return Ok(vm.Entity);
         }
 
         [ActionDescription("Sys.Edit")]
@@ -101,18 +111,22 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            vm.DoEdit(false);
-            if (!ModelState.IsValid)
+            else
             {
-                return BadRequest(ModelState.GetErrorJson());
+                vm.DoEdit(false);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState.GetErrorJson());
+                }
+                else
+                {
+                    return Ok(vm.Entity);
+                }
             }
-            return Ok(vm.Entity);
         }
 
         [HttpPost("BatchDelete")]
@@ -123,7 +137,6 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             var vm = Wtm.CreateVM<FrameworkRoleBatchVM>();
             List<string> RoleCode = new List<string>();
             if (ids != null && ids.Count() > 0)
@@ -135,19 +148,20 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Ok();
             }
-
             if (!ModelState.IsValid || !vm.DoBatchDelete())
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            var ur = DC.Set<FrameworkUserRole>().Where(x => RoleCode.Contains(x.RoleCode)).ToList();
-            var itcodes = ur.Select(x => x.UserCode).ToArray();
-            DC.Set<FrameworkUserRole>().RemoveRange(ur);
-            DC.SaveChanges();
-            await Wtm.RemoveUserCacheByRole(itcodes);
-            await Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant);
-            return Ok(ids.Length);
+            else
+            {
+                var ur = DC.Set<FrameworkUserRole>().Where(x => RoleCode.Contains(x.RoleCode)).ToList();
+                var itcodes = ur.Select(x => x.UserCode).ToArray();
+                DC.Set<FrameworkUserRole>().RemoveRange(ur);
+                DC.SaveChanges();
+                await Wtm.RemoveUserCacheByRole(itcodes);
+                await Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant);
+                return Ok(ids.Count());
+            }
         }
 
         [ActionDescription("Sys.Export")]
@@ -158,7 +172,6 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             var vm = Wtm.CreateVM<FrameworkRoleListVM>();
             vm.Searcher = searcher;
             vm.SearcherMode = ListVMSearchModeEnum.Export;
@@ -173,7 +186,6 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             var vm = Wtm.CreateVM<FrameworkRoleListVM>();
             if (ids != null && ids.Count() > 0)
             {
@@ -191,7 +203,6 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Content(Localizer["_Admin.HasMainHost"]);
             }
-
             var vm = Wtm.CreateVM<FrameworkRoleImportVM>();
             var qs = new Dictionary<string, string>();
             foreach (var item in Request.Query.Keys)
@@ -216,9 +227,11 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return BadRequest(vm.GetErrorJson());
             }
-
-            Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
-            return Ok(vm.EntityList.Count);
+            else
+            {
+                Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
+                return Ok(vm.EntityList.Count);
+            }
         }
     }
 }

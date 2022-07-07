@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Extensions;
@@ -28,8 +29,10 @@ namespace WalkingTec.Mvvm.Admin.Api
                 vm.Searcher = searcher;
                 return Content(vm.GetJson());
             }
-
-            return BadRequest(ModelState.GetErrorJson());
+            else
+            {
+                return BadRequest(ModelState.GetErrorJson());
+            }
         }
 
         [ActionDescription("Sys.Get")]
@@ -48,13 +51,19 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            vm.DoAdd();
-            if (!ModelState.IsValid)
+            else
             {
-                return BadRequest(ModelState.GetErrorJson());
+                vm.DoAdd();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState.GetErrorJson());
+                }
+                else
+                {
+                    return Ok(vm.Entity);
+                }
             }
-            return Ok(vm.Entity);
+
         }
 
         [ActionDescription("Sys.Edit")]
@@ -65,13 +74,18 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-
-            vm.DoEdit(true);
-            if (!ModelState.IsValid)
+            else
             {
-                return BadRequest(ModelState.GetErrorJson());
+                vm.DoEdit(true);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState.GetErrorJson());
+                }
+                else
+                {
+                    return Ok(vm.Entity);
+                }
             }
-            return Ok(vm.Entity);
         }
 
         [HttpPost("BatchDelete")]
@@ -87,12 +101,14 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return Ok();
             }
-
             if (!ModelState.IsValid || !vm.DoBatchDelete())
             {
                 return BadRequest(ModelState.GetErrorJson());
             }
-            return Ok(ids.Length);
+            else
+            {
+                return Ok(ids.Count());
+            }
         }
 
         [ActionDescription("Sys.Export")]
@@ -110,12 +126,11 @@ namespace WalkingTec.Mvvm.Admin.Api
         public IActionResult ExportExcelByIds(string[] ids)
         {
             var vm = Wtm.CreateVM<FrameworkMenuListVM2>();
-            if (ids != null && ids.Length > 0)
+            if (ids != null && ids.Count() > 0)
             {
                 vm.Ids = new List<string>(ids);
                 vm.SearcherMode = ListVMSearchModeEnum.CheckExport;
             }
-
             return vm.GetExportData();
         }
 
@@ -140,8 +155,8 @@ namespace WalkingTec.Mvvm.Admin.Api
         [AllRights]
         public ActionResult GetActionsByModel(string ModelName)
         {
-            var m = GlobaInfo.AllModule.Where(x => x.IsApi && x.FullName.ToLower() == ModelName.ToLower()).SelectMany(x => x.Actions).ToList();
-            List<SimpleAction> toremove = new();
+            var m = GlobaInfo.AllModule.Where(x => x.IsApi == true && x.FullName.ToLower() == ModelName.ToLower()).SelectMany(x => x.Actions).ToList();
+            List<SimpleAction> toremove = new List<SimpleAction>();
             foreach (var item in m)
             {
                 if (item.IgnorePrivillege == true || item.Module.IgnorePrivillege == true)
@@ -160,7 +175,7 @@ namespace WalkingTec.Mvvm.Admin.Api
         [AllRights]
         public ActionResult GetFolders()
         {
-            var AllParents = DC.Set<FrameworkMenu>().Where(x => x.FolderOnly).OrderBy(x => x.DisplayOrder).GetSelectListItems(Wtm, x => x.PageName);
+            var AllParents = DC.Set<FrameworkMenu>().Where(x => x.FolderOnly == true).OrderBy(x => x.DisplayOrder).GetSelectListItems(Wtm, x => x.PageName);
             foreach (var p in AllParents)
             {
                 if (p.Text.StartsWith("MenuKey."))
@@ -185,5 +200,7 @@ namespace WalkingTec.Mvvm.Admin.Api
         {
             return IconFontsHelper.IconFontDicItems[key];
         }
+
     }
+
 }

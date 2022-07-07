@@ -68,9 +68,9 @@
         return await StartSearchTree<FrameworkMenu_ListView>("/api/_frameworkmenu/Search", SearchModel, opts);
     }
 
-    private async Task<IEnumerable<FrameworkMenu_ListView>> OnTreeExpand(FrameworkMenu_ListView data)
+    private async Task<IEnumerable<TableTreeNode<FrameworkMenu_ListView>>> OnTreeExpand(FrameworkMenu_ListView data)
     {
-        return await Task.FromResult(data.Children);
+        return await Task.FromResult(data.Children.Select(s => new TableTreeNode<FrameworkMenu_ListView>(s)));
     }
 
     private async Task DoSearch(IEnumerable<FrameworkMenu_ListView> data)

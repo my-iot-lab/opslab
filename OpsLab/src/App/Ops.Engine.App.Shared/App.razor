@@ -23,7 +23,7 @@
         <Router AppAssembly="@typeof(Program).Assembly">
             <Found Context="routeData">
                 <CascadingValue Value="User" IsFixed="false">
-                    <Login @bind-LoginSuccess="hasToken" OnUserInfoSet="async ()=> { User = await GetUserInfo(); }" />
+                    <Login @bind-LoginSuccess="hasToken" OnUserInfoSet="async ()=> {User = await GetUserInfo(); }" />
                 </CascadingValue>
             </Found>
             <NotFound>
@@ -105,12 +105,19 @@
     private void IsPublicPage()
     {
         var url = NavigationManager.ToBaseRelativePath(NavigationManager.Uri?.ToLower());
-        var i = url.IndexOf('?');
-        if (i >= 0)
+        var i =  url.IndexOf('?');
+        if(i >= 0)
         {
             url = url[0..i];
         }
+        if (this.WtmBlazor.PublicPages.Any(x => Regex.IsMatch(url, x)))
+        {
+            IsPublic = true;
+        }
+        else
+        {
+            IsPublic = false;
+        }
 
-        IsPublic = this.WtmBlazor.PublicPages.Any(x => Regex.IsMatch(url, x));
     }
 }

@@ -1,54 +1,58 @@
 // WTM默认页面 Wtm buidin page
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Extensions;
 
-namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkRoleVMs;
-
-public class FrameworkRoleVM : BaseCRUDVM<FrameworkRole>
+namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkRoleVMs
 {
-    public override DuplicatedInfo<FrameworkRole> SetDuplicatedCheck()
+    public class FrameworkRoleVM : BaseCRUDVM<FrameworkRole>
     {
-        var rv = CreateFieldsInfo(SimpleField(x => x.RoleName));
-        rv.AddGroup(SimpleField(x => x.RoleCode));
-        return rv;
-    }
 
-    public override void DoAdd()
-    {
-        base.DoAdd();
-        Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
-    }
-
-    public override void DoEdit(bool updateAllFields = false)
-    {
-        if (FC.ContainsKey("Entity.RoleCode"))
+        public override DuplicatedInfo<FrameworkRole> SetDuplicatedCheck()
         {
-            FC.Remove("Entity.RoleCode");
+            var rv = CreateFieldsInfo(SimpleField(x => x.RoleName));
+            rv.AddGroup(SimpleField(x => x.RoleCode));
+            return rv;
         }
 
-        base.DoEdit(updateAllFields);
-        Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
-    }
-
-    public override async Task DoDeleteAsync()
-    {
-        using var tran = DC.BeginTransaction();
-        try
+        public override void DoAdd()
         {
-            await base.DoDeleteAsync();
-            var ur = DC.Set<FrameworkUserRole>().Where(x => x.RoleCode == Entity.RoleCode);
-            DC.Set<FrameworkUserRole>().RemoveRange(ur);
-            DC.SaveChanges();
-            tran.Commit();
-
-            await Wtm.RemoveUserCacheByRole(Entity.RoleCode);
-            await Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant);
+            base.DoAdd();
+            Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
         }
-        catch
+
+        public override void DoEdit(bool updateAllFields = false)
         {
-            tran.Rollback();
+            if (FC.ContainsKey("Entity.RoleCode"))
+            {
+                FC.Remove("Entity.RoleCode");
+            }
+            base.DoEdit(updateAllFields);
+            Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant).Wait();
+        }
+
+        public override async Task DoDeleteAsync()
+        {
+            using (var tran = DC.BeginTransaction())
+            {
+                try
+                {
+                    await base.DoDeleteAsync();
+                    var ur = DC.Set<FrameworkUserRole>().Where(x => x.RoleCode == Entity.RoleCode);
+                    DC.Set<FrameworkUserRole>().RemoveRange(ur);
+                    DC.SaveChanges();
+                    tran.Commit();
+                    await Wtm.RemoveUserCacheByRole(Entity.RoleCode);
+                    await Wtm.RemoveRoleCache(Wtm.LoginUserInfo.CurrentTenant);
+                }
+                catch
+                {
+                    tran.Rollback();
+                }
+            }
         }
     }
 }

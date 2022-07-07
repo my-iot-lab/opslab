@@ -13,7 +13,6 @@
                       OnDelete="@OnAvatarDelete" DisplayText="@LabelText" DefaultFileList="@dlist" IsDisabled="@IsDisabled"></AvatarUpload>
     }
 </div>
-
 @code{
 
     [Parameter]
@@ -43,7 +42,6 @@
             }
         }
     }
-
     [Parameter]
     public bool ShowLabel { get; set; } = true;
     [Parameter]
@@ -232,4 +230,5 @@
             refpage.DeletedFileIds = new List<string>();
         }
     }
+
 }

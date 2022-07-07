@@ -7,7 +7,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="WalkingTec.Mvvm.Core" Version="6.2.5" />
-  </ItemGroup >
+    <PackageReference Include="WalkingTec.Mvvm.Core" Version="6.2.9" />
+  </ItemGroup>
 </Project>
 

@@ -26,7 +26,7 @@
     <TableToolbarTemplate>
         @if (IsAccessable("/api/_FrameworkGroup/Add")&& (WtmBlazor.ConfigInfo.HasMainHost == false || UserInfo.CurrentTenant != null))
         {
-            <TableToolbarButton TItem="FrameworkGroup_View" Color="Color.Primary" Icon="fa fa-fw fa-plus" Text="@WtmBlazor.Localizer["Sys.Create"]" OnClickCallback="OnCreateClick" />
+            <TableToolbarButton TItem="FrameworkGroup_View" Color="Color.Primary" Icon="fa fa-fw fa-plus" Text="@WtmBlazor.Localizer["Sys.Create"]" OnClickCallback="@OnCreateClick" />
         }
         @if (IsAccessable("/api/_FrameworkGroup/BatchDelete")&&  (WtmBlazor.ConfigInfo.HasMainHost == false || UserInfo.CurrentTenant != null))
         {
@@ -78,9 +78,9 @@
         dataTable.QueryAsync();
     }
 
-        private async Task<IEnumerable<FrameworkGroup_View>> OnTreeExpand(FrameworkGroup_View data)
+    private async Task<IEnumerable<TableTreeNode<FrameworkGroup_View>>> OnTreeExpand(FrameworkGroup_View data)
     {
-        return await Task.FromResult(data.Children);
+        return await Task.FromResult(data.Children.Select(s => new TableTreeNode<FrameworkGroup_View>(s)));
     }
 
     private async Task OnCreateClick(IEnumerable<FrameworkGroup_View> items)
