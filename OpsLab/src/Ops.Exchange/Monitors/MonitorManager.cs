@@ -208,24 +208,39 @@ public sealed class MonitorManager : IDisposable
                     connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                 }
 
-                PayloadData? value = null;
                 try
                 {
-                    for (int i = 0; i < ctx.Response.Values.Count; i++)
+                    // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中允许回写。
+                    CancellationTokenSource cts1 = new(_opsCofig.Monitor.CallbackTimeout); // 回写超时
+                    using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
+                    _ = Task.Run(async () =>
                     {
-                        value = ctx.Response.Values[i];
-                        await WriteDataAsync(connector.Driver, value);
-                    }
+                        PayloadData? value = null;
+                        try
+                        {
+                            for (int i = 0; i < ctx.Response.Values.Count; i++)
+                            {
+                                value = ctx.Response.Values[i];
+                                await WriteDataAsync(connector.Driver, value);
+                            }
 
-                    ctx.Response.LastAction?.Invoke();
+                            ctx.Response.LastDelegate?.Invoke(); // TODO: 回写失败，状态机状态是否要继续设置？若是要重试，一定更改对应的状态。
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
+                                    ctx.Request.RequestId,
+                                    ctx.Request.DeviceInfo.Schema.Station,
+                                    value?.Tag ?? "",
+                                    value?.Value ?? "");
+                        }
+                    }, cts0.Token);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is OperationCanceledException)
                 {
-                    _logger.LogError(ex, "[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
-                            ctx.Request.RequestId,
-                            ctx.Request.DeviceInfo.Schema.Station,
-                            value?.Tag ?? "",
-                            value?.Value ?? "");
+                    _logger.LogError(ex, "[Monitor] 数据写入 PLC 超时取消，RequestId：{0}，工站：{1}",
+                                    ctx.Request.RequestId,
+                                    ctx.Request.DeviceInfo.Schema.Station);
                 }
             }
         });

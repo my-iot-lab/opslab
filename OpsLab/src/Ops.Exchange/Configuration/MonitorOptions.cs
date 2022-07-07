@@ -11,7 +11,12 @@ public class MonitorOptions
     public int DefaultPollingInterval { get; set; } = 500;
 
     /// <summary>
-    /// 事件处理超时时间（单位：毫秒）
+    /// 事件处理超时时长（单位：毫秒）
     /// </summary>
     public int EventHandlerTimeout { get; set; } = 5_000;
+
+    /// <summary>
+    /// 回写数据超时时长（单位：毫秒）
+    /// </summary>
+    public int CallbackTimeout { get; set; } = 5_000;
 }

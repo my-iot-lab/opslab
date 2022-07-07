@@ -17,6 +17,7 @@ namespace Ops.Engine.App.Api;
 public class WorkController : BaseApiController
 {
     private readonly ILogger _logger;
+
     public WorkController(ILogger<WorkController> logger)
     {
         _logger = logger;

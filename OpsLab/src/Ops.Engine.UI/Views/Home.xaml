@@ -48,41 +48,51 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer
-            Grid.Row="1"
-            HorizontalScrollBarVisibility="Auto"
-            VerticalScrollBarVisibility="Disabled"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Margin="0 16 0 4">
-            <StackPanel Orientation="Horizontal">
-                <ListBox ItemsSource="{Binding Devices}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <materialDesign:Card Width="200" Background="#03a9f4" 
+        <Grid Grid.Row="1" Margin="0 16 0 4">
+            <ListView ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                      ItemsSource="{Binding Devices}">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card Width="190" Background="#03a9f4"
                                                  Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}" 
                                                  Padding="0">
-                                <Grid VerticalAlignment="Stretch">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Margin="16 16 16 4"
-                                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                        Text="{Binding Station}" />
-                                    <Separator Grid.Row="1" Style="{StaticResource MaterialDesignLightSeparator}" />
-                                    <TextBlock Grid.Row="2" Margin="16 0 16 8" 
+                            <Grid VerticalAlignment="Stretch">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Margin="16 16 16 4"
+                                           VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                           Text="{Binding Station}" />
+                                <Separator Grid.Row="1" Style="{StaticResource MaterialDesignLightSeparator}" />
+                                <TextBlock Grid.Row="2" Margin="16 0 16 8" 
                                                VerticalAlignment="Center" HorizontalAlignment="Left" 
                                                Style="{StaticResource MaterialDesignBody2TextBlock}"
                                                Text="{Binding Line}" />
-                                </Grid>
-                            </materialDesign:Card>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </StackPanel>
-        </ScrollViewer>
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                                            Margin="16 0 16 8" 
+                                            HorizontalAlignment="Right">
+                                    <Button HorizontalAlignment="Right"
+                                            Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                            Width="30"
+                                            Padding="2 0 2 0"
+                                            materialDesign:RippleAssist.IsCentered="True">
+                                        <materialDesign:PackIcon Kind="LightbulbOnOutline" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
         <Grid Grid.Row="2">
             <ListBox Name="MessageListBox"

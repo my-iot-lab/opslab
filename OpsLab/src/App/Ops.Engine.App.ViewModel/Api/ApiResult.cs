@@ -8,7 +8,7 @@ namespace Ops.Engine.App.ViewModel.Api;
 public class ApiResult
 {
     /// <summary>
-    /// 状态码，1 表示成功
+    /// 状态码，1 表示成功。
     /// </summary>
     public short Code { get; set; }
 
@@ -18,12 +18,12 @@ public class ApiResult
     public string Message { get; set; }
 
     /// <summary>
-    /// 要回执的数据集合。
+    /// 要回执的数据集合。注意：回写的数据类型必须与地址变量定义的一致。
     /// </summary>
     public IReadOnlyDictionary<string, object> Values { get; } = new Dictionary<string, object>();
 
     /// <summary>
-    /// 添加回写数据值
+    /// 添加回写数据值。注意：回写的数据类型必须与地址变量定义的一致。
     /// </summary>
     /// <param name="tag">标签值</param>
     /// <param name="value">要添加的值</param>

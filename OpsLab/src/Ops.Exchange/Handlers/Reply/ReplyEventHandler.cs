@@ -87,7 +87,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         finally
         {
             // 保证触发状态与回写状态一致
-            eventData.Context.Response.LastAction = () =>
+            eventData.Context.Response.LastDelegate = () =>
             {
                 _stateManager.Change(stateKey, newState);
             };

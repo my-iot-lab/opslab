@@ -25,7 +25,7 @@ public sealed class TriggerStateManager
     }
 
     /// <summary>
-    /// 检查是否能下发。
+    /// 检查是否能下发。如果能下发，会顺便更改至对应的状态。
     /// </summary>
     /// <param name="state">要检查的状态</param>
     /// <returns></returns>
@@ -97,11 +97,6 @@ public sealed class TriggerStateManager
             // 新旧状态不等，且新状态值为 1。
             return entry.State != newState && newState == ExStatusCode.Trigger;
         });
-
-        entry0.OnChanged = arg =>
-        {
-
-        };
 
         return entry0;
     }

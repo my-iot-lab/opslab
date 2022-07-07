@@ -14,5 +14,5 @@ public sealed class PayloadResponse
     /// <summary>
     /// 数据回写完后的执行方法
     /// </summary>
-    public Action? LastAction { get; set; }
+    public Action? LastDelegate { get; set; }
 }
