@@ -35,15 +35,15 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                 data.RequestId,
                 data.Schema.Station,
                 data.Tag,
-                string.Join("&", data.Values.Select(s => $"{s.Tag}={s.Value}")));
+                JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value })));
 
         // 派发数据
-        var (controller, action) = data.Tag switch
+        var action = data.Tag switch
         {
-            OpsSymbol.PLC_Sign_Inbound => ("work", "inbound"),
-            OpsSymbol.PLC_Sign_Outbound => ("work", "outbound"),
-            OpsSymbol.PLC_Sign_Critical_Material => ("material", "critical"),
-            OpsSymbol.PLC_Sign_Batch_Material => ("material", "batch"),
+            OpsSymbol.PLC_Sign_Inbound => "inbound",
+            OpsSymbol.PLC_Sign_Outbound => "outbound",
+            OpsSymbol.PLC_Sign_Critical_Material => "materialcritical",
+            OpsSymbol.PLC_Sign_Batch_Material => "materialbatch",
             _ => throw new NotImplementedException(),
         };
 
@@ -53,7 +53,7 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
 
         try
         {
-            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/{controller}/{action}", jsonContent, cancellationToken);
+            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/{action}", jsonContent, cancellationToken);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
@@ -66,7 +66,7 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                                 data.Schema.Station,
                                 data.Tag,
                                 result.Code,
-                                string.Join("&", data.Values.Select(s => $"{s.Tag}={s.Value}")));
+                                JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value })));
 
                     return result.ToReplyResult();
                 }

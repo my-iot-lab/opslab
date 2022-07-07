@@ -11,8 +11,8 @@ namespace Ops.Engine.App.Areas.Api;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[AllRights]
-public class TestController : BaseApiController
+//[AllRights]
+public class TestController : Controller
 {
     private readonly IWebHostEnvironment _env;
 
@@ -37,47 +37,21 @@ public class TestController : BaseApiController
 
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult Test2()
+    public IActionResult Test2(ApiTestData data)
     {
-        return JsonMore(new { Code = 1, Code2 = 2, Messsage = "error" });
+        return Ok(data);
     }
 }
 
-//[ApiController]
-[Route("api/[controller]")]
-public class TestRawController : Controller
+public sealed class ApiTestData
 {
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public IActionResult Test1()
-    {
-        var obj = new { Code = 1, Code2 = 2, Messsage = "error" };
-        var json = System.Text.Json.JsonSerializer.Serialize(obj);
-        return Ok(new { Data = obj, Json = json });
-    }
+    /// <summary>
+    /// 请求的 Id，可用于追踪数据。
+    /// </summary>
+    public string RequestId { get; set; }
 
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public IActionResult Test2()
-    {
-        var obj = new { Code = 1, Code2 = 2, Messsage = "error" };
-        var json = System.Text.Json.JsonSerializer.Serialize(obj);
-        return Content(json);
-    }
-
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public IActionResult Test3()
-    {
-        return Json(new { Code = 1, Code2 = 2, Messsage = "error" });
-    }
-
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public IActionResult Test4()
-    {
-        var obj = new { Code = 1, Code2 = 2, Messsage = "error" };
-        var json = System.Text.Json.JsonSerializer.Serialize(obj);
-        return Ok(json);
-    }
+    /// <summary>
+    /// 事件标签 Tag（唯一）
+    /// </summary>
+    public string Tag { get; set; }
 }

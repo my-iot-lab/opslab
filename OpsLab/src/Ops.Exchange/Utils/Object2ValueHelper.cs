@@ -179,7 +179,7 @@ public static class Object2ValueHelper
             return arr.ToArray();
         }
 
-        return new T[0];
+        return Array.Empty<T>();
     }
 
     /// <summary>

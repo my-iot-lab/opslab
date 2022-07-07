@@ -34,7 +34,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
                 data.RequestId,
                 data.Schema.Station,
                 data.Tag,
-                string.Join("&", data.Values.Select(s => $"{s.Tag}={s.Value}")));
+                JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value })));
 
         // 推送执行通知
         // TODO: 添加 HTTP 请求验证功能
@@ -43,7 +43,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
 
         try
         {
-            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/notifier/notice", jsonContent, cancellationToken);
+            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/notice", jsonContent, cancellationToken);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);

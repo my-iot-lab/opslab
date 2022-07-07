@@ -8,22 +8,22 @@ public sealed class ApiData
     /// <summary>
     /// 请求的 Id，可用于追踪数据。
     /// </summary>
-    public string RequestId { get; }
+    public string RequestId { get; set; }
 
     /// <summary>
     /// 设备 Schema 基础信息。
     /// </summary>
-    public DeviceSchema Schema { get; }
+    public DeviceSchema Schema { get; set; }
 
     /// <summary>
     /// 事件标签 Tag（唯一）
     /// </summary>
-    public string Tag { get; }
+    public string Tag { get; set; }
 
     /// <summary>
     /// 请求的数据
     /// </summary>
-    public PayloadData[] Values { get; }
+    public PayloadData[] Values { get; set; }
 }
 
 public sealed class DeviceSchema
@@ -51,7 +51,7 @@ public sealed class DeviceSchema
     /// <summary>
     /// 设备主机（IP地址）。
     /// </summary>
-    public string Host { get; }
+    public string Host { get; set; }
 }
 
 public sealed class PayloadData
