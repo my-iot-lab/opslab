@@ -277,6 +277,16 @@ public sealed class MonitorManager : IDisposable
                 }
                 break;
             case VariableType.Byte:
+                if (deviceVariable.Length > 0)
+                {
+                    var resultBit2 = await driver.ReadAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultBit2, data);
+                }
+                else
+                {
+                    var resultBit1 = await driver.ReadAsync(deviceVariable.Address, 1);
+                    SetValue(resultBit1, data);
+                }
                 break;
             case VariableType.Word:
                 if (deviceVariable.Length > 0)
@@ -383,145 +393,101 @@ public sealed class MonitorManager : IDisposable
             case VariableType.Bit:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<bool>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<bool>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToBoolean(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<bool>(data.Value));
                 }
                 break;
             case VariableType.Byte:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<byte>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<byte>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToByte(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<byte>(data.Value));
                 }
                 break;
             case VariableType.Word:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<ushort>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<ushort>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToUInt16(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<ushort>(data.Value));
                 }
                 break;
             case VariableType.DWord:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<uint>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<uint>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToUInt32(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<uint>(data.Value));
                 }
                 break;
             case VariableType.Int:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<short>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<short>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToInt16(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<short>(data.Value));
                 }
                 break;
             case VariableType.DInt:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<int>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<int>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToInt32(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<int>(data.Value));
                 }
                 break;
             case VariableType.Real:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<float>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<float>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToSingle(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<float>(data.Value));
                 }
                 break;
             case VariableType.LReal:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2Array<double>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<double>(data.Value));
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToDouble(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<double>(data.Value));
                 }
                 break;
             case VariableType.String or VariableType.S7String:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToString(data.Value), data.Length);
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value), data.Length);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Convert.ToString(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
                 }
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
                 {
-                    await driver2.WriteWStringAsync(data.Address, Convert.ToString(data.Value));
+                    await driver2.WriteWStringAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
                 }
                 break;
             default:
                 break;
         }
-    }
-
-    private static T[] Object2Array<T>(object obj)
-    {
-        if (obj is T[] obj2)
-        {
-            return obj2;
-        }
-
-        if (!obj.GetType().IsArray)
-        {
-            return Array.Empty<T>();
-        }
-
-        if (typeof(T) == typeof(bool))
-        {
-            var arr = (bool[])obj;
-            return arr.Cast<T>().ToArray();
-        }
-
-        // 从宽类型转换为窄类型
-        if (typeof(T) == typeof(byte) ||
-            typeof(T) == typeof(ushort) ||
-            typeof(T) == typeof(short) ||
-            typeof(T) == typeof(uint) ||
-            typeof(T) == typeof(int))
-        {
-            var arr = (int[])obj;
-            return arr.Cast<T>().ToArray();
-        }
-
-        if (typeof(T) == typeof(float))
-        {
-            var arr = (float[])obj;
-            return arr.Cast<T>().ToArray();
-        }
-
-        if (typeof(T) == typeof(double))
-        {
-            var arr = (double[])obj;
-            return arr.Cast<T>().ToArray();
-        }
-
-        return Array.Empty<T>();
     }
 }

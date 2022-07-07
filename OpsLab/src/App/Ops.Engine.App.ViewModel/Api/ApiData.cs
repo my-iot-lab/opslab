@@ -1,5 +1,8 @@
 ﻿namespace Ops.Engine.App.ViewModel.Api;
 
+/// <summary>
+/// 请求数据
+/// </summary>
 public sealed class ApiData
 {
     /// <summary>
@@ -18,7 +21,7 @@ public sealed class ApiData
     public string Tag { get; }
 
     /// <summary>
-    /// 附加的数据
+    /// 请求的数据
     /// </summary>
     public PayloadData[] Values { get; }
 }

@@ -10,7 +10,7 @@ public sealed class MaterialVM : BaseVM
     /// <returns></returns>
     public ApiResult ScanCritical(ApiData data)
     {
-        return ApiResult.CreateOK();
+        return ApiResult.Ok();
     }
 
     /// <summary>
@@ -19,6 +19,6 @@ public sealed class MaterialVM : BaseVM
     /// <returns></returns>
     public ApiResult ScanBatch(ApiData data)
     {
-        return ApiResult.CreateOK();
+        return ApiResult.Ok();
     }
 }

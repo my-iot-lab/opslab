@@ -8,11 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ops.Engine.App.Model\Ops.Engine.App.Model.csproj" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Utils\" />
-  </ItemGroup>
+  </ItemGroup >
 </Project>
 

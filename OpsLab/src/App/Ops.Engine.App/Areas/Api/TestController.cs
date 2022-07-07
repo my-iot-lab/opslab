@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
@@ -13,6 +14,20 @@ namespace Ops.Engine.App.Areas.Api;
 [AllRights]
 public class TestController : BaseApiController
 {
+    private readonly IWebHostEnvironment _env;
+
+    public TestController(IWebHostEnvironment env)
+    {
+        _env = env;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("[action]")]
+    public IActionResult Env()
+    {
+        return Ok(_env.EnvironmentName);
+    }
+
     [AllowAnonymous]
     [HttpPost("[action]")]
     public IActionResult Test1()

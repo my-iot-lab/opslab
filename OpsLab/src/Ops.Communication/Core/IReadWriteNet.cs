@@ -773,14 +773,14 @@ public interface IReadWriteNet
 	Task<OperateResult> WriteCustomerAsync<T>(string address, T value) where T : IDataTransfer, new();
 
 	/// <summary>
-	/// 异步读取支持Hsl特性的数据内容。
+	/// 异步读取支持相关特性的数据内容。
 	/// </summary>
 	/// <typeparam name="T">自定义的数据类型对象</typeparam>
 	/// <returns>包含是否成功的结果对象</returns>
 	Task<OperateResult<T>> ReadAsync<T>() where T : class, new();
 
 	/// <summary>
-	/// 异步写入支持Hsl特性的数据，返回是否写入成功。
+	/// 异步写入支持相关特性的数据，返回是否写入成功。
 	/// </summary>
 	/// <typeparam name="T">自定义的数据类型对象</typeparam>
 	/// <returns>包含是否成功的结果对象</returns>

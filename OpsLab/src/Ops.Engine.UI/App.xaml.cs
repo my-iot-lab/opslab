@@ -22,7 +22,7 @@ namespace Ops.Engine.UI
             Log.Logger = new LoggerConfiguration()
                           .Enrich.FromLogContext()
                           .MinimumLevel.Information()
-                          .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
+                          .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Error)
                           .WriteTo.File("logs\\mlog_.log", outputTemplate: logformat, rollingInterval: RollingInterval.Day)
                           .WriteTo.Seq("http://localhost:5341") // seq 日志平台，参考 https://docs.datalust.co/docs/using-serilog
                           .CreateLogger();

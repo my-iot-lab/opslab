@@ -10,7 +10,7 @@ public sealed class ReplyResult
     /// </summary>
     public short Result { get; set; }
 
-    public IReadOnlyDictionary<string, object> Values { get; } = new Dictionary<string, object>();
+    public IReadOnlyDictionary<string, object> Values { get; set; } = new Dictionary<string, object>(0);
 
     /// <summary>
     /// 添加回写数据值

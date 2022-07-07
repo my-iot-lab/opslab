@@ -11,8 +11,10 @@ public sealed class InboundWM : BaseVM
     /// 进站
     /// </summary>
     /// <returns></returns>
-    public ApiResult<ApiData> In(ApiData data)
+    public ApiResult In(ApiData data)
     {
-        return ApiResult<ApiData>.CreateOK(new ApiData());
+        var resp = ApiResult.Ok();
+
+        return resp;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Ops.Engine.App.ViewModel.Api;
 using Ops.Engine.App.ViewModel.Api.WorkVMs;
 using WalkingTec.Mvvm.Core;
@@ -15,6 +16,12 @@ namespace Ops.Engine.App.Api;
 [AllRights]
 public class WorkController : BaseApiController
 {
+    private readonly ILogger _logger;
+    public WorkController(ILogger<WorkController> logger)
+    {
+        _logger = logger;
+    }
+
     /// <summary>
     /// 进站
     /// </summary>
@@ -24,7 +31,7 @@ public class WorkController : BaseApiController
     {
         var wm = Wtm.CreateVM<InboundWM>();
         var result = wm.In(data);
-        
+
         return Ok(result.GetJson());
     }
 

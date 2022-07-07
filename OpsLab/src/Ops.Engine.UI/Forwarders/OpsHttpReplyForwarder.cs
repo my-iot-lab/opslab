@@ -57,7 +57,7 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
-                var result = await JsonSerializer.DeserializeAsync<HttpResult<ReplyResult>>(contentStream, cancellationToken: cancellationToken);
+                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, cancellationToken: cancellationToken);
                 if (result?.IsOk() == true)
                 {
                     // 记录成功回执信息
@@ -65,10 +65,10 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                                 data.RequestId,
                                 data.Schema.Station,
                                 data.Tag,
-                                result.Data.Result,
+                                result.Code,
                                 string.Join("&", data.Values.Select(s => $"{s.Tag}={s.Value}")));
 
-                    return result.Data;
+                    return result.ToReplyResult();
                 }
 
                 // 记录数据推送失败

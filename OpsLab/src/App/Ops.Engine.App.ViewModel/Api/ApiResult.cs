@@ -8,64 +8,18 @@ namespace Ops.Engine.App.ViewModel.Api;
 public class ApiResult
 {
     /// <summary>
-    /// 状态码，0 表示成功
+    /// 状态码，1 表示成功
     /// </summary>
-    public int Code { get; set; }
+    public short Code { get; set; }
 
     /// <summary>
     /// 错误消息
     /// </summary>
     public string Message { get; set; }
 
-    public virtual string GetJson()
-    {
-        return System.Text.Json.JsonSerializer.Serialize(this);
-    }
-
-    public static ApiResult CreateOK()
-    {
-        return new ApiResult();
-    }
-
-    public static ApiResult CreateError(int code, string message)
-    {
-        return new ApiResult { Code = code, Message = message };
-    }
-}
-
-/// <summary>
-/// Api 调用返回结果
-/// </summary>
-public sealed class ApiResult<T> : ApiResult
-{
     /// <summary>
-    /// 结果数据
+    /// 要回执的数据集合。
     /// </summary>
-    public T Data { get; set; }
-
-    public override string GetJson()
-    {
-        return System.Text.Json.JsonSerializer.Serialize(this);
-    }
-
-    public static ApiResult<T> Create(int code, string message, T data)
-    {
-        return new ApiResult<T> { Code = code, Message = message, Data = data };
-    }
-
-    public static ApiResult<T> CreateOK(T data)
-    {
-        return new ApiResult<T> { Data = data };
-    }
-}
-
-public sealed class ReplyResult
-{
-    /// <summary>
-    /// 返回的结果
-    /// </summary>
-    public short Result { get; set; }
-
     public IReadOnlyDictionary<string, object> Values { get; } = new Dictionary<string, object>();
 
     /// <summary>
@@ -76,5 +30,33 @@ public sealed class ReplyResult
     public void AddValue(string tag, object value)
     {
         ((Dictionary<string, object>)Values).Add(tag, value);
+    }
+
+    public static ApiResult Ok(IDictionary<string, object> values = null)
+    {
+        return From(1, values);
+    }
+
+    public static ApiResult From(short code, IDictionary<string, object> values = null)
+    {
+        var resp = new ApiResult()
+        {
+            Code = code,
+        };
+
+        if (values != null)
+        {
+            foreach (var item in values)
+            {
+                resp.AddValue(item.Key, item.Value);
+            }
+        }
+
+        return resp;
+    }
+
+    public virtual string GetJson()
+    {
+        return System.Text.Json.JsonSerializer.Serialize(this);
     }
 }

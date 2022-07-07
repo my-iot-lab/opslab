@@ -11,8 +11,8 @@ public sealed class OutboundWM : BaseVM
     /// 出站
     /// </summary>
     /// <returns></returns>
-    public ApiResult<ApiData> Out(ApiData data)
+    public ApiResult Out(ApiData data)
     {
-        return ApiResult<ApiData>.CreateOK(new ApiData());
+        return ApiResult.Ok();
     }
 }

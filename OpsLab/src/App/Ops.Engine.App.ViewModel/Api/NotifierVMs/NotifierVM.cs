@@ -10,6 +10,6 @@ public sealed class NotifierVM : BaseVM
     /// <returns></returns>
     public ApiResult Notice(ApiData data)
     {
-        return ApiResult.CreateOK();
+        return ApiResult.Ok();
     }
 }
