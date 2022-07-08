@@ -24,6 +24,7 @@ public class Converter_Tests
             IntArr = new int[] { 1, 2, 3 },
             FloatArr = new float[] { 1.345F, 2.1F, 3F },
             DoubleArr = new double[] { 11.345, 12.2, 13 },
+            DynamicObj = "abc",
         };
         var json = JsonSerializer.Serialize(obj1);
         var objA = JsonSerializer.Deserialize<ConvertModel>(json);
@@ -63,5 +64,7 @@ public class Converter_Tests
         public object FloatArr { get; set; }
 
         public object DoubleArr { get; set; }
+
+        public dynamic DynamicObj { get; set; }
     }
 }
