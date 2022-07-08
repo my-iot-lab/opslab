@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +20,7 @@ namespace Ops.Engine.App
     {
         public IConfiguration ConfigRoot { get; }
 
-        public Startup(IWebHostEnvironment env, IConfiguration config)
+        public Startup(IConfiguration config)
         {
             ConfigRoot = config;
         }
@@ -36,7 +35,7 @@ namespace Ops.Engine.App
             services.AddWtmAuthentication(ConfigRoot);
             services.AddWtmHttpClient(ConfigRoot);
             services.AddWtmSwagger();
-            services.AddWtmMultiLanguages(ConfigRoot,op => op.LocalizationType = typeof(Shared.Program));
+            services.AddWtmMultiLanguages(ConfigRoot, op => op.LocalizationType = typeof(Shared.Program));
 
             services.AddMvc(options =>
             {
@@ -46,13 +45,14 @@ namespace Ops.Engine.App
             {
                 options.UseWtmJsonOptions();
             })
-            
+
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.UseWtmApiOptions();
             })
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
-           .AddWtmDataAnnotationsLocalization(typeof(Shared.Program));
+            .AddWtmDataAnnotationsLocalization(typeof(Shared.Program));
+
             if (config.BlazorMode == BlazorModeEnum.Server)
             {
                 services.AddServerSideBlazor();
@@ -62,6 +62,7 @@ namespace Ops.Engine.App
                 });
                 services.AddWtmBlazor(config);
             }
+
             services.AddWtmContext(ConfigRoot, (options) =>
             {
                 options.DataPrivileges = DataPrivilegeSettings();
@@ -81,6 +82,7 @@ namespace Ops.Engine.App
             {
                 throw new InvalidOperationException("Can not find Configs service, make sure you call AddWtmContext at ConfigService");
             }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -185,7 +187,5 @@ namespace Ops.Engine.App
         {
             return null;
         }
-
     }
-
 }
