@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -49,7 +48,7 @@ internal sealed class HomeViewModel : ObservableObject
             });
         }
 
-        _ = Task.Factory.StartNew(() => Thread.Sleep(100)).ContinueWith(async t =>
+        _ = Task.Factory.StartNew(async () =>
         {
             while (await _msgChannal.Reader.WaitToReadAsync())
             {
@@ -63,7 +62,7 @@ internal sealed class HomeViewModel : ObservableObject
                 MessageLogs.Add(msg);
                 MessageAutoScrollDelegate?.Invoke();
             }
-        }, TaskScheduler.FromCurrentSynchronizationContext());
+        }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     /// <summary>

@@ -27,7 +27,7 @@ public sealed class LimitingScheduler
     /// <summary>
     /// 调度器实现。
     /// </summary>
-    private class LimitingTaskScheduler : TaskScheduler
+    private sealed class LimitingTaskScheduler : TaskScheduler
     {
         // 当前线程是否正在处理工作项。
         [ThreadStatic]
@@ -98,7 +98,7 @@ public sealed class LimitingScheduler
                             }
 
                             // 从队列中获取下一个要处理的项。
-                            item = _tasks.First.Value;
+                            item = _tasks.First!.Value;
                             _tasks.RemoveFirst();
                         }
 
@@ -150,6 +150,7 @@ public sealed class LimitingScheduler
                 {
                     return _tasks.ToArray();
                 }
+
                 throw new NotSupportedException();
             }
             finally

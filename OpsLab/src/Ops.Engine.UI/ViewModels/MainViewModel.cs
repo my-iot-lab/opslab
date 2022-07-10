@@ -118,6 +118,7 @@ public class MainViewModel : ObservableObject
         {
             new ListItem("首页", typeof(Home)),
             new ListItem("地址变量", typeof(Address)),
+            new ListItem("程序状态", typeof(AppDiagnostic)),
         });
     }
 

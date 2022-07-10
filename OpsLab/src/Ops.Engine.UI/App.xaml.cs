@@ -98,6 +98,7 @@ namespace Ops.Engine.UI
             services.AddTransient<Home2ViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<AddressViewModel>();
+            services.AddTransient<AppDiagnosticViewModel>();
         }
     }
 }

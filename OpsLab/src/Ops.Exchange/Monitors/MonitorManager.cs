@@ -260,11 +260,12 @@ public sealed class MonitorManager : IDisposable
 
         if (_cts != null)
         {
-            _cts.CancelAfter(500); // 阻塞 500ms
+            _cts.Cancel(); // 阻塞 500ms
             _cts.Dispose();
             _cts = null;
         }
 
+        Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult();
         _driverConnectorManager.Reset();
 
         _logger.LogInformation("[Monitor] 监控停止");
