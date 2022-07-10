@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Ops.Extensions.Zero.Domain.Entities;
+using Ops.Extensions.Zero.Domain.Entities.Auditing;
 using Ops.Extensions.Zero.Expressions;
 
 namespace Ops.Extensions.Zero.EntityFrameworkCore;
@@ -84,32 +85,34 @@ public abstract class OpsDbContext : DbContext
         switch (entry.State)
         {
             case EntityState.Added:
-                ApplyAbpConceptsForAddedEntity(entry);
+                ApplyConceptsForAddedEntity(entry);
                 break;
             case EntityState.Modified:
-                ApplyAbpConceptsForModifiedEntity(entry);
+                ApplyConceptsForModifiedEntity(entry);
                 break;
             case EntityState.Deleted:
-                ApplyAbpConceptsForDeletedEntity(entry);
+                ApplyConceptsForDeletedEntity(entry);
                 break;
         }
     }
 
-    protected virtual void ApplyAbpConceptsForAddedEntity(EntityEntry entry)
+    protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry)
     {
         CheckIsGuidAndSet(entry);
+        SetCreationAuditProperties(entry);
     }
 
-    protected virtual void ApplyAbpConceptsForModifiedEntity(EntityEntry entry)
+    protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry)
     {
+        SetModificationAuditProperties(entry);
     }
 
-    protected virtual void ApplyAbpConceptsForDeletedEntity(EntityEntry entry)
+    protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry)
     {
         CancelDeletionForSoftDelete(entry);
     }
 
-    protected void ConfigureGlobalFilters<TEntity>(ModelBuilder modelBuilder)
+    protected void ConfigureGlobalFilters<TEntity>(ModelBuilder modelBuilder, IMutableEntityType mutableEntityType)
             where TEntity : class
     {
         if (ShouldFilterEntity<TEntity>())
@@ -146,6 +149,22 @@ public abstract class OpsDbContext : DbContext
         return expression;
     }
 
+    protected virtual void SetCreationAuditProperties(EntityEntry entry)
+    {
+        if (entry.Entity is IShouldHaveCreateTime entity0)
+        {
+            entity0.CreatedAt = DateTime.Now; // 考虑
+        }
+    }
+
+    protected virtual void SetModificationAuditProperties(EntityEntry entry)
+    {
+        if (entry.Entity is IShouldHaveUpdateTime entity0)
+        {
+            entity0.UpdatedAt ??= DateTime.Now; // 考虑
+        }
+    }
+
     protected virtual void CancelDeletionForSoftDelete(EntityEntry entry)
     {
         if (entry.Entity is not ISoftDelete entity0)
@@ -156,6 +175,8 @@ public abstract class OpsDbContext : DbContext
         entry.Reload();
         entry.State = EntityState.Modified;
         entity0.IsDeleted = true;
+
+        // 考虑更新时间
     }
 
     protected virtual void CheckIsGuidAndSet(EntityEntry entry)

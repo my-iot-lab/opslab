@@ -7,7 +7,21 @@ using Ops.Extensions.Zero.Domain.Repositories;
 
 namespace Ops.Extensions.Zero.EntityFrameworkCore.Repositories;
 
-public class EfCoreRepositoryBase<TDbContext, TEntity, TPrimaryKey> : RepositoryBase<TEntity, TPrimaryKey>
+public abstract class EfCoreRepositoryBase<TDbContext, TEntity> : EfCoreRepositoryBase<TDbContext, TEntity, int>
+    where TEntity : class, IEntity
+    where TDbContext : DbContext
+{
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="dbContextProvider"></param>
+    public EfCoreRepositoryBase(IDbContextProvider<TDbContext> dbContextProvider) : base(dbContextProvider)
+    {
+        
+    }
+}
+
+public abstract class EfCoreRepositoryBase<TDbContext, TEntity, TPrimaryKey> : RepositoryBase<TEntity, TPrimaryKey>
     where TEntity : class, IEntity<TPrimaryKey>
     where TDbContext : DbContext
 {
@@ -102,8 +116,7 @@ public class EfCoreRepositoryBase<TDbContext, TEntity, TPrimaryKey> : Repository
         return await GetAllIncludingAsync();
     }
 
-    public override IQueryable<TEntity> GetAllIncluding(
-        params Expression<Func<TEntity, object>>[] propertySelectors)
+    public override IQueryable<TEntity> GetAllIncluding(params Expression<Func<TEntity, object>>[] propertySelectors)
     {
         var query = GetQueryable();
 
@@ -112,7 +125,7 @@ public class EfCoreRepositoryBase<TDbContext, TEntity, TPrimaryKey> : Repository
             return query;
         }
 
-        foreach (var propertySelector in propertySelectors)
+        foreach (var propertySelector in propertySelectors!)
         {
             query = query.Include(propertySelector);
         }

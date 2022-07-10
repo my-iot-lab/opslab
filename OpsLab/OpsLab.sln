@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Extensions.Zero.EntityF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{110C5F78-D337-432F-B885-E3E2F958F54C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ops.Extensions.Zero.EntityFrameworkCore.Tests", "test\Ops.Extensions.Zero.EntityFrameworkCore.Tests\Ops.Extensions.Zero.EntityFrameworkCore.Tests.csproj", "{1029383C-588A-4678-AB25-34453224A99C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,10 @@ Global
 		{56AD0E7C-4460-41B5-8524-345A226EA5AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56AD0E7C-4460-41B5-8524-345A226EA5AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56AD0E7C-4460-41B5-8524-345A226EA5AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1029383C-588A-4678-AB25-34453224A99C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1029383C-588A-4678-AB25-34453224A99C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1029383C-588A-4678-AB25-34453224A99C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1029383C-588A-4678-AB25-34453224A99C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,6 +128,7 @@ Global
 		{FF958140-46B2-4E1D-83FD-C0AFBC27D220} = {208266DB-4762-49DB-A69C-05C2359893DC}
 		{56AD0E7C-4460-41B5-8524-345A226EA5AF} = {FF958140-46B2-4E1D-83FD-C0AFBC27D220}
 		{110C5F78-D337-432F-B885-E3E2F958F54C} = {208266DB-4762-49DB-A69C-05C2359893DC}
+		{1029383C-588A-4678-AB25-34453224A99C} = {67FF79E8-1480-492D-A6BE-59EA0D8A85B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5A07B7A-25FB-4EEC-A4DA-6BA9113A3C43}

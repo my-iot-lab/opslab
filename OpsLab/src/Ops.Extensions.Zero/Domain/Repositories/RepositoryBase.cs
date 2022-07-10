@@ -3,6 +3,13 @@ using Ops.Extensions.Zero.Domain.Entities;
 
 namespace Ops.Extensions.Zero.Domain.Repositories;
 
+public abstract class RepositoryBase<TEntity> : RepositoryBase<TEntity, int>
+    where TEntity : class, IEntity
+{
+
+}
+
+
 /// <summary>
 /// 仓储基类
 /// </summary>

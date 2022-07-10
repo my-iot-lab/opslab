@@ -70,6 +70,9 @@ public sealed class MonitorManager : IDisposable
         await _driverConnectorManager.ConnectServerAsync();
 
         // 每个工站启用
+        // TODO: 下面都使用线程池线程运行，若有长时间运行的任务过多，会不会导致线程中线程被消耗殆尽？
+        //      或是考虑 Task.Factory.StartNew TaskCreationOptions.LongRunning，但这样每个任务都会创建一个新的独立线程（与线程池无关）。
+        //      或是 可以采用 Actor 模式，可参考 https://mp.weixin.qq.com/s/hep-t5hhUngtiIHVCC9NdQ
         foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
             // 心跳数据监控器
@@ -195,19 +198,6 @@ public sealed class MonitorManager : IDisposable
                     break;
                 }
 
-                // 若连接驱动不处于连接状态，会循环等待。
-                var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
-                while (!_cts.Token.IsCancellationRequested)
-                {
-                    if (connector.Status == ConnectingStatus.Connected)
-                    {
-                        break;
-                    }
-
-                    await Task.Delay(1000, _cts.Token); // 延迟1s
-                    connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
-                }
-
                 try
                 {
                     // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中允许回写。
@@ -215,6 +205,20 @@ public sealed class MonitorManager : IDisposable
                     using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
                     _ = Task.Run(async () =>
                     {
+                        // 若连接驱动不处于连接状态，会循环等待。
+                        // 注：此处 Driver Connector 可能有被清空的情况出现，还需做一些其他的校验。
+                        var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
+                        while (!_cts.Token.IsCancellationRequested)
+                        {
+                            if (connector.Status == ConnectingStatus.Connected)
+                            {
+                                break;
+                            }
+
+                            await Task.Delay(1000, _cts.Token); // 延迟1s
+                            connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
+                        }
+
                         PayloadData? value = null;
                         try
                         {
@@ -239,8 +243,8 @@ public sealed class MonitorManager : IDisposable
                 catch (Exception ex) when (ex is OperationCanceledException)
                 {
                     _logger.LogError(ex, "[Monitor] 数据写入 PLC 超时取消，RequestId：{0}，工站：{1}",
-                                    ctx.Request.RequestId,
-                                    ctx.Request.DeviceInfo.Schema.Station);
+                                    ctx!.Request.RequestId,
+                                    ctx!.Request.DeviceInfo.Schema.Station);
                 }
             }
         });
@@ -256,13 +260,11 @@ public sealed class MonitorManager : IDisposable
 
         if (_cts != null)
         {
-            _cts.Cancel();
+            _cts.CancelAfter(500); // 阻塞 500ms
             _cts.Dispose();
+            _cts = null;
         }
-        _cts = null;
 
-        // 阻塞 500ms
-        Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult();
         _driverConnectorManager.Reset();
 
         _logger.LogInformation("[Monitor] 监控停止");

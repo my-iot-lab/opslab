@@ -8,6 +8,11 @@ public interface IRepository
 
 }
 
+public interface IRepository<TEntity> : IRepository<TEntity, int> where TEntity : class, IEntity
+{
+
+}
+
 public interface IRepository<TEntity, TPrimaryKey> : IRepository where TEntity : class, IEntity<TPrimaryKey>
 {
     #region Select/Get/Query

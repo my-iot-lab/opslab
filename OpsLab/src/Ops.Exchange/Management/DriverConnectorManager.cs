@@ -84,10 +84,13 @@ public sealed class DriverConnectorManager : IDisposable
     /// </summary>
     /// <param name="id">设备Id</param>
     /// <returns></returns>
-    public IReadWriteNet GetDriver(string id)
+    public DriverConnector? GetConnector(string id)
     {
-        var connector = _drivers[id];
-        return connector.Driver;
+        if (_drivers.TryGetValue(id, out var connector))
+        {
+            return connector;
+        }
+        return default;
     }
 
     /// <summary>
