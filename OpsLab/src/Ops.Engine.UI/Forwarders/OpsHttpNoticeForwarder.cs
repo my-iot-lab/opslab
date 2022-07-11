@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -41,9 +42,13 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
         var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
         var httpClient = _httpClientFactory.CreateClient();
 
+        var stopWatch = Stopwatch.StartNew();
         try
         {
             using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/notice", jsonContent, cancellationToken);
+
+            stopWatch.Stop();
+
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
@@ -51,20 +56,22 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
                 if (result?.IsOk() != true)
                 {
                     // 记录数据推送失败信息
-                    _logger.LogError("[Notice] HTTP 数据推送失败，RequestId：{0}，工站：{1}, 触发点：{2}，错误状态码：{3}，错误消息：{4}",
+                    _logger.LogError("[Notice] HTTP 数据推送处理失败，RequestId：{0}，工站：{1}, 触发点：{2}，错误状态码：{3}，错误消息：{4}，Elapsed：{5}ms",
                             data.RequestId,
                             data.Schema.Station,
                             data.Tag,
                             result?.Code,
-                            result?.Message);
+                            result?.Message,
+                            stopWatch.Elapsed.TotalMilliseconds);
                     return;
                 }
 
                 // 记录成功回执信息
-                _logger.LogInformation("[Notice] HTTP 数据推送成功，RequestId：{0}，工站：{1}, 触发点：{2}",
+                _logger.LogInformation("[Notice] HTTP 数据推送成功，RequestId：{0}，工站：{1}, 触发点：{2}，Elapsed：{3}ms",
                             data.RequestId,
                             data.Schema.Station,
-                            data.Tag);
+                            data.Tag,
+                            stopWatch.Elapsed.TotalMilliseconds);
                 return;
             }
 

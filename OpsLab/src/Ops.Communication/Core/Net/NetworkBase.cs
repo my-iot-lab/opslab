@@ -429,11 +429,13 @@ public abstract class NetworkBase
 		{
 			fileStateObject = null;
 			manualResetEvent.Close();
+
 			return new OperateResult("stream.BeginWrite Exception -> " + ex.Message);
 		}
 
 		manualResetEvent.WaitOne();
 		manualResetEvent.Close();
+
 		if (fileStateObject.IsError)
 		{
 			return new OperateResult
@@ -619,7 +621,7 @@ public abstract class NetworkBase
 
 		if (operateResult.Content2 == null)
 		{
-			operateResult.Content2 = new byte[0];
+			operateResult.Content2 = Array.Empty<byte>();
 		}
 		return OperateResult.Ok(BitConverter.ToInt32(operateResult.Content1, 4), Encoding.Unicode.GetString(operateResult.Content2));
 	}
@@ -824,7 +826,7 @@ public abstract class NetworkBase
 			{
 				connectTimeout.IsSuccessful = true;
 				socket?.Close();
-				if (connectErrorCount < 1000000000)
+				if (connectErrorCount < 1_000_000_000)
 				{
 					connectErrorCount++;
 				}

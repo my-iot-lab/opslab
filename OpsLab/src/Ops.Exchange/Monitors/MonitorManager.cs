@@ -105,6 +105,11 @@ public sealed class MonitorManager : IDisposable
             {
                 await Task.Delay(pollingInterval, _cts.Token);
 
+                if (connector.Status != ConnectingStatus.Connected)
+                {
+                    continue;
+                }
+
                 var result = await connector.Driver.ReadInt16Async(variable.Address);
                 if (result.IsSuccess && result.Content == 1)
                 {
@@ -129,6 +134,11 @@ public sealed class MonitorManager : IDisposable
                 while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
+
+                    if (connector.Status != ConnectingStatus.Connected)
+                    {
+                        continue;
+                    }
 
                     var result = await connector.Driver.ReadInt16Async(variable.Address);
                     if (result.IsSuccess && result.Content == ExStatusCode.Trigger)
@@ -170,6 +180,11 @@ public sealed class MonitorManager : IDisposable
                 while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
+
+                    if (connector.Status != ConnectingStatus.Connected)
+                    {
+                        continue;
+                    }
 
                     var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
                     if (ok)

@@ -207,10 +207,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <summary>
 	/// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" />
 	/// </summary>
+	/// <param name="timeout">Ping 超时时间</param>
 	/// <returns>返回PING的结果</returns>
-	public IPStatus IpAddressPing()
+	public IPStatus PingIpAddress(int timeout = 5000)
 	{
-		return ping.Value.Send(IpAddress).Status;
+		return ping.Value.Send(IpAddress, timeout).Status;
+	}
+
+	public async Task<IPStatus> PingIpAddressAsync(int timeout = 5000)
+	{
+		var pingReply = await ping.Value.SendPingAsync(IpAddress, timeout);
+		return pingReply.Status;
 	}
 
 	/// <summary>
