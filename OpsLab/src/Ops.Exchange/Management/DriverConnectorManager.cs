@@ -14,7 +14,7 @@ namespace Ops.Exchange.Management;
 /// <summary>
 /// 连接状态
 /// </summary>
-public enum ConnectingStatus
+public enum ConnectionStatus
 {
     /// <summary>
     /// 初始化，等待连接
@@ -24,17 +24,33 @@ public enum ConnectingStatus
     /// <summary>
     /// 已连接
     /// </summary>
-    Connected = 2,
+    Connected,
 
     /// <summary>
-    /// 已与服务断开（被动断开）
+    /// 已与服务断开
     /// </summary>
-    Disconnected = 3,
+    Disconnected,
 
     /// <summary>
-    /// 连接终止（主动终止）
+    /// 连接终止，表示不会再连接。
     /// </summary>
-    Aborted = 4,
+    Aborted,
+}
+
+/// <summary>
+/// 驱动状态
+/// </summary>
+public enum DriverStatus
+{
+    /// <summary>
+    /// 可正常通信
+    /// </summary>
+    Normal = 1,
+
+    /// <summary>
+    /// 驱动挂起中
+    /// </summary>
+    Suspended = 2,
 }
 
 public sealed class DriverConnector
@@ -54,9 +70,24 @@ public sealed class DriverConnector
     public IReadWriteNet Driver { get; }
 
     /// <summary>
-    /// 连接状态
+    /// 连接处于的状态
     /// </summary>
-    public ConnectingStatus Status { get; set; } = ConnectingStatus.Wait;
+    public ConnectionStatus ConnectedStatus { get; set; } = ConnectionStatus.Wait;
+
+    /// <summary>
+    /// 表示可与服务器进行连接（能 Ping 通）。
+    /// </summary>
+    public bool Available { get; internal set; }
+
+    /// <summary>
+    /// 驱动状态
+    /// </summary>
+    public DriverStatus DriverStatus = DriverStatus.Normal;
+
+    /// <summary>
+    /// 是否挂起
+    /// </summary>
+    public bool IsSuspended { get; internal set; }
 
     public DriverConnector(string id, string host, int port, IReadWriteNet driver)
     {
@@ -65,6 +96,11 @@ public sealed class DriverConnector
         Port = port;
         Driver = driver;
     }
+
+    /// <summary>
+    /// 是否可连接
+    /// </summary>
+    public bool CanConnect => Available && DriverStatus == DriverStatus.Normal && ConnectedStatus == ConnectionStatus.Connected;
 }
 
 /// <summary>
@@ -74,8 +110,8 @@ public sealed class DriverConnectorManager : IDisposable
 {
     private readonly Dictionary<string, DriverConnector> _connectors = new(); // Key 为设备编号
     private bool _isConnectedServer;
+    private Timer? _heartbeatTimer;
 
-    private readonly Timer _heartBeatTimer;
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly ILogger _logger;
 
@@ -85,9 +121,6 @@ public sealed class DriverConnectorManager : IDisposable
     {
         _deviceInfoManager = deviceInfoManager;
         _logger = logger;
-
-        var state = new WeakReference<DriverConnectorManager>(this);
-        _heartBeatTimer = new Timer(Heartbeat, state, 2000, 5000); // 5s 监听一次是否服务器能 ping 通
     }
 
     /// <summary>
@@ -157,53 +190,112 @@ public sealed class DriverConnectorManager : IDisposable
     /// 驱动连接到服务
     /// </summary>
     /// <returns></returns>
-    public async Task ConnectServerAsync()
+    public async Task ConnectAsync()
     {
         if (!_isConnectedServer)
         {
             foreach (var connector in _connectors.Values)
             {
-                var result = await (connector.Driver as NetworkDeviceBase)!.ConnectServerAsync();
-                if (result.IsSuccess)
+                if (connector.Driver is NetworkDeviceBase networkDevice)
                 {
-                    connector.Status = ConnectingStatus.Connected;
+                    networkDevice.SetPersistentConnection(); // 设置为长连接
+
+                    // 每次连接成功或失败后设置状态
+                    networkDevice.ConnectServerPostDelegate = (ok) =>
+                    {
+                        connector.ConnectedStatus = ok ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+                    };
+
+                    // 先检查服务器能否访问
+                    var ipStatus = await networkDevice.PingIpAddressAsync(1_000);
+                    if (ipStatus == IPStatus.Success)
+                    {
+                        connector.Available = true;
+                        _ = await networkDevice.ConnectServerAsync();
+                    }
+                    else
+                    {
+                        connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                    }
                 }
             }
+
+            _isConnectedServer = true;
+
+            // 开启心跳检测
+            var state = new WeakReference<DriverConnectorManager>(this);
+            int period = Math.Max(5_000, _connectors.Count * 500 + 2_000); // 计算全部Ping一次的时长
+            _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5s 监听一次是否服务器能 ping 通
         }
-        _isConnectedServer = true;
     }
 
     /// <summary>
-    /// 连接重置。会断开并清空所有连接。
+    /// 驱动连接挂起
     /// </summary>
-    public void Reset()
+    public void Suspend()
     {
         lock (SyncLock)
         {
             foreach (var connector in _connectors.Values)
             {
-                (connector.Driver as NetworkDeviceBase)!.Dispose();
-                connector.Status = ConnectingStatus.Aborted;
+                if (connector.DriverStatus == DriverStatus.Normal)
+                {
+                    connector.DriverStatus = DriverStatus.Suspended;
+                }
             }
+        }
+    }
 
-            _connectors.Clear();
-            _isConnectedServer = false;
+    public void Restart()
+    {
+        lock (SyncLock)
+        {
+            foreach (var connector in _connectors.Values)
+            {
+                if (connector.DriverStatus == DriverStatus.Suspended)
+                {
+                    connector.DriverStatus = DriverStatus.Normal;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 关闭并释放所有连接。
+    /// </summary>
+    public void Close()
+    {
+        lock (SyncLock)
+        {
+            if (_isConnectedServer)
+            {
+                foreach (var connector in _connectors.Values)
+                {
+                    connector.ConnectedStatus = ConnectionStatus.Aborted;
+                    if (connector.Driver is NetworkDeviceBase networkDevice)
+                    {
+                        networkDevice.Dispose();
+                    }
+                }
+
+                _connectors.Clear();
+                _heartbeatTimer?.Dispose();
+                _isConnectedServer = false;
+            }
         }
     }
 
     public void Dispose()
     {
-        Reset();
-
-        _heartBeatTimer.Dispose();
+        Close();
     }
 
     /// <summary>
     /// 轮询监听是否能访问服务器
     /// </summary>
-    private void Heartbeat(object state)
+    private void Heartbeat(object? state)
     {
-        var weakReference = (WeakReference<DriverConnectorManager>)state;
+        var weakReference = (WeakReference<DriverConnectorManager>)state!;
         if (weakReference.TryGetTarget(out var target))
         {
             target.Heartbeat2();
@@ -218,31 +310,19 @@ public sealed class DriverConnectorManager : IDisposable
             driverConnectors = _connectors.Values.ToArray();
         }
 
-        var tasks = new List<Task>(driverConnectors.Length);
-
-        // 考虑站很多，执行时间会超过轮询周期
         foreach (var connector in driverConnectors)
         {
             if (connector.Driver is NetworkDeviceBase networkDevice
-                && (connector.Status == ConnectingStatus.Connected || connector.Status == ConnectingStatus.Disconnected))
+                && connector.ConnectedStatus == ConnectionStatus.Disconnected)
             {
-                var task = new Task(() =>
-                {
-                    var reply = networkDevice.PingIpAddress(1000);
-                    if (reply != IPStatus.Success)
-                    {
-                        connector.Status = ConnectingStatus.Disconnected;
-                    }
-                    else
-                    {
-                        connector.Status = ConnectingStatus.Connected;
-                    }
-                });
+                var reply = networkDevice.PingIpAddress(500);
+                connector.Available = reply == IPStatus.Success;
 
-                tasks.Add(task);
+                if (connector.Available)
+                {
+                    _ = networkDevice.ConnectServer();
+                }
             }
         }
-
-        Task.WaitAll(tasks.ToArray());
     }
 }

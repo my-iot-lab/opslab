@@ -67,7 +67,7 @@ public sealed class MonitorManager : IDisposable
         }
 
         await _driverConnectorManager.LoadAsync();
-        await _driverConnectorManager.ConnectServerAsync();
+        await _driverConnectorManager.ConnectAsync();
 
         // 每个工站启用
         // TODO: 下面都使用线程池线程运行，若有长时间运行的任务过多，会不会导致线程中线程被消耗殆尽？
@@ -105,7 +105,7 @@ public sealed class MonitorManager : IDisposable
             {
                 await Task.Delay(pollingInterval, _cts.Token);
 
-                if (connector.Status != ConnectingStatus.Connected)
+                if (!connector.CanConnect)
                 {
                     continue;
                 }
@@ -135,7 +135,7 @@ public sealed class MonitorManager : IDisposable
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
 
-                    if (connector.Status != ConnectingStatus.Connected)
+                    if (!connector.CanConnect)
                     {
                         continue;
                     }
@@ -181,7 +181,7 @@ public sealed class MonitorManager : IDisposable
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
 
-                    if (connector.Status != ConnectingStatus.Connected)
+                    if (!connector.CanConnect)
                     {
                         continue;
                     }
@@ -225,7 +225,7 @@ public sealed class MonitorManager : IDisposable
                         var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                         while (!_cts.Token.IsCancellationRequested)
                         {
-                            if (connector.Status == ConnectingStatus.Connected)
+                            if (!connector.CanConnect)
                             {
                                 break;
                             }
@@ -281,7 +281,7 @@ public sealed class MonitorManager : IDisposable
         }
 
         Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult();
-        _driverConnectorManager.Reset();
+        _driverConnectorManager.Close();
 
         _logger.LogInformation("[Monitor] 监控停止");
     }

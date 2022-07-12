@@ -339,6 +339,7 @@ public abstract class NetworkBase
 					connectErrorCount++;
 				}
 
+				// 超时之前（500ms），可重试一次。
 				if (hslTimeOut.GetConsumeTime() < TimeSpan.FromMilliseconds(500.0) && num < 2)
 				{
 					Thread.Sleep(100);

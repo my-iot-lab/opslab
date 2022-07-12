@@ -11,13 +11,13 @@ namespace Ops.Communication;
 /// </remarks>
 public sealed class OpsTimeOut
 {
-	private static long hslTimeoutId = 0L;
-	private static readonly List<OpsTimeOut> WaitHandleTimeOut = new(128);
+	private static long s_opsTimeoutId = 0L;
+	private static readonly List<OpsTimeOut> s_waitHandleTimeOut = new(128);
 	private static readonly object listLock = new();
-	private static Thread threadCheckTimeOut;
-	private static long threadUniqueId = 0L;
-	private static DateTime threadActiveTime;
-	private static int activeDisableCount = 0;
+	private static Thread s_threadCheckTimeOut;
+	private static long s_threadUniqueId = 0L;
+	private static DateTime s_threadActiveTime;
+	private static int s_activeDisableCount = 0;
 
 	/// <summary>
 	/// 当前超时对象的唯一ID信息，没实例化一个对象，id信息就会自增1
@@ -54,14 +54,14 @@ public sealed class OpsTimeOut
 	/// <summary>
 	/// 获取当前检查超时对象的个数
 	/// </summary>
-	public static int TimeOutCheckCount => WaitHandleTimeOut.Count;
+	public static int TimeOutCheckCount => s_waitHandleTimeOut.Count;
 
 	/// <summary>
 	/// 实例化一个默认的对象
 	/// </summary>
 	public OpsTimeOut()
 	{
-		UniqueId = Interlocked.Increment(ref hslTimeoutId);
+		UniqueId = Interlocked.Increment(ref s_opsTimeoutId);
 		StartTime = DateTime.Now;
 		IsSuccessful = false;
 		IsTimeout = false;
@@ -94,15 +94,15 @@ public sealed class OpsTimeOut
 	{
 		lock (listLock)
 		{
-			if ((DateTime.Now - threadActiveTime).TotalSeconds > 60.0)
+			if ((DateTime.Now - s_threadActiveTime).TotalSeconds > 60.0)
 			{
-				threadActiveTime = DateTime.Now;
-				if (Interlocked.Increment(ref activeDisableCount) >= 2)
+				s_threadActiveTime = DateTime.Now;
+				if (Interlocked.Increment(ref s_activeDisableCount) >= 2)
 				{
 					CreateTimeoutCheckThread();
 				}
 			}
-			WaitHandleTimeOut.Add(timeOut);
+			s_waitHandleTimeOut.Add(timeOut);
 		}
 	}
 
@@ -114,7 +114,7 @@ public sealed class OpsTimeOut
 	{
 		lock (listLock)
 		{
-			return WaitHandleTimeOut.ToArray();
+			return s_waitHandleTimeOut.ToArray();
 		}
 	}
 
@@ -142,13 +142,13 @@ public sealed class OpsTimeOut
 
 	private static void CreateTimeoutCheckThread()
 	{
-		threadActiveTime = DateTime.Now;
-		threadCheckTimeOut = new Thread(CheckTimeOut)
+		s_threadActiveTime = DateTime.Now;
+		s_threadCheckTimeOut = new Thread(CheckTimeOut)
 		{
 			IsBackground = true,
 			Priority = ThreadPriority.AboveNormal,
 		};
-		threadCheckTimeOut.Start(Interlocked.Increment(ref threadUniqueId));
+		s_threadCheckTimeOut.Start(Interlocked.Increment(ref s_threadUniqueId));
 	}
 
 	/// <summary>
@@ -161,30 +161,30 @@ public sealed class OpsTimeOut
 		while (true)
 		{
 			Thread.Sleep(100);
-			if (num != threadUniqueId)
+			if (num != s_threadUniqueId)
 			{
 				break;
 			}
 
-			threadActiveTime = DateTime.Now;
-			activeDisableCount = 0;
+			s_threadActiveTime = DateTime.Now;
+			s_activeDisableCount = 0;
 			lock (listLock)
 			{
-				for (int num2 = WaitHandleTimeOut.Count - 1; num2 >= 0; num2--)
+				for (int num2 = s_waitHandleTimeOut.Count - 1; num2 >= 0; num2--)
 				{
-					OpsTimeOut hslTimeOut = WaitHandleTimeOut[num2];
-					if (hslTimeOut.IsSuccessful)
+					OpsTimeOut opsTimeOut = s_waitHandleTimeOut[num2];
+					if (opsTimeOut.IsSuccessful)
 					{
-						WaitHandleTimeOut.RemoveAt(num2);
+						s_waitHandleTimeOut.RemoveAt(num2);
 					}
-					else if ((DateTime.Now - hslTimeOut.StartTime).TotalMilliseconds > hslTimeOut.DelayTime)
+					else if ((DateTime.Now - opsTimeOut.StartTime).TotalMilliseconds > opsTimeOut.DelayTime)
 					{
-						if (!hslTimeOut.IsSuccessful)
+						if (!opsTimeOut.IsSuccessful)
 						{
-							hslTimeOut.WorkSocket?.Close();
-							hslTimeOut.IsTimeout = true;
+							opsTimeOut.WorkSocket?.Close();
+							opsTimeOut.IsTimeout = true;
 						}
-						WaitHandleTimeOut.RemoveAt(num2);
+						s_waitHandleTimeOut.RemoveAt(num2);
 					}
 				}
 			}

@@ -14,25 +14,14 @@ namespace Ops.Communication.Core.Net;
 /// </summary>
 public class NetworkDoubleBase : NetworkBase, IDisposable
 {
-	private string ipAddress = "127.0.0.1";
+	private string _ipAddress = "127.0.0.1";
 
-	private int port = 10000;
-
-	private int connectTimeOut = 10000;
-
-	private string connectionId = string.Empty;
-
-	private bool isUseSpecifiedSocket = false;
-
-	/// <summary>
-	/// 接收数据的超时时间，单位：毫秒
-	/// </summary>
-	protected int receiveTimeOut = 5000;
+    private bool _isUseSpecifiedSocket = false;
 
 	/// <summary>
 	/// 是否是长连接的状态
 	/// </summary>
-	protected bool isPersistentConn = false;
+	protected bool IsPersistentConn = false;
 
 	/// <summary>
 	/// 交互的混合锁，保证交互操作的安全性
@@ -52,13 +41,13 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <summary>
 	/// 是否使用账号登录，这个账户登录的功能是<c>HSL</c>组件创建的服务器特有的功能。
 	/// </summary>
-	protected bool isUseAccountCertificate = false;
+	protected bool IsUseAccountCertificate = false;
 
-	private string userName = string.Empty;
+	private string _userName = string.Empty;
 
-	private string password = string.Empty;
+	private string _password = string.Empty;
 
-	private bool disposedValue = false;
+	private bool _disposedValue = false;
 
 	private readonly Lazy<Ping> ping = new(() => new Ping());
 
@@ -73,38 +62,15 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 不适用于异形模式的连接。
 	/// </remarks>
-	public virtual int ConnectTimeOut
-	{
-		get
-		{
-			return connectTimeOut;
-		}
-		set
-		{
-			if (value >= 0)
-			{
-				connectTimeOut = value;
-			}
-		}
-	}
+	public int ConnectTimeOut { get; set; } = 10_000;
 
-	/// <summary>
-	/// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈
-	/// </summary>
-	/// <remarks>
-	/// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
-	/// </remarks>
-	public int ReceiveTimeOut
-	{
-		get
-		{
-			return receiveTimeOut;
-		}
-		set
-		{
-			receiveTimeOut = value;
-		}
-	}
+    /// <summary>
+    /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈
+    /// </summary>
+    /// <remarks>
+    /// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
+    /// </remarks>
+    public int ReceiveTimeOut { get; protected set; } = 5000;
 
 	/// <summary>
 	/// 获取或是设置远程服务器的IP地址，如果是本机测试，那么需要设置为127.0.0.1 
@@ -113,16 +79,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// 最好实在初始化的时候进行指定，当使用短连接的时候，支持动态更改，切换；当使用长连接后，无法动态更改
 	/// </remarks>
 	public virtual string IpAddress
-	{
-		get
-		{
-			return ipAddress;
-		}
-		set
-		{
-			ipAddress = OpsHelper.GetIpAddressFromInput(value);
-		}
-	}
+    {
+        get => _ipAddress;
+        set => _ipAddress = OpsHelper.GetIpAddressFromInput(value);
+    }
 
 	/// <summary>
 	/// 获取或设置服务器的端口号，具体的值需要取决于对方的配置
@@ -130,34 +90,15 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 最好实在初始化的时候进行指定，当使用短连接的时候，支持动态更改，切换；当使用长连接后，无法动态更改
 	/// </remarks>
-	public virtual int Port
-	{
-		get
-		{
-			return port;
-		}
-		set
-		{
-			port = value;
-		}
-	}
+	public int Port { get; set; } = 10000;
 
-	public string ConnectionId
-	{
-		get
-		{
-			return connectionId;
-		}
-		set
-		{
-			connectionId = value;
-		}
-	}
 
-	/// <summary>
-	/// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
-	/// </summary>
-	public int SleepTime { get; set; }
+	public string ConnectionId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
+    /// </summary>
+    public int SleepTime { get; set; }
 
 	/// <summary>
 	/// 获取或设置绑定的本地的IP地址和端口号信息，如果端口设置为0，代表任何可用的端口
@@ -178,13 +119,18 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	public int SocketKeepAliveTime { get; set; } = -1;
 
 	/// <summary>
+	/// 获取或设置连接后处理方法，参数表示连接成功还是失败。
+	/// </summary>
+	public Action<bool> ConnectServerPostDelegate { get; set; }
+
+	/// <summary>
 	/// 默认的无参构造函数 <br />
 	/// Default no-parameter constructor
 	/// </summary>
 	public NetworkDoubleBase()
 	{
 		InteractiveLock = new SimpleHybirdLock();
-		connectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
+		ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
 	}
 
 	/// <summary>
@@ -201,7 +147,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	public void SetPersistentConnection()
 	{
-		isPersistentConn = true;
+		IsPersistentConn = true;
 	}
 
 	/// <summary>
@@ -214,6 +160,11 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		return ping.Value.Send(IpAddress, timeout).Status;
 	}
 
+	/// <summary>
+	/// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" />
+	/// </summary>
+	/// <param name="timeout">Ping 超时时间</param>
+	/// <returns>返回PING的结果</returns>
 	public async Task<IPStatus> PingIpAddressAsync(int timeout = 5000)
 	{
 		var pingReply = await ping.Value.SendPingAsync(IpAddress, timeout);
@@ -226,9 +177,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>返回连接结果，如果失败的话（也即IsSuccess为False），包含失败信息</returns>
 	public OperateResult ConnectServer()
 	{
-		isPersistentConn = true;
+		IsPersistentConn = true;
 		CoreSocket?.Close();
 		OperateResult<Socket> operateResult = CreateSocketAndInitialication();
+		ConnectServerPostDelegate?.Invoke(operateResult.IsSuccess);
 		if (!operateResult.IsSuccess)
 		{
 			IsSocketError = true;
@@ -241,6 +193,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		{
 			CoreSocket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
 		}
+
 		Logger?.LogDebug(ToString() + " -- NetEngineStart");
 		return operateResult;
 	}
@@ -255,8 +208,8 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </remarks>
 	public OperateResult ConnectServer(AlienSession session)
 	{
-		isPersistentConn = true;
-		isUseSpecifiedSocket = true;
+		IsPersistentConn = true;
+		_isUseSpecifiedSocket = true;
 		if (session != null)
 		{
 			AlienSession?.Socket?.Close();
@@ -280,6 +233,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			IsSocketError = true;
 			return new OperateResult();
 		}
+
 		IsSocketError = true;
 		return new OperateResult();
 	}
@@ -291,7 +245,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	public OperateResult ConnectClose()
 	{
 		var operateResult = new OperateResult();
-		isPersistentConn = false;
+		IsPersistentConn = false;
 		InteractiveLock.Enter();
 		try
 		{
@@ -308,7 +262,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			InteractiveLock.Leave();
 		}
 
-		Logger?.LogDebug(ToString() + "-- NetEngineClose");
+		Logger?.LogDebug(ToString() + " -- NetEngineClose");
 		return operateResult;
 	}
 
@@ -352,13 +306,13 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		if (!string.IsNullOrEmpty(userName.Trim()))
 		{
-			isUseAccountCertificate = true;
-			this.userName = userName;
-			this.password = password;
+			IsUseAccountCertificate = true;
+			_userName = userName;
+			_password = password;
 		}
 		else
 		{
-			isUseAccountCertificate = false;
+			IsUseAccountCertificate = false;
 		}
 	}
 
@@ -369,7 +323,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>认证结果</returns>
 	protected OperateResult AccountCertificate(Socket socket)
 	{
-		OperateResult operateResult = SendAccountAndCheckReceive(socket, 1, userName, password);
+		OperateResult operateResult = SendAccountAndCheckReceive(socket, 1, _userName, _password);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -390,7 +344,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	protected async Task<OperateResult> AccountCertificateAsync(Socket socket)
 	{
-		OperateResult send = await SendAccountAndCheckReceiveAsync(socket, 1, userName, password);
+		OperateResult send = await SendAccountAndCheckReceiveAsync(socket, 1, _userName, _password);
 		if (!send.IsSuccess)
 		{
 			return send;
@@ -421,7 +375,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
 	{
-		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(ipAddress), port), connectTimeOut, LocalBinding);
+		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding);
 		if (result.IsSuccess)
 		{
 			OperateResult initi = await InitializationOnConnectAsync(result.Content);
@@ -441,9 +395,9 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns></returns>
 	protected async Task<OperateResult<Socket>> GetAvailableSocketAsync()
 	{
-		if (isPersistentConn)
+		if (IsPersistentConn)
 		{
-			if (isUseSpecifiedSocket)
+			if (_isUseSpecifiedSocket)
 			{
 				if (IsSocketError)
 				{
@@ -473,9 +427,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	public async Task<OperateResult> ConnectServerAsync()
 	{
-		isPersistentConn = true;
+		IsPersistentConn = true;
 		CoreSocket?.Close();
 		OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync();
+		ConnectServerPostDelegate?.Invoke(rSocket.IsSuccess);
 		if (!rSocket.IsSuccess)
 		{
 			IsSocketError = true;
@@ -490,7 +445,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	public async Task<OperateResult> ConnectCloseAsync()
 	{
-		isPersistentConn = false;
+		IsPersistentConn = false;
 		InteractiveLock.Enter();
 		OperateResult result;
 		try
@@ -529,22 +484,22 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			return OperateResult.Error<byte[]>(sendResult);
 		}
 
-		if (receiveTimeOut < 0)
+		if (ReceiveTimeOut < 0)
 		{
-			return OperateResult.Ok(new byte[0]);
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 
 		if (!hasResponseData)
 		{
-			return OperateResult.Ok(new byte[0]);
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 
 		if (SleepTime > 0)
 		{
-			Thread.Sleep(SleepTime);
+			await Task.Delay(SleepTime);
 		}
 
-		var resultReceive = await ReceiveByMessageAsync(socket, receiveTimeOut, netMessage);
+		var resultReceive = await ReceiveByMessageAsync(socket, ReceiveTimeOut, netMessage);
 		if (!resultReceive.IsSuccess)
 		{
 			return resultReceive;
@@ -607,7 +562,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			InteractiveLock.Leave();
 		}
 
-		if (!isPersistentConn)
+		if (!IsPersistentConn)
 		{
 			resultSocket?.Content?.Close();
 		}
@@ -641,9 +596,9 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>是否成功，如果成功，使用这个套接字</returns>
 	protected OperateResult<Socket> GetAvailableSocket()
 	{
-		if (isPersistentConn)
+		if (IsPersistentConn)
 		{
-			if (isUseSpecifiedSocket)
+			if (_isUseSpecifiedSocket)
 			{
 				if (IsSocketError)
 				{
@@ -663,8 +618,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				IsSocketError = false;
 				return OperateResult.Ok(CoreSocket);
 			}
+
 			return OperateResult.Ok(CoreSocket);
 		}
+
 		return CreateSocketAndInitialication();
 	}
 
@@ -674,7 +631,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>带有socket的结果对象</returns>
 	private OperateResult<Socket> CreateSocketAndInitialication()
 	{
-		OperateResult<Socket> operateResult = CreateSocketAndConnect(new IPEndPoint(IPAddress.Parse(ipAddress), port), connectTimeOut, LocalBinding);
+		OperateResult<Socket> operateResult = CreateSocketAndConnect(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding);
 		if (operateResult.IsSuccess)
 		{
 			OperateResult operateResult2 = InitializationOnConnect(operateResult.Content);
@@ -701,7 +658,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>接收的完整的报文信息</returns>
 	public virtual OperateResult<byte[]> ReadFromCoreServer(Socket socket, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
 	{
-		byte[] array = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
+		byte[] array = usePackAndUnpack ? PackCommandWithHeader(send) : send;
 		Logger?.LogDebug($"{ToString()} Send: {(LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array))}");
 
 		INetMessage newNetMessage = GetNewNetMessage();
@@ -715,7 +672,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		{
 			return OperateResult.Error<byte[]>(operateResult);
 		}
-		if (receiveTimeOut < 0)
+		if (ReceiveTimeOut < 0)
 		{
 			return OperateResult.Ok(Array.Empty<byte>());
 		}
@@ -729,7 +686,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			Thread.Sleep(SleepTime);
 		}
 
-		var operateResult2 = ReceiveByMessage(socket, receiveTimeOut, newNetMessage);
+		var operateResult2 = ReceiveByMessage(socket, ReceiveTimeOut, newNetMessage);
 		if (!operateResult2.IsSuccess)
 		{
 			return operateResult2;
@@ -802,7 +759,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			InteractiveLock.Leave();
 		}
 
-		if (!isPersistentConn)
+		if (!IsPersistentConn)
 		{
 			operateResult2?.Content?.Close();
 		}
@@ -815,14 +772,14 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <param name="disposing">是否释放托管的资源信息</param>
 	protected virtual void Dispose(bool disposing)
 	{
-		if (!disposedValue)
+		if (!_disposedValue)
 		{
 			if (disposing)
 			{
 				ConnectClose();
 				InteractiveLock?.Dispose();
 			}
-			disposedValue = true;
+			_disposedValue = true;
 		}
 	}
 

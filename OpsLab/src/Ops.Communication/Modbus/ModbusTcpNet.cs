@@ -199,7 +199,7 @@ public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadW
 
 	protected override OperateResult InitializationOnConnect(Socket socket)
 	{
-		if (isUseAccountCertificate)
+		if (IsUseAccountCertificate)
 		{
 			return AccountCertificate(socket);
 		}
@@ -208,7 +208,7 @@ public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadW
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		if (isUseAccountCertificate)
+		if (IsUseAccountCertificate)
 		{
 			return await AccountCertificateAsync(socket);
 		}
