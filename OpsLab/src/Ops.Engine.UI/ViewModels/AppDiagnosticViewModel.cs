@@ -15,13 +15,11 @@ internal class AppDiagnosticViewModel : ObservableObject, IDisposable
 
     private readonly PerformanceCounter _cpuCounter;
     private readonly PerformanceCounter _gcCounter;
-    private readonly PerformanceCounter _disCounter;
 
     public AppDiagnosticViewModel()
     {
         _cpuCounter = new("Processor", "% Processor Time", "_Total");
         _gcCounter = new(".NET CLR Memory", "% Time in GC");
-        _disCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
 
         _ = Task.Factory.StartNew(async () =>
         {
@@ -29,7 +27,7 @@ internal class AppDiagnosticViewModel : ObservableObject, IDisposable
             {
                 await Task.Delay(1000);
 
-                CpuConsumption = (float)Math.Round(_cpuCounter.NextValue(), 2);
+                CpuConsumption = (float)Math.Round(_cpuCounter.NextValue(), 1);
                 GcConsumption = new Random().Next(1, 100); // _gcCounter.NextValue();
             }
         }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
@@ -79,6 +77,5 @@ internal class AppDiagnosticViewModel : ObservableObject, IDisposable
 
         _cpuCounter.Dispose();
         _gcCounter.Dispose();
-        _disCounter.Dispose();
     }
 }

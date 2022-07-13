@@ -24,6 +24,7 @@ public class Repository_MySql_Tests
                           .FirstOrDefault(s => s.Id == 1);
         Assert.NotNull(product);
         Assert.NotNull(product!.ProductDetails);
+        Assert.True(product!.ProductDetails.Count > 0);
     }
 
     [Fact]
