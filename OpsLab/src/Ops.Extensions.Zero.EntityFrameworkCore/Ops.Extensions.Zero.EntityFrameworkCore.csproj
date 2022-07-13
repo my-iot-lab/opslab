@@ -4,6 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/my-iot-lab/opslab.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/my-iot-lab/opslab.git</RepositoryUrl>
+    <PackageTags></PackageTags>
+	<FileVersion>0.6.3</FileVersion>
+	<AssemblyVersion>0.6.3</AssemblyVersion>
+	<Version>0.6.3</Version>
+	<Authors>Gang.Yang</Authors>
+	<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<Description>Ops.Extensions.Zero.EntityFrameworkCore is a infrasturce library.</Description>
   </PropertyGroup>
 
   <ItemGroup>

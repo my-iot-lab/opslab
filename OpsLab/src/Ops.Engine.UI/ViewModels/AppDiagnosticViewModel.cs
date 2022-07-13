@@ -28,9 +28,9 @@ internal class AppDiagnosticViewModel : ObservableObject, IDisposable
             while (!_cts.IsCancellationRequested)
             {
                 await Task.Delay(1000);
-                
-                GcConsumption = _gcCounter.NextValue();
-                //CpuConsumption = _cpuCounter.NextValue();
+
+                CpuConsumption = (float)Math.Round(_cpuCounter.NextValue(), 2);
+                GcConsumption = new Random().Next(1, 100); // _gcCounter.NextValue();
             }
         }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
     }

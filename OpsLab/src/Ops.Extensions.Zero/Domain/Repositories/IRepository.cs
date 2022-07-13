@@ -3,22 +3,39 @@ using Ops.Extensions.Zero.Domain.Entities;
 
 namespace Ops.Extensions.Zero.Domain.Repositories;
 
+/// <summary>
+/// 表示实现对象为仓储
+/// </summary>
 public interface IRepository
 {
 
 }
 
+/// <summary>
+/// 表示实现对象为仓储
+/// </summary>
+/// <typeparam name="TEntity">实体类型</typeparam>
 public interface IRepository<TEntity> : IRepository<TEntity, int> where TEntity : class, IEntity
 {
 
 }
 
+/// <summary>
+/// 表示实现对象为仓储
+/// </summary>
+/// <typeparam name="TEntity">实体类型</typeparam>
+/// <typeparam name="TPrimaryKey">实体主键</typeparam>
 public interface IRepository<TEntity, TPrimaryKey> : IRepository where TEntity : class, IEntity<TPrimaryKey>
 {
     #region Select/Get/Query
 
     IQueryable<TEntity> GetAll();
 
+    /// <summary>
+    /// 对于有主从关系的对象，需要获取从表数据集合的，需要包 Include 从表数据集合。
+    /// </summary>
+    /// <param name="propertySelectors"></param>
+    /// <returns></returns>
     IQueryable<TEntity> GetAllIncluding(params Expression<Func<TEntity, object>>[] propertySelectors);
 
     List<TEntity> GetAllList();
@@ -58,106 +75,189 @@ public interface IRepository<TEntity, TPrimaryKey> : IRepository where TEntity :
 
     #region Insert
 
+    /// <summary>
+    /// 新增实体。
+    /// </summary>
+    /// <param name="entity">要新增的实体</param>
+    /// <returns></returns>
     TEntity Insert(TEntity entity);
 
+    /// <summary>
+    /// 新增实体。
+    /// </summary>
+    /// <param name="entity">要新增的实体</param>
     Task<TEntity> InsertAsync(TEntity entity);
 
     /// <summary>
-    /// Inserts a new entity and gets it's Id.
-    /// It may require to save current unit of work
-    /// to be able to retrieve id.
+    /// 新增实体并获取其 Id。
+    /// 注：这可能会导致提交当前的工作单元。
     /// </summary>
-    /// <param name="entity">Entity</param>
-    /// <returns>Id of the entity</returns>
+    /// <param name="entity">要新增的实体</param>
+    /// <returns></returns>
     TPrimaryKey InsertAndGetId(TEntity entity);
 
     /// <summary>
-    /// Inserts a new entity and gets it's Id.
-    /// It may require to save current unit of work
-    /// to be able to retrieve id.
+    /// 新增实体并获取其 Id。
+    /// 注：这可能会导致提交当前的工作单元。
     /// </summary>
-    /// <param name="entity">Entity</param>
-    /// <returns>Id of the entity</returns>
+    /// <param name="entity">要新增的实体</param>
+    /// <returns></returns>
     Task<TPrimaryKey> InsertAndGetIdAsync(TEntity entity);
 
     /// <summary>
-    /// Inserts or updates given entity depending on Id's value.
+    /// 新增或更新实体。
     /// </summary>
-    /// <param name="entity">Entity</param>
+    /// <param name="entity">要新增或更新的实体对象</param>
     TEntity InsertOrUpdate(TEntity entity);
 
     /// <summary>
-    /// Inserts or updates given entity depending on Id's value.
+    /// 新增或更新实体。
     /// </summary>
-    /// <param name="entity">Entity</param>
+    /// <param name="entity">要新增或更新的实体对象</param>
     Task<TEntity> InsertOrUpdateAsync(TEntity entity);
 
     /// <summary>
-    /// Inserts or updates given entity depending on Id's value.
-    /// Also returns Id of the entity.
-    /// It may require to save current unit of work
-    /// to be able to retrieve id.
+    /// 新增或更新实体，并获取其 Id。
+    /// 注：这可能会导致提交当前的工作单元。
     /// </summary>
-    /// <param name="entity">Entity</param>
-    /// <returns>Id of the entity</returns>
+    /// <param name="entity">要新增或更新的实体对象</param>
     TPrimaryKey InsertOrUpdateAndGetId(TEntity entity);
 
     /// <summary>
-    /// Inserts or updates given entity depending on Id's value.
-    /// Also returns Id of the entity.
-    /// It may require to save current unit of work
-    /// to be able to retrieve id.
+    /// 新增或更新实体，并获取其 Id。
+    /// 注：这可能会导致提交当前的工作单元。
     /// </summary>
-    /// <param name="entity">Entity</param>
-    /// <returns>Id of the entity</returns>
+    /// <param name="entity">要新增或更新的实体对象</param>
     Task<TPrimaryKey> InsertOrUpdateAndGetIdAsync(TEntity entity);
 
     #endregion
 
     #region Update
 
+    /// <summary>
+    /// 更新实体对象。
+    /// </summary>
+    /// <param name="entity">要更新的实体</param>
+    /// <returns></returns>
     TEntity Update(TEntity entity);
 
+    /// <summary>
+    /// 更新实体对象。
+    /// </summary>
+    /// <param name="entity">要更新的实体</param>
+    /// <returns></returns>
     Task<TEntity> UpdateAsync(TEntity entity);
 
+    /// <summary>
+    /// 更新实体对象。
+    /// </summary>
+    /// <param name="id">要更新的实体 Id</param>
+    /// <param name="updateAction">更新对象的委托</param>
+    /// <returns></returns>
     TEntity Update(TPrimaryKey id, Action<TEntity> updateAction);
 
+    /// <summary>
+    /// 更新实体对象。
+    /// </summary>
+    /// <param name="id">要更新的实体 Id</param>
+    /// <param name="updateAction">更新对象的委托</param>
+    /// <returns></returns>
     Task<TEntity> UpdateAsync(TPrimaryKey id, Func<TEntity, Task> updateAction);
 
     #endregion
 
     #region Delete
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="entity">要删除的实体</param>
     void Delete(TEntity entity);
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="entity">要删除的实体</param>
     Task DeleteAsync(TEntity entity);
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="id">要删除的实体 Id</param>
     void Delete(TPrimaryKey id);
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="id">要删除的实体 Id</param>
     Task DeleteAsync(TPrimaryKey id);
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="predicate">要删除的实体筛选表达式</param>
     void Delete(Expression<Func<TEntity, bool>> predicate);
 
+    /// <summary>
+    /// 删除实体对象。
+    /// </summary>
+    /// <param name="predicate">要删除的实体筛选表达式</param>
     Task DeleteAsync(Expression<Func<TEntity, bool>> predicate);
 
     #endregion
 
     #region Aggregates
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <returns></returns>
     int Count();
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <returns></returns>
     Task<int> CountAsync();
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <param name="predicate">筛选表达式</param>
+    /// <returns></returns>
     int Count(Expression<Func<TEntity, bool>> predicate);
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <param name="predicate">筛选表达式</param>
+    /// <returns></returns>
     Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate);
 
+    /// <summary>
+    /// 实体数量
+    /// </summary>
+    /// <returns></returns>
     long LongCount();
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <returns></returns>
     Task<long> LongCountAsync();
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <param name="predicate">筛选表达式</param>
+    /// <returns></returns>
     long LongCount(Expression<Func<TEntity, bool>> predicate);
 
+    /// <summary>
+    /// 获取实体数量。
+    /// </summary>
+    /// <param name="predicate">筛选表达式</param>
+    /// <returns></returns>
     Task<long> LongCountAsync(Expression<Func<TEntity, bool>> predicate);
 
     #endregion

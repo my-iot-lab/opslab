@@ -2,6 +2,9 @@
 
 namespace Ops.Extensions.Zero.Domain.Entities;
 
+/// <summary>
+/// 实体没有找到异常
+/// </summary>
 public sealed class EntityNotFoundException : Exception
 {
     public Type EntityType { get; set; }

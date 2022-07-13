@@ -310,6 +310,7 @@ public sealed class DriverConnectorManager : IDisposable
             driverConnectors = _connectors.Values.ToArray();
         }
 
+        // 可考虑采用 Task.Run 快速执行执行。
         foreach (var connector in driverConnectors)
         {
             if (connector.Driver is NetworkDeviceBase networkDevice

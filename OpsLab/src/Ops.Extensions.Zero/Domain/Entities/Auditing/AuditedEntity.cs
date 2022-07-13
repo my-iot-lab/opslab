@@ -23,11 +23,17 @@ public abstract class AuditedEntity<TPrimaryKey> : Entity<TPrimaryKey>, IShouldH
     public DateTime? UpdatedAt { get; set; }
 }
 
+/// <summary>
+/// 表示实现实体有创建时间
+/// </summary>
 public interface IShouldHaveCreateTime
 {
     DateTime CreatedAt { get; set; }
 }
 
+/// <summary>
+/// 表示实现实体有更新时间
+/// </summary>
 public interface IShouldHaveUpdateTime
 {
     DateTime? UpdatedAt { get; set; }

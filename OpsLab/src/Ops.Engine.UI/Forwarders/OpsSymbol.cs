@@ -3,10 +3,16 @@ namespace Ops.Engine.UI.Forwarders;
 
 /// <summary>
 /// 主要变量地址符号定义。
+/// 其中 PLC 触发信号都需要以 "PLC_Sign_" 为前缀。 
 /// </summary>
-public sealed class OpsSymbol
+public static class OpsSymbol
 {
     #region PLC To MES
+
+    /// <summary>
+    /// 指定的 PLC 触发信号前缀
+    /// </summary>
+    public const string PLC_Sign_Prefix = "PLC_Sign_";
 
     /// <summary>
     /// 进站请求信号
@@ -78,4 +84,19 @@ public sealed class OpsSymbol
     public const string MES_Message_Error_Desc = nameof(MES_Message_Error_Desc);
 
     #endregion
+
+    /// <summary>
+    /// 获取PLC信号标签的 action 名称。
+    /// </summary>
+    /// <param name="tag">信号标签</param>
+    /// <returns></returns>
+    public static string GetPlcSignAction(string tag)
+    {
+        if (!tag.StartsWith(PLC_Sign_Prefix))
+        {
+            return string.Empty;
+        }
+
+        return tag[PLC_Sign_Prefix.Length..];
+    }
 }
