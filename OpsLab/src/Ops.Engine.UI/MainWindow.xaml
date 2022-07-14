@@ -149,7 +149,7 @@
                     <Grid Grid.Row="1">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Margin="10,0,0,0">版本号：</TextBlock>
-                            <TextBlock Text="12.3.2"/>
+                            <TextBlock Text="{Binding AppVersion}"/>
                             <TextBlock Margin="20,0,0,0">通讯状态：</TextBlock>
                             <TextBlock Foreground="Red" Text="已断开" />
                         </StackPanel>

@@ -18,14 +18,6 @@ namespace Ops.Engine.UI
 
         public App()
         {
-            string logformat = @"{Timestamp:yyyy-MM-dd HH:mm:ss:fff }[{Level:u3}] {Message:lj}{NewLine}{Exception}";
-            Log.Logger = new LoggerConfiguration()
-                          .Enrich.FromLogContext()
-                          .MinimumLevel.Information()
-                          .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Error)
-                          .WriteTo.File("logs\\mlog_.log", outputTemplate: logformat, rollingInterval: RollingInterval.Day)
-                          .WriteTo.Seq("http://localhost:5341") // seq 日志平台，参考 https://docs.datalust.co/docs/using-serilog
-                          .CreateLogger();
         }
 
         static IHostBuilder CreateHostBuilder(string[]? args) =>
@@ -35,7 +27,9 @@ namespace Ops.Engine.UI
                     services.AddHttpClient();
                     ConfigureServices(services, builder.Configuration);
                 })
-                .UseSerilog();
+                .UseSerilog((hostingContext, loggerConfiguration) =>
+                    loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)
+                );
 
         /// <summary>
         /// 获取当前正在使用的 <see cref="App"/> 实例。

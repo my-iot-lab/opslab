@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Extensions.Options;
@@ -86,6 +87,13 @@ public class MainViewModel : ObservableObject
     {
         get => _controlsEnabled;
         set => SetProperty(ref _controlsEnabled, value);
+    }
+
+    private string _appVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+    public string AppVersion
+    {
+        get => _appVersion;
+        set => SetProperty(ref _appVersion, value);
     }
 
     #endregion
