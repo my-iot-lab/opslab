@@ -107,6 +107,12 @@ public partial class AdminTable<TItem> where TItem : class, new()
     [Parameter]
     public bool ShowSearch { get; set; } = true;
 
+    [Parameter]
+    public SearchMode SearchMode { get; set; } = SearchMode.Top;
+
+    [Parameter]
+    public TItem? SearchModel { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

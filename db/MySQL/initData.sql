@@ -21,7 +21,7 @@ INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('消息状态', '未读
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('消息状态', '已读', '1', 0);
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('消息标签', '一般', '0', 0);
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('消息标签', '紧要', '1', 0);
-INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('头像地址', '头像路径', '~/images/uploader/', 0);
+INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('头像地址', '头像路径', '/images/uploader/', 0);
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('头像地址', '头像文件', 'default.jpg', 0);
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('网站样式', '蓝色样式', 'blue.css', 0);
 INSERT INTO Dicts (Category, Name, Code, Define) VALUES ('网站样式', '黑色样式', 'black.css', 0);
