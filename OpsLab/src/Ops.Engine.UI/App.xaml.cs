@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Ops.Exchange.DependencyInjection;
-using Ops.Engine.UI.Forwarders;
 using Ops.Engine.UI.Config;
 using Ops.Engine.UI.ViewModels;
+using Ops.Engine.UI.Forwarders.HttpForwarders;
 
 namespace Ops.Engine.UI
 {

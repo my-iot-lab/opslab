@@ -12,7 +12,7 @@ using Ops.Engine.UI.Config;
 using Ops.Exchange;
 using Ops.Exchange.Forwarder;
 
-namespace Ops.Engine.UI.Forwarders;
+namespace Ops.Engine.UI.Forwarders.HttpForwarders;
 
 internal sealed class OpsHttpReplyForwarder : IReplyForwarder
 {
@@ -66,7 +66,7 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
         try
         {
             using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/{action}", jsonContent, cancellationToken);
-            
+
             stopWatch.Stop();
 
             if (httpResponseMessage.IsSuccessStatusCode)
@@ -116,9 +116,5 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
         {
             Result = ExStatusCode.RemoteException,
         };
-    }
-
-    public void Dispose()
-    {
     }
 }

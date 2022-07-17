@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Ops.Exchange.Forwarder;
 
-namespace Ops.Engine.UI.Forwarders;
+namespace Ops.Engine.UI.Forwarders.LocalForwarders;
 
 /// <summary>
 /// 本地处理请求/响应事件
@@ -14,9 +14,5 @@ internal sealed class OpsLocalReplyForwarder : IReplyForwarder
         // Do somethings ...
 
         return Task.FromResult(new ReplyResult());
-    }
-
-    public void Dispose()
-    {
     }
 }

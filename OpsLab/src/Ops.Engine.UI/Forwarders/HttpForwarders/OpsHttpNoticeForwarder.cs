@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Ops.Engine.UI.Config;
 using Ops.Exchange.Forwarder;
 
-namespace Ops.Engine.UI.Forwarders;
+namespace Ops.Engine.UI.Forwarders.HttpForwarders;
 
 internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
 {
@@ -96,9 +96,5 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
                 data.Schema.Station,
                 data.Tag);
         }
-    }
-
-    public void Dispose()
-    {
     }
 }
