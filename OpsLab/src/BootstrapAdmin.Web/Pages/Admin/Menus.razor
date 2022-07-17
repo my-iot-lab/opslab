@@ -1,0 +1,37 @@
+﻿@page "/Admin/Menus"
+
+<AdminTable TItem="DataAccess.Models.Navigation"
+            IsTree="true" OnTreeExpand="OnTreeExpand" TreeNodeConverter="TreeNodeConverter" ModelEqualityComparer="ModelEqualityComparer"
+            ExtendButtonColumnWidth="200" CustomerSearchModel="SearchModel" OnQueryAsync="OnQueryAsync">
+    <TableToolbarTemplate>
+        <TableToolbarButton TItem="DataAccess.Models.Navigation" Color="Color.Info" Icon="fa fa-sitemap" Text="分配角色" 
+            IsEnableWhenSelectedOneRow="true" IsShow="@AuthorizeButton("assignRole")" 
+            OnClickCallback="menus => OnAssignmentRoles(menus.First())" />
+    </TableToolbarTemplate>
+    <TableColumns>
+        <TableColumn @bind-Field="@context.Name" Filterable="true" Searchable="true" Width="200"></TableColumn>
+        <TableColumn @bind-Field="@context.Order" Width="50"></TableColumn>
+        <TableColumn @bind-Field="@context.Icon" Width="50" Align="Alignment.Center">
+            <Template Context="v">
+                <i class="text-info cell-icon @v.Value"></i>
+            </Template>
+        </TableColumn>
+        <TableColumn @bind-Field="@context.Url"></TableColumn>
+        <TableColumn @bind-Field="@context.Category" Filterable="true"></TableColumn>
+        <TableColumn @bind-Field="@context.Target" Filterable="true" Lookup="Targets"></TableColumn>
+        <TableColumn @bind-Field="@context.IsResource" Filterable="true"></TableColumn>
+        <TableColumn @bind-Field="@context.Application" Filterable="true" Lookup="Apps"></TableColumn>
+    </TableColumns>
+    <EditTemplate Context="v">
+        <MenuEditor Value="v" ParementMenus="ParementMenus" Targets="Targets" Apps="Apps" />
+    </EditTemplate>
+    <RowButtonTemplate>
+        <TableCellButton Size="Size.ExtraSmall" IsShow="@AuthorizeButton("assignRole")" Color="Color.Info" Icon="fa fa-sitemap" Text="分配角色" OnClick="() => OnAssignmentRoles(context)" />
+    </RowButtonTemplate>
+    <CustomerSearchTemplate>
+        @if (context is MenusSearchModel searchModel)
+        {
+            <MenusSearch @bind-Value="searchModel"></MenusSearch>
+        }
+    </CustomerSearchTemplate>
+</AdminTable>

@@ -1,0 +1,38 @@
+﻿<ValidateForm OnValidSubmit="OnSaveCleint" Model="Value">
+    <div class="row g-3 form-inline">
+        <div class="col-6 col-sm-6">
+            <BootstrapInput @bind-Value="Value.AppId" placeholder="不可为空，50字以内" Readonly="Value.AppId != null" ValidateRules="@Validators"></BootstrapInput>
+        </div>
+        <div class="col-6 col-sm-6">
+            <BootstrapInput @bind-Value="Value.AppName" placeholder="不可为空，50字以内" Readonly="Value.AppName != null"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.Title" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.Footer" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.HomeUrl" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.ProfileUrl" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.SettingsUrl" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.NotificationUrl" placeholder="不可为空，50字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.Icon" placeholder="不可为空，2000字以内"></BootstrapInput>
+        </div>
+        <div class="col-12 col-sm-12">
+            <BootstrapInput @bind-Value="Value.Favicon" placeholder="不可为空，2000字以内"></BootstrapInput>
+        </div>
+    </div>
+    <div class="form-footer">
+        <Button ButtonType="ButtonType.Button" Text="关闭" Icon="fa fa-close" Color="Color.Secondary" OnClick="OnClickClose"></Button>
+        <Button ButtonType="ButtonType.Submit" Text="保存" Icon="fa fa-save"></Button>
+    </div>
+</ValidateForm>

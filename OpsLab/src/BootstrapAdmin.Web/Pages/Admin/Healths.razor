@@ -1,0 +1,32 @@
+﻿@page "/Admin/Healths"
+@using Bootstrap.Security.Blazor.HealthChecks
+
+<Card IsShadow="true">
+    <CardHeader>
+        <div class="d-flex align-items-center">
+            <span class="flex-fill">健康检查结果</span>
+            <span class="me-3">@Duration</span>
+            <Tag class="me-3" Color="GetTagColor()" Icon="@GetTagIcon()">@GetTagText()</Tag>
+            <Button class="btn-hc" IsAsync="true" OnClickWithoutRender="OnCheck" Icon="fa fa-fw fa-refresh" Text="重新检查"></Button>
+        </div>
+    </CardHeader>
+    <CardBody>
+        <AdminTable TItem="HealthCheckReportItem" IsFixedHeader="false" @ref="HealthTable" IsMultipleSelect="false"
+                    ShowToolbar="false" ShowEmpty="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="OnQueryAsync">
+            <TableColumns>
+                <TableColumn @bind-Field="@context.Name" Lookup="@GetNameLookup()" Text="检查项"></TableColumn>
+                <TableColumn @bind-Field="@context.Description" Text="描述"></TableColumn>
+                <TableColumn @bind-Field="@context.Duration" Text="时长"></TableColumn>
+                <TableColumn @bind-Field="@context.Exception" Text="异常"></TableColumn>
+                <TableColumn @bind-Field="@context.Status" Text="检查结果">
+                    <Template Context="v">
+                        <Tag Icon="@GetTagIcon(v.Value)" Color="@GetTagColor(v.Value)">@GetTagText(v.Value)</Tag>
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+            <RowButtonTemplate>
+                <TableCellButton Color="Color.Primary" Icon="fa fa-info-circle" Text="明细" OnClick="@(() => OnRowButtonClick(context))" />
+            </RowButtonTemplate>
+        </AdminTable>
+    </CardBody>
+</Card>

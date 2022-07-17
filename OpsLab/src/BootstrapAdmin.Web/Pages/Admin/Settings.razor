@@ -1,0 +1,196 @@
+﻿@page "/Admin/Settings"
+
+<div class="tab-scroll-body">
+    <AdminCard HeaderText="系统名称设置" AuthorizeKey="SaveTitle">
+        <AdminAlert Text="演示系统禁止更改系统名称" IsShow="IsDemo" />
+        <ValidateForm OnValidSubmit="OnSaveTitle" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-6">
+                    <BootstrapInput @bind-Value="@AppInfo.Title" Readonly="IsDemo" />
+                </div>
+                <Block Condition="!IsDemo">
+                    <div class="col-12 col-sm-6 text-end">
+                        <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                    </div>
+                </Block>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="网站页脚设置" AuthorizeKey="SaveFooter">
+        <AdminAlert Text="演示系统禁止更改网站页脚" IsShow="IsDemo" />
+        <ValidateForm OnValidSubmit="OnSaveFooter" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-6">
+                    <BootstrapInput @bind-Value="@AppInfo.Footer" Readonly="IsDemo" />
+                </div>
+                <Block Condition="!IsDemo">
+                    <div class="col-12 col-sm-6 text-end">
+                        <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                    </div>
+                </Block>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="网站样式设置" AuthorizeKey="SaveTheme">
+        <AdminAlert Color="Color.Info">
+            <span>注意：本设置将覆盖 <b><TabLink Url="/Admin/Profiles" Text="个人中心" Icon="fa fa-fa">个人中心</TabLink></b> 中设置的网站样式覆盖本设置</span>
+        </AdminAlert>
+        <ValidateForm OnValidSubmit="OnSaveTheme" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-6">
+                    <Dropdown Items="Themes" @bind-Value="AppInfo.Theme" />
+                </div>
+                <div class="col-12 col-sm-6 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="后台登录首页设置" AuthorizeKey="SaveLogin">
+        <AdminAlert Text="通过此功能进行整个网站的登录界面设置" Color="Color.Info" />
+        <ValidateForm OnValidSubmit="OnSaveLogin" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-6">
+                    <Dropdown Items="Logins" @bind-Value="AppInfo.Login" />
+                </div>
+                <div class="col-12 col-sm-6 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="前台应用设置" AuthorizeKey="SaveFrontApp">
+        <AdminAlert Text="演示系统禁止更改前台应用设置" IsShow="IsDemo" />
+        <ClientList />
+    </AdminCard>
+
+    <AdminCard HeaderText="网站功能设置" AuthorizeKey="SaveAppFeatures">
+        <ValidateForm OnValidSubmit="OnSaveAppFeatures" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.SiderbarSetting" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.TitleSetting" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.FixHeaderSetting" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.HealthCheckSetting" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-12 col-sm-12 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="网站登录设置" AuthorizeKey="SaveAppLogin">
+        <ValidateForm OnValidSubmit="OnSaveSaveAppLogin" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.MobileLogin" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.OAuthLogin" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-12 col-sm-12 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="自动锁屏设置" AuthorizeKey="SaveAppLockScreen">
+        <ValidateForm OnValidSubmit="OnSaveAppLockScreen" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-6 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.AutoLock" OnText="启用" OffText="关闭"></Toggle>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.Interval"></BootstrapInputNumber>
+                </div>
+                <div class="col-12 col-sm-12 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="默认应用设置" AuthorizeKey="DefaultApp">
+        <AdminAlert Text="开启本功能后登录成功时自动导航到第一个已授权前台应用" Color="Color.Info" />
+        <ValidateForm OnValidSubmit="OnSaveApp" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-6">
+                    <Toggle @bind-Value="AppInfo.EnableDefaultApp" OnText="启用" OffText="关闭" />
+                </div>
+                <div class="col-12 col-sm-6 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="地址位置信息" AuthorizeKey="SaveLogCache">
+        <ValidateForm OnValidSubmit="SaveAdressInfo" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-6 col-sm-6">
+                    <Dropdown Items="@IPLocators" @bind-Value="AppInfo.IpLocator" ShowLabel="true"></Dropdown>
+                </div>
+                <div class="col-6 col-sm-6 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="日志缓存设置" AuthorizeKey="SaveAdressInfo">
+        <ValidateForm OnValidSubmit="OnSaveLogCache" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.ExceptionExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.OperateExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.LoginExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.AccessExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.CookieExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-6 col-sm-6">
+                    <BootstrapInputNumber @bind-Value="AppInfo.IPCacheExpired"></BootstrapInputNumber>
+                </div>
+                <div class="col-12 col-sm-12 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+
+    <AdminCard HeaderText="系统演示设置" AuthorizeKey="SaveDemo">
+        <AdminAlert Text="开启本功能后系统运行在演示模式下部分功能禁止操作" Color="Color.Info" />
+        <ValidateForm OnValidSubmit="OnSaveDemo" Model="AppInfo">
+            <div class="row g-3 form-inline">
+                <div class="col-12 col-sm-4">
+                    <Toggle @bind-Value="AppInfo.IsDemo" OnText="启用" OffText="关闭" />
+                </div>
+                <div class="col-12 col-sm-4">
+                    <BootstrapPassword @bind-Value="@AppInfo.AuthCode" />
+                </div>
+                <div class="col-12 col-sm-4 text-end">
+                    <Button ButtonType="ButtonType.Submit" Icon="fa fa-save" Text="保存" />
+                </div>
+            </div>
+        </ValidateForm>
+    </AdminCard>
+</div>
