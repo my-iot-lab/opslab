@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BootstrapBlazor.Chart" Version="6.0.0" />
+    <PackageReference Include="BootstrapBlazor.FontAwesome" Version="6.0.1" />
     <PackageReference Include="BootstrapBlazor.Middleware" Version="1.0.0" />
     <PackageReference Include="BootstrapBlazor.TableExport" Version="6.0.0" />
     <PackageReference Include="Longbow.Logging" Version="6.0.2" />
