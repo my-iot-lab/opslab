@@ -131,6 +131,9 @@ public partial class AdminTable<TItem> where TItem : class, new()
     [Parameter]
     public bool ShowExtendButtons { get; set; } = true;
 
+    [Parameter]
+    public bool ShowExportButton { get; set; } = false;
+
     /// <summary>
     /// 
     /// </summary>

@@ -41,6 +41,7 @@ public class Navigation
     /// 获得/设置 菜单URL地址
     /// </summary>
     [NotNull]
+    [Required]
     [Display(Name = "地址")]
     public string? Url { get; set; }
 
