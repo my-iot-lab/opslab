@@ -82,12 +82,7 @@ public sealed class DriverConnector
     /// <summary>
     /// 驱动状态
     /// </summary>
-    public DriverStatus DriverStatus = DriverStatus.Normal;
-
-    /// <summary>
-    /// 是否挂起
-    /// </summary>
-    public bool IsSuspended { get; internal set; }
+    public DriverStatus DriverStatus { get; internal set; } = DriverStatus.Normal;
 
     public DriverConnector(string id, string host, int port, IReadWriteNet driver)
     {

@@ -7,7 +7,7 @@ using Serilog;
 using Ops.Exchange.DependencyInjection;
 using Ops.Engine.UI.Config;
 using Ops.Engine.UI.ViewModels;
-using Ops.Engine.UI.Forwarders.HttpForwarders;
+using Ops.Engine.UI.Forwarders;
 
 namespace Ops.Engine.UI
 {
@@ -81,12 +81,10 @@ namespace Ops.Engine.UI
             // options
             services.Configure<OpsUIOptions>(configuration.GetSection("OpsUI"));
 
-            services.AddOpsExchange(configuration, options =>
-            {
-                options.AddNoticeForword<OpsHttpNoticeForwarder>();
-                options.AddReplyForword<OpsHttpReplyForwarder>();
-            });
+            services.AddOpsExchange(configuration)
+                    .AddHttpForwarder();
 
+            // 添加 ViewModel
             services.AddTransient<MainViewModel>();
             services.AddTransient<HomeViewModel>();
             services.AddTransient<Home2ViewModel>();

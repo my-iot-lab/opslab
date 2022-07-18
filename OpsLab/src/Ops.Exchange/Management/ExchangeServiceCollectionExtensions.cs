@@ -14,31 +14,6 @@ namespace Ops.Exchange.DependencyInjection;
 
 public class OpsExchangeOptions
 {
-    public Type? NoticeForwarderType { get; private set; }
-
-    public Type? ReplyForwarderType { get; private set; }
-
-    /// <summary>
-    /// 添加通知事件处理器。
-    /// <para>对象会采用 Scope 作用域。</para>
-    /// </summary>
-    /// <typeparam name="TNoticeForwarder"></typeparam>
-    public void AddNoticeForword<TNoticeForwarder>()
-        where TNoticeForwarder : INoticeForwarder
-    {
-        NoticeForwarderType = typeof(TNoticeForwarder);
-    }
-
-    /// <summary>
-    /// 添加触发事件处理器。
-    /// <para>对象会采用 Scope 作用域。</para>
-    /// </summary>
-    /// <typeparam name="TReplyForwarder"></typeparam>
-    public void AddReplyForword<TReplyForwarder>()
-        where TReplyForwarder : IReplyForwarder
-    {
-        ReplyForwarderType = typeof(TReplyForwarder);
-    }
 }
 
 public static class ExchangeServiceCollectionExtensions
@@ -47,7 +22,7 @@ public static class ExchangeServiceCollectionExtensions
     /// 添加 OPS Exchange 服务
     /// </summary>
     /// <returns></returns>
-    public static IServiceCollection AddOpsExchange(this IServiceCollection services, IConfiguration configuration, Action<OpsExchangeOptions> configureDelegate)
+    public static IServiceCollection AddOpsExchange(this IServiceCollection services, IConfiguration configuration, Action<OpsExchangeOptions>? configureDelegate = null)
     {
         // options
         services.Configure<OpsConfig>(configuration.GetSection("Ops"));
@@ -69,10 +44,7 @@ public static class ExchangeServiceCollectionExtensions
 
         // Options
         OpsExchangeOptions exOptions = new();
-        configureDelegate(exOptions);
-
-        services.AddScoped(typeof(INoticeForwarder), exOptions.NoticeForwarderType ?? typeof(NullNoticeForwarder));
-        services.AddScoped(typeof(IReplyForwarder), exOptions.ReplyForwarderType ?? typeof(NullReplyForwarder));
+        configureDelegate?.Invoke(exOptions);
 
         return services;
     }

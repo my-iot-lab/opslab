@@ -9,31 +9,38 @@ namespace Ops.Engine.UI.Forwarders.SignalRForwarders;
 
 internal sealed class OpsSignalRNoticeForwarder : INoticeForwarder
 {
-    public readonly SignalRForwarderManager _signalRForwarderManager;
+    public readonly SignalRForwarderManager _signalRManager;
     private readonly ILogger _logger;
 
     public OpsSignalRNoticeForwarder(
         SignalRForwarderManager signalRForwarderManager,
         ILogger<OpsSignalRNoticeForwarder> logger)
     {
-        _signalRForwarderManager = signalRForwarderManager;
+        _signalRManager = signalRForwarderManager;
         _logger = logger;
+
+        _signalRManager.Connection.On<HttpResult>("NoticeCallback", OnCallback); // 可以重复注册（会更新）
     }
 
     public async Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
-        // 可以重复注册（会更新）
-        _signalRForwarderManager.Connection.On<HttpResult>("NoticeCallback", result =>
-        {
-
-        });
-
         try
         {
-            await _signalRForwarderManager.Connection.InvokeAsync("Notice", data, cancellationToken);
+            await _signalRManager.Connection.InvokeAsync("Notice", data, cancellationToken);
         }
         catch (Exception)
         {
+
+        }
+    }
+
+    void OnCallback(HttpResult httpResult)
+    {
+        if (httpResult?.IsOk() != true)
+        {
+            // 记录数据推送失败信息
+
+            return;
         }
     }
 }
