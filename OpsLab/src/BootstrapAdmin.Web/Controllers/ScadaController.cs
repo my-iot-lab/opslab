@@ -6,7 +6,6 @@ using BootstrapAdmin.Web.Utils;
 
 namespace BootstrapAdmin.Web.Controllers;
 
-[AllowAnonymous]
 [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
 public class ScadaController : Controller
 {
@@ -22,7 +21,7 @@ public class ScadaController : Controller
     /// </summary>
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult Inbound(ApiData data)
+    public IActionResult Inbound([FromBody] ApiData data)
     {
         ReBuild(data);
 
@@ -34,7 +33,7 @@ public class ScadaController : Controller
     /// </summary>
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult Outbound(ApiData data)
+    public IActionResult Outbound([FromBody] ApiData data)
     {
         ReBuild(data);
 
@@ -44,8 +43,9 @@ public class ScadaController : Controller
     /// <summary>
     /// 扫关键物料
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult MaterialCritical(ApiData data)
+    public IActionResult MaterialCritical([FromBody] ApiData data)
     {
         ReBuild(data);
 
@@ -57,7 +57,7 @@ public class ScadaController : Controller
     /// </summary>
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult MaterialBatch(ApiData data)
+    public IActionResult MaterialBatch([FromBody] ApiData data)
     {
         ReBuild(data);
 
@@ -69,7 +69,7 @@ public class ScadaController : Controller
     /// </summary>
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public IActionResult Notice(ApiData data)
+    public IActionResult Notice([FromBody] ApiData data)
     {
         ReBuild(data);
 

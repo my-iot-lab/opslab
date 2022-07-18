@@ -76,7 +76,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
             }
 
             // 记录数据推送失败
-            _logger.LogInformation("[Notice] HTTP 数据推送失败，RequestId：{0}，工站：{1}, 触发点：{2}，HTTP状态码：{3}",
+            _logger.LogError("[Notice] HTTP 数据推送失败，RequestId：{0}，工站：{1}, 触发点：{2}，HTTP状态码：{3}",
                    data.RequestId,
                    data.Schema.Station,
                    data.Tag,

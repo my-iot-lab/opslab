@@ -96,6 +96,13 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                             result?.Message,
                             stopWatch.Elapsed.TotalMilliseconds);
             }
+
+            // 记录数据推送失败
+            _logger.LogError("[Reply] HTTP 数据推送失败，RequestId：{0}，工站：{1}, 触发点：{2}，HTTP状态码：{3}",
+                   data.RequestId,
+                   data.Schema.Station,
+                   data.Tag,
+                   (int)httpResponseMessage.StatusCode);
         }
         catch (TaskCanceledException ex)
         {

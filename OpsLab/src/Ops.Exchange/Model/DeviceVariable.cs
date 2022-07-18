@@ -1,4 +1,6 @@
-﻿namespace Ops.Exchange.Model;
+﻿using System.Text.Json.Serialization;
+
+namespace Ops.Exchange.Model;
 
 /// <summary>
 /// 设备 PLC 地址变量
@@ -24,6 +26,7 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     /// <summary>
     /// 地址变量类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public VariableType VarType { get; }
 
     /// <summary>
@@ -34,6 +37,7 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     /// <summary>
     /// 变量类型标识。
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public VariableFlag Flag { get; }
 
     /// <summary>

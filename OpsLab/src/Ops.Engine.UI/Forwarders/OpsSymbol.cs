@@ -1,5 +1,4 @@
-﻿
-namespace Ops.Engine.UI.Forwarders;
+﻿namespace Ops.Engine.UI.Forwarders;
 
 /// <summary>
 /// 主要变量地址符号定义。

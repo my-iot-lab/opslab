@@ -1,4 +1,6 @@
-﻿namespace Ops.Exchange.Model;
+﻿using System.Text.Json.Serialization;
+
+namespace Ops.Exchange.Model;
 
 /// <summary>
 /// 设备地址。
@@ -39,6 +41,7 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
     /// <summary>
     /// 设备驱动类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public DriverModel DriverModel { get; }
 
     public DeviceSchema(string line, string lineName, string station, string stationName, string host, DriverModel driverModel)
