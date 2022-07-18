@@ -32,6 +32,9 @@ namespace Microsoft.Extensions.DependencyInjection
             // 增加 BootstrapBlazor 组件
             services.AddBootstrapBlazor();
 
+            // 增加 Table Excel 导出服务
+            services.AddBootstrapBlazorTableExcelExport();
+
             // 配置地理位置定位器
             services.ConfigureIPLocatorOption(op => op.LocatorFactory = LocatorHelper.CreateLocator);
 
