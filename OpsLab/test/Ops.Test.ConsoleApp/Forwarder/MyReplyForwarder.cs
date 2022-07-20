@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Ops.Exchange.Forwarder;
+using Ops.Exchange.Utils;
 
 namespace Ops.Test.ConsoleApp.Forwarder
 {
@@ -14,24 +15,20 @@ namespace Ops.Test.ConsoleApp.Forwarder
 
         public async Task<ReplyResult> ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
         {
+            var dataString = System.Text.Json.JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value }));
             _logger.LogInformation("请求数据 -- RequestId：{0}，工站：{1}, 数据：{2}",
                 data.RequestId,
                 data.Schema.Station,
-                string.Join(";", data.Values.Select(s => $"{s.Tag}={s.Value}")));
+                dataString);
 
-            await Task.Delay(new Random().Next(1000, 10000), cancellationToken);
+            await Task.Delay(new Random().Next(0, 8) * 1000, cancellationToken);
 
             var result = new ReplyResult();
-            //result.AddValue("Normal_1", (short)new Random().Next(10, 255));
-            //result.AddValue("Normal_2", (short)new Random().Next(10, 255));
-            //result.AddValue("Normal_3", (short)new Random().Next(10, 255));
+            result.AddValue("MES_ProdTask_Productcode", $"Hello{new Random().Next(100, 999)}");
+            result.AddValue("MES_ProdTask_Amount", (short)new Random().Next(10, 255));
+            result.AddValue("MES_ProdTask_Prior", (short)new Random().Next(10, 255));
 
             return result;
-        }
-
-        public void Dispose()
-        {
-            
         }
     }
 }

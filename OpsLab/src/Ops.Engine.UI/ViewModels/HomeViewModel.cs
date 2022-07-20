@@ -24,7 +24,7 @@ internal sealed class HomeViewModel : ObservableObject
 
         StartCommand = new RelayCommand(async () =>
         {
-            await Start();
+            await StartAsync();
         });
 
         StopCommand = new RelayCommand(() =>
@@ -32,12 +32,12 @@ internal sealed class HomeViewModel : ObservableObject
             Stop();
         });
 
-        InitAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        Init();
     }
 
-    async Task InitAsync()
+    void Init()
     {
-        var deviceInfos = await _deviceInfoManager.GetAllAsync();
+        var deviceInfos = _deviceInfoManager.GetAll();
         foreach (var deviceInfo in deviceInfos)
         {
             Devices.Add(new DeviceState
@@ -122,7 +122,7 @@ internal sealed class HomeViewModel : ObservableObject
     /// <summary>
     /// 启动监听
     /// </summary>
-    private async Task Start()
+    private async Task StartAsync()
     {
         if (Devices.Count == 0)
         {

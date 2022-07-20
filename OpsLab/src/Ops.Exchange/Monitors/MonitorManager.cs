@@ -394,8 +394,16 @@ public sealed class MonitorManager : IDisposable
                 }
                 break;
             case VariableType.String or VariableType.S7String:
-                var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
-                SetValue(resultString2, data);
+                if (driver is SiemensS7Net driver1)
+                {
+                    var resultString1 = await driver1.ReadStringAsync(deviceVariable.Address); // S7 自动计算长度
+                    SetValue(resultString1, data);
+                } 
+                else
+                {
+                    var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    SetValue(resultString2, data);
+                }
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
@@ -504,19 +512,16 @@ public sealed class MonitorManager : IDisposable
                 }
                 break;
             case VariableType.String or VariableType.S7String:
-                if (data.Length > 0)
-                {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value), data.Length);
-                }
-                else
-                {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
-                }
+                await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
                 {
                     await driver2.WriteWStringAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
+                }
+                else
+                {
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
                 }
                 break;
             default:

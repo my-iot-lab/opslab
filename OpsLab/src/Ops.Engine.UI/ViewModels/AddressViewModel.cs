@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -16,17 +15,17 @@ internal sealed class AddressViewModel : ObservableObject
     {
         _deviceInfoManager = deviceInfoManager;
 
-        SelectedStationCommand = new RelayCommand(async () =>
+        SelectedStationCommand = new RelayCommand(() =>
         {
-            await SelectStation();
+            SelectStation();
         });
 
-        InitAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        Init();
     }
 
-    async Task InitAsync()
+    void Init()
     {
-        var deviceInfos = await _deviceInfoManager.GetAllAsync();
+        var deviceInfos = _deviceInfoManager.GetAll();
         foreach (var deviceInfo in deviceInfos)
         {
             _stations.Add(deviceInfo.Schema);
@@ -69,11 +68,11 @@ internal sealed class AddressViewModel : ObservableObject
 
     #region Private
 
-    private async Task SelectStation()
+    private void SelectStation()
     {
         DeviceVariables.Clear();
 
-        var deviceInfo = await _deviceInfoManager.GetAsync(SelectedStationValue!.Line, SelectedStationValue!.Station);
+        var deviceInfo = _deviceInfoManager.Get(SelectedStationValue!.Line, SelectedStationValue!.Station);
         foreach (var variable in deviceInfo!.Variables)
         {
             DeviceVariables.Add(variable);

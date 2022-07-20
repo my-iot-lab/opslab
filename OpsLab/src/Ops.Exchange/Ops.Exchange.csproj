@@ -8,9 +8,9 @@
     <PackageProjectUrl>https://github.com/my-iot-lab/opslab.git</PackageProjectUrl>
     <RepositoryUrl>https://github.com/my-iot-lab/opslab.git</RepositoryUrl>
     <PackageTags></PackageTags>
-	<FileVersion>0.2.5</FileVersion>
-	<AssemblyVersion>0.2.5</AssemblyVersion>
-	<Version>0.2.5</Version>
+	<FileVersion>0.2.7</FileVersion>
+	<AssemblyVersion>0.2.7</AssemblyVersion>
+	<Version>0.2.7</Version>
 	<Authors>Gang.Yang</Authors>
 	<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>

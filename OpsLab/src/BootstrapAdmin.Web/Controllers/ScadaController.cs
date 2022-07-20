@@ -37,7 +37,7 @@ public class ScadaController : Controller
     {
         ReBuild(data);
 
-        return Ok();
+        return Ok(ApiResult.Ok());
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class ScadaController : Controller
     {
         ReBuild(data);
 
-        return Ok();
+        return Ok(ApiResult.Ok());
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class ScadaController : Controller
     {
         ReBuild(data);
 
-        return Ok();
+        return Ok(ApiResult.Ok());
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public class ScadaController : Controller
     {
         ReBuild(data);
 
-        return Ok();
+        return Ok(ApiResult.Ok());
     }
 
     #region privates

@@ -931,25 +931,30 @@ public class SiemensS7Net : NetworkDeviceBase
 			{
 				return operateResult;
 			}
+
 			if (operateResult.Content[0] == byte.MaxValue)
 			{
 				return new OperateResult<string>(ErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
+
 			if (operateResult.Content[0] == 0)
 			{
 				operateResult.Content[0] = 254;
 			}
+
 			if (value.Length > operateResult.Content[0])
 			{
 				return new OperateResult<string>(ErrorCode.SiemensStringlengthIsToolongThanPlcDefined.Desc());
 			}
+
 			return Write(address, SoftBasic.SpliceArray(new byte[2]
 			{
 				operateResult.Content[0],
 				(byte)value.Length,
 			}, array));
 		}
-		return Write(address, SoftBasic.SpliceArray<byte>(new byte[1] { (byte)value.Length }, array));
+
+		return Write(address, SoftBasic.SpliceArray(new byte[1] { (byte)value.Length }, array));
 	}
 
 	/// <summary>

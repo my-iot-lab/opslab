@@ -3,17 +3,23 @@
 /// <summary>
 /// Api 调用返回结果
 /// </summary>
-public class ApiResult
+public sealed class ApiResult
 {
     /// <summary>
-    /// 状态码，1 表示成功。
+    /// 成功状态。
     /// </summary>
-    public short Code { get; set; }
+    public const short Success = 1;
+
+    /// <summary>
+    /// 状态码，1 表示成功。
+    /// 注：状态码不要设置为 0。
+    /// </summary>
+    public short Code { get; set; } = Success;
 
     /// <summary>
     /// 错误消息
     /// </summary>
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     /// 要回执的数据集合。注意：回写的数据类型必须与地址变量定义的一致。
@@ -30,12 +36,18 @@ public class ApiResult
         ((Dictionary<string, object>)Values).Add(tag, value);
     }
 
-    public static ApiResult Ok(IDictionary<string, object> values = null)
+    public static ApiResult Ok(IDictionary<string, object>? values = null)
     {
-        return From(1, values);
+        return From(Success, values);
     }
 
-    public static ApiResult From(short code, IDictionary<string, object> values = null)
+    /// <summary>
+    /// 转换为 <see cref="ApiResult"/> 对象
+    /// </summary>
+    /// <param name="code">状态</param>
+    /// <param name="values">要回写的数据集合</param>
+    /// <returns></returns>
+    public static ApiResult From(short code, IDictionary<string, object>? values = null)
     {
         var resp = new ApiResult()
         {
@@ -51,10 +63,5 @@ public class ApiResult
         }
 
         return resp;
-    }
-
-    public virtual string GetJson()
-    {
-        return System.Text.Json.JsonSerializer.Serialize(this);
     }
 }

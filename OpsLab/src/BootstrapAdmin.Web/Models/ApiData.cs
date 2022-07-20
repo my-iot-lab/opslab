@@ -1,4 +1,6 @@
-﻿namespace BootstrapAdmin.Web.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace BootstrapAdmin.Web.Models;
 
 /// <summary>
 /// 请求数据
@@ -75,6 +77,7 @@ public sealed class PayloadData
     /// <summary>
     /// 地址变量类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public VariableType VarType { get; set; }
 
     /// <summary>

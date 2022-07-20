@@ -26,6 +26,19 @@ public sealed class DeviceInfoManager
     /// 获取所有设备信息
     /// </summary>
     /// <returns></returns>
+    public List<DeviceInfo> GetAll()
+    {
+        return _cache.GetOrCreate(CacheKey, cacheEntry =>
+        {
+            //cacheEntry.SetSlidingExpiration(TimeSpan.FromDays(1));
+            return GetFromLocal();
+        });
+    }
+
+    /// <summary>
+    /// 获取所有设备信息
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<DeviceInfo>> GetAllAsync()
     {
         return await _cache.GetOrCreateAsync(CacheKey, async cacheEntry =>
@@ -52,9 +65,9 @@ public sealed class DeviceInfoManager
     /// <param name="line">产线编号</param>
     /// <param name="station">设备工站编号</param>
     /// <returns></returns>
-    public async Task<DeviceInfo?> GetAsync(string line, string station)
+    public DeviceInfo? Get(string line, string station)
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = GetAll();
         return deviceInfos.SingleOrDefault(s => s.Schema.Line == line && s.Schema.Station == station);
     }
 
@@ -79,9 +92,9 @@ public sealed class DeviceInfoManager
     /// 更新设备
     /// </summary>
     /// <param name="deviceInfo">要更新的设备信息</param>
-    public async Task<(bool ok, string err)> UpdateAsync(DeviceInfo deviceInfo)
+    public (bool ok, string err) Update(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = GetAll();
         if (deviceInfos.Any())
         {
             if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
@@ -100,9 +113,9 @@ public sealed class DeviceInfoManager
     /// 删除设备
     /// </summary>
     /// <param name="deviceInfo"></param>
-    public async Task RemoveAsync(DeviceInfo deviceInfo)
+    public void Remove(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = GetAll();
         if (deviceInfos.Any())
         {
             deviceInfos.RemoveAll(s => s.Name == deviceInfo.Name);
@@ -117,36 +130,32 @@ public sealed class DeviceInfoManager
     /// <summary>
     /// 将缓存中的数据写入到文件中
     /// </summary>
-    public async Task FlushAsync(CancellationToken cancellationToken = default)
+    public void Flush()
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = GetAll();
         foreach (var deviceInfo in deviceInfos)
         {
-            await FlushAsync(deviceInfo, cancellationToken);
+            Flush(deviceInfo);
         }
     }
 
-    public async Task FlushAsync(DeviceInfo deviceInfo, CancellationToken cancellationToken = default)
+    public void Flush(DeviceInfo deviceInfo)
     {
         var dir = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir);
         var fileName = $"{deviceInfo.Name}.json";
 
         var content = JsonSerializer.Serialize(deviceInfo, new JsonSerializerOptions { WriteIndented = true });
         var path = Path.Combine(dir, fileName);
-        await File.WriteAllTextAsync(path, content, cancellationToken);
+        File.WriteAllText(path, content);
     }
 
-    /// <summary>
-    /// 从本地存储获取设备信息。
-    /// </summary>
-    /// <returns></returns>
-    private Task<List<DeviceInfo>> GetFromLocalAsync()
+    private List<DeviceInfo> GetFromLocal()
     {
         var dir = Path.Combine(AppContext.BaseDirectory, _config.DeviceDir);
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
-            return Task.FromResult(new List<DeviceInfo>());
+            return new List<DeviceInfo>(0);
         }
 
         var filePaths = Directory.GetFiles(dir);
@@ -158,6 +167,15 @@ public sealed class DeviceInfoManager
             deviceInfos.Add(deviceInfo!);
         }
 
-        return Task.FromResult(deviceInfos);
+        return deviceInfos;
+    }
+
+    /// <summary>
+    /// 从本地存储获取设备信息。
+    /// </summary>
+    /// <returns></returns>
+    private Task<List<DeviceInfo>> GetFromLocalAsync()
+    {
+        return Task.FromResult(GetFromLocal());
     }
 }

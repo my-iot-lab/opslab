@@ -71,8 +71,9 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true }; // 需忽略大小写才能反序列成功
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
-                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, cancellationToken: cancellationToken);
+                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, options, cancellationToken: cancellationToken);
                 if (result?.IsOk() == true)
                 {
                     // 记录成功回执信息
@@ -83,18 +84,20 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                                 result.Code,
                                 JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value })),
                                 stopWatch.Elapsed.TotalMilliseconds);
-
-                    return result.ToReplyResult();
+                }
+                else
+                {
+                    // 记录数据推送失败
+                    _logger.LogError("[Reply] HTTP 数据推送处理失败，RequestId：{0}，工站：{1}, 触发点：{2}，错误状态码：{3}，错误消息：{4}，Elapsed：{5}ms",
+                                data.RequestId,
+                                data.Schema.Station,
+                                data.Tag,
+                                result?.Code,
+                                result?.Message,
+                                stopWatch.Elapsed.TotalMilliseconds);
                 }
 
-                // 记录数据推送失败
-                _logger.LogError("[Reply] HTTP 数据推送处理失败，RequestId：{0}，工站：{1}, 触发点：{2}，错误状态码：{3}，错误消息：{4}，Elapsed：{5}ms",
-                            data.RequestId,
-                            data.Schema.Station,
-                            data.Tag,
-                            result?.Code,
-                            result?.Message,
-                            stopWatch.Elapsed.TotalMilliseconds);
+                return result!.ToReplyResult();
             }
 
             // 记录数据推送失败
