@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ops.Exchange.DependencyInjection;
+using Ops.Exchange.Forwarder;
 using Ops.Test.ConsoleApp.Forwarder;
 using Ops.Test.ConsoleApp.Suits;
 using Serilog;
@@ -20,9 +21,13 @@ try
     var host = CreateHostBuilder(null).Build();
     host.Start();
 
-    var modbusTcpSuit = host.Services.GetRequiredService<ModbusTcpSuit>();
-    await modbusTcpSuit.InitAsync();
-    await modbusTcpSuit.RunAsync();
+    //var modbusTcpSuit = host.Services.GetRequiredService<ModbusTcpSuit>();
+    //await modbusTcpSuit.InitAsync();
+    //await modbusTcpSuit.RunAsync();
+
+    var s7Suit = host.Services.GetRequiredService<SimaticS7Suit>();
+    await s7Suit.InitAsync();
+    await s7Suit.RunAsync();
 
     Console.ReadLine();
 }
@@ -44,11 +49,9 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     // 注册后台服务
     //services.AddHostedService<Worker>();
 
-    services.AddOpsExchange(configuration, options =>
-    {
-        options.AddNoticeForword<MyNoticeForwarder>();
-        options.AddReplyForword<MyReplyForwarder>();
-    });
+    services.AddOpsExchange(configuration);
+    services.AddSingleton<INoticeForwarder, MyNoticeForwarder>();
+    services.AddSingleton<IReplyForwarder, MyReplyForwarder>();
 
-    services.AddTransient<ModbusTcpSuit>();
+    services.AddTransient<SimaticS7Suit>();
 }

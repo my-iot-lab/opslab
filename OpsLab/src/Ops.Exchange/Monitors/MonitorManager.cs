@@ -221,11 +221,11 @@ public sealed class MonitorManager : IDisposable
                     _ = Task.Run(async () =>
                     {
                         // 若连接驱动不处于连接状态，会循环等待。
-                        // 注：此处 Driver Connector 可能有被清空的情况出现，还需做一些其他的校验。
+                        // TODO: 注：此处 Driver Connector 可能有被清空的情况出现，还需做一些其他的校验。
                         var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                         while (!_cts.Token.IsCancellationRequested)
                         {
-                            if (!connector.CanConnect)
+                            if (connector.CanConnect)
                             {
                                 break;
                             }

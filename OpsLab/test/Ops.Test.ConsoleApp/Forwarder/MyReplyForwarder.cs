@@ -22,9 +22,9 @@ namespace Ops.Test.ConsoleApp.Forwarder
             await Task.Delay(new Random().Next(1000, 10000), cancellationToken);
 
             var result = new ReplyResult();
-            result.AddValue("Normal_1", (short)new Random().Next(10, 255));
-            result.AddValue("Normal_2", (short)new Random().Next(10, 255));
-            result.AddValue("Normal_3", (short)new Random().Next(10, 255));
+            //result.AddValue("Normal_1", (short)new Random().Next(10, 255));
+            //result.AddValue("Normal_2", (short)new Random().Next(10, 255));
+            //result.AddValue("Normal_3", (short)new Random().Next(10, 255));
 
             return result;
         }
