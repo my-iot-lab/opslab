@@ -71,8 +71,8 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true }; // 需忽略大小写才能反序列成功
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true }; // 需忽略大小写才能反序列成功
                 var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, options, cancellationToken: cancellationToken);
                 if (result?.IsOk() == true)
                 {

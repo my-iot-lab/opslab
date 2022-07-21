@@ -52,7 +52,8 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
-                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, cancellationToken: cancellationToken);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true }; // 需忽略大小写才能反序列成功
+                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, options, cancellationToken: cancellationToken);
                 if (result?.IsOk() != true)
                 {
                     // 记录数据推送失败信息
