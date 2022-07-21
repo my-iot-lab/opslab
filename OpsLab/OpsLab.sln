@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.Web.Core", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.Web", "src\BootstrapAdmin.Web\BootstrapAdmin.Web.csproj", "{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BootstrapAdmin.DataAccess.EFCore", "src\BootstrapAdmin.DataAccess.EFCore\BootstrapAdmin.DataAccess.EFCore.csproj", "{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,6 +135,7 @@ Global
 		{A005B84B-04FA-4351-959A-73A581EF8A08} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 		{3FDD0EFE-FF34-4FC6-8997-227F5502C13A} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E} = {110C5F78-D337-432F-B885-E3E2F958F54C}
+		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5A07B7A-25FB-4EEC-A4DA-6BA9113A3C43}

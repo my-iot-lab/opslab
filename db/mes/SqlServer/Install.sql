@@ -128,7 +128,7 @@ CREATE TABLE [dbo].[ArchiveItem](
 	[Id] 				[int] IDENTITY(1,1) NOT NULL,
 	[ArchiveId]			[int] NOT NULL, -- 主数据 ID
 	[Tag]				[varchar](32) NULL, -- 触发点
-	[Item] 				[nvarchar](64) NOT NULL, -- 名称
+	[Name] 				[nvarchar](64) NOT NULL, -- 名称
 	[Value] 			[varchar](1024) NULL, -- 值，数组以逗号隔开
 	[IsArray]			[bit] NOT NULL DEFAULT 0, -- 是否是数组值
 	[Higher]			[DECIMAL(12, 2)] NULL, -- 上限值
