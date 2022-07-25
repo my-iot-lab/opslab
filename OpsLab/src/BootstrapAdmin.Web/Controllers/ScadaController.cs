@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BootstrapAdmin.Web.Models;
-using BootstrapAdmin.Web.Utils;
+using BootstrapAdmin.Web.Core.Models;
+using BootstrapAdmin.Web.Core.Utils;
 
 namespace BootstrapAdmin.Web.Controllers;
 
@@ -58,6 +58,32 @@ public class ScadaController : Controller
     [AllowAnonymous]
     [HttpPost("[action]")]
     public IActionResult MaterialBatch([FromBody] ApiData data)
+    {
+        ReBuild(data);
+
+        return Ok(ApiResult.Ok());
+    }
+
+    /// <summary>
+    /// 自定义的触发点。
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpPost("[action]")]
+    public IActionResult Custom([FromBody] ApiData data)
+    {
+        ReBuild(data);
+
+        return Ok(ApiResult.Ok());
+    }
+
+    /// <summary>
+    /// 警报
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("[action]")]
+    public IActionResult Alarm([FromBody] ApiData data)
     {
         ReBuild(data);
 

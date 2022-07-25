@@ -18,12 +18,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BootstrapAdmin.DataAccess.PetaPoco\BootstrapAdmin.DataAccess.PetaPoco.csproj" />
+    <ProjectReference Include="..\BootstrapAdmin.DataAccess.FreeSql\BootstrapAdmin.DataAccess.FreeSql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="BootstrapBlazor.Components" />
     <Using Include="Microsoft.AspNetCore.Components" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="logs\" />
   </ItemGroup>
 
 </Project>

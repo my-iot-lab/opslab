@@ -35,13 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.Caching", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.DataAccess.Models", "src\BootstrapAdmin.DataAccess.Models\BootstrapAdmin.DataAccess.Models.csproj", "{807F14BF-007C-4301-B007-1BC55A10A1D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.DataAccess.PetaPoco", "src\BootstrapAdmin.DataAccess.PetaPoco\BootstrapAdmin.DataAccess.PetaPoco.csproj", "{A005B84B-04FA-4351-959A-73A581EF8A08}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.Web.Core", "src\BootstrapAdmin.Web.Core\BootstrapAdmin.Web.Core.csproj", "{3FDD0EFE-FF34-4FC6-8997-227F5502C13A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.Web", "src\BootstrapAdmin.Web\BootstrapAdmin.Web.csproj", "{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BootstrapAdmin.DataAccess.EFCore", "src\BootstrapAdmin.DataAccess.EFCore\BootstrapAdmin.DataAccess.EFCore.csproj", "{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BootstrapAdmin.DataAccess.FreeSql", "src\BootstrapAdmin.DataAccess.FreeSql\BootstrapAdmin.DataAccess.FreeSql.csproj", "{B933F97B-9E80-4094-A5AF-3DAB925E08A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,10 +95,6 @@ Global
 		{807F14BF-007C-4301-B007-1BC55A10A1D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{807F14BF-007C-4301-B007-1BC55A10A1D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{807F14BF-007C-4301-B007-1BC55A10A1D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A005B84B-04FA-4351-959A-73A581EF8A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A005B84B-04FA-4351-959A-73A581EF8A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A005B84B-04FA-4351-959A-73A581EF8A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A005B84B-04FA-4351-959A-73A581EF8A08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3FDD0EFE-FF34-4FC6-8997-227F5502C13A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3FDD0EFE-FF34-4FC6-8997-227F5502C13A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FDD0EFE-FF34-4FC6-8997-227F5502C13A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -109,10 +103,10 @@ Global
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B933F97B-9E80-4094-A5AF-3DAB925E08A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B933F97B-9E80-4094-A5AF-3DAB925E08A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B933F97B-9E80-4094-A5AF-3DAB925E08A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B933F97B-9E80-4094-A5AF-3DAB925E08A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,10 +126,9 @@ Global
 		{1029383C-588A-4678-AB25-34453224A99C} = {67FF79E8-1480-492D-A6BE-59EA0D8A85B7}
 		{BEBD9A73-45E8-41B8-9E97-42A72A826F35} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 		{807F14BF-007C-4301-B007-1BC55A10A1D6} = {110C5F78-D337-432F-B885-E3E2F958F54C}
-		{A005B84B-04FA-4351-959A-73A581EF8A08} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 		{3FDD0EFE-FF34-4FC6-8997-227F5502C13A} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 		{C2883E03-26EA-462C-9DC1-BB5F946ABB2E} = {110C5F78-D337-432F-B885-E3E2F958F54C}
-		{4C9F5B43-A0F0-4AA3-828D-B6410FF29D73} = {110C5F78-D337-432F-B885-E3E2F958F54C}
+		{B933F97B-9E80-4094-A5AF-3DAB925E08A4} = {110C5F78-D337-432F-B885-E3E2F958F54C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5A07B7A-25FB-4EEC-A4DA-6BA9113A3C43}

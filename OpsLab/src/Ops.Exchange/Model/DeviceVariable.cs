@@ -30,7 +30,12 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     public VariableType VarType { get; }
 
     /// <summary>
-    /// 地址描述。
+    /// 变量名称
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// 变量描述。
     /// </summary>
     public string? Desc { get; }
 
@@ -51,16 +56,23 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     public int PollingInterval { get; set; }
 
     /// <summary>
+    /// 是否是附加数据。
+    /// <para>注：对于部分数据，主数据表示主表中存储的，附加标识表示是额外增项。</para>
+    /// </summary>
+    public bool IsAdditional { get; set; }
+
+    /// <summary>
     /// 若本地址为 <see cref="VariableFlag.Trigger"/> 类型，该地址表示其负载数据的地址。
     /// </summary>
     public List<DeviceVariable> NormalVariables { get; set; } = new(0);
 
-    public DeviceVariable(string tag, string address, int length, VariableType varType, string? desc, VariableFlag flag, int pollingInterval = 0)
+    public DeviceVariable(string tag, string address, int length, VariableType varType, string? name, string? desc, VariableFlag flag, int pollingInterval = 0)
     {
         Tag = tag;
         Address = address;
         Length = length;
         VarType = varType;
+        Name = name;
         Desc = desc;
         Flag = flag;
         PollingInterval = pollingInterval;

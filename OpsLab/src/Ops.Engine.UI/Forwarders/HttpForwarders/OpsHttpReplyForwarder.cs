@@ -42,21 +42,11 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
         var action = data.Tag switch
         {
             OpsSymbol.PLC_Sign_Inbound => "inbound",
-            OpsSymbol.PLC_Sign_Outbound => "outbound",
+            OpsSymbol.PLC_Sign_Archive => "archive",
             OpsSymbol.PLC_Sign_Critical_Material => "materialcritical",
             OpsSymbol.PLC_Sign_Batch_Material => "materialbatch",
-            _ => string.Empty,
+            _ => "Custom", // 自定义的要推送的触发点，全部通过一个 action 推送。
         };
-
-        // 自定义的要推送的触发点
-        if (action == string.Empty)
-        {
-            action = OpsSymbol.GetPlcSignAction(data.Tag);
-            if (action == string.Empty)
-            {
-                throw new NotImplementedException($"Tag {data.Tag} 定义不正确");
-            }
-        }
 
         // TODO: 添加 HTTP 请求验证功能
         var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");

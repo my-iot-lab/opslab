@@ -31,6 +31,18 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
 
     public async Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
+        string action = "notice";
+        // 警报消息，0 表示无任何异常，不用推送
+        if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
+        {
+            if ((uint)data.Values[0].Value == 0)
+            {
+                return;
+            }
+
+            action = "alarm";
+        }
+
         _logger.LogInformation("[Notice] HTTP 数据推送，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
                 data.RequestId,
                 data.Schema.Station,
@@ -45,7 +57,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
         var stopWatch = Stopwatch.StartNew();
         try
         {
-            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/notice", jsonContent, cancellationToken);
+            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/{action}", jsonContent, cancellationToken);
 
             stopWatch.Stop();
 

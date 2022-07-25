@@ -21,25 +21,25 @@ public class SimaticS7Suit : IDisposable
 
         List<DeviceVariable> variables = new()
             {
-                new DeviceVariable("PLC_Sys_Connected", "DB4.0", 0, VariableType.Int, "心跳", VariableFlag.Heartbeat, 500),
+                new DeviceVariable("PLC_Sys_Connected", "DB4.0", 0, VariableType.Int,  "", "心跳", VariableFlag.Heartbeat, 500),
 
-                new DeviceVariable("PLC_Sys_E_State", "DB4.2", 0, VariableType.Int, "通知1", VariableFlag.Notice, 10_000),
+                new DeviceVariable("PLC_Sys_E_State", "DB4.2", 0, VariableType.Int,  "", "通知1", VariableFlag.Notice, 10_000),
 
-                new DeviceVariable("PLC_Sys_Sign_Archive_Exe", "DB4.4", 0, VariableType.Int, "Archive", VariableFlag.Trigger, 500)
+                new DeviceVariable("PLC_Sys_Sign_Archive_Exe", "DB4.4", 0, VariableType.Int,  "", "Archive", VariableFlag.Trigger, 500)
                 {
                      NormalVariables = new()
                      {
-                         new DeviceVariable("PLC_Archive_SN", "DB4.30", 20, VariableType.String, "SN", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Archive_Cycletime", "DB4.76", 0, VariableType.Int, "CT", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Archive_Pass", "DB4.78", 0, VariableType.Int, "Pass", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Archive_Operator", "DB4.104", 20, VariableType.String, "Operator", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Archive_Voltage", "DB4.126", 20, VariableType.Real, "Voltages", VariableFlag.Normal),
+                         new DeviceVariable("PLC_Archive_SN", "DB4.30", 20, VariableType.String,  "", "SN", VariableFlag.Normal),
+                         new DeviceVariable("PLC_Archive_Cycletime", "DB4.76", 0, VariableType.Int,  "", "CT", VariableFlag.Normal),
+                         new DeviceVariable("PLC_Archive_Pass", "DB4.78", 0, VariableType.Int,  "", "Pass", VariableFlag.Normal),
+                         new DeviceVariable("PLC_Archive_Operator", "DB4.104", 20, VariableType.String,  "", "Operator", VariableFlag.Normal),
+                         new DeviceVariable("PLC_Archive_Voltage", "DB4.126", 20, VariableType.Real,  "", "Voltages", VariableFlag.Normal),
                      },
                 },
 
-                new DeviceVariable("MES_ProdTask_Productcode", "DB3.40", 10, VariableType.String, "Productcode", VariableFlag.Normal),
-                new DeviceVariable("MES_ProdTask_Amount", "DB3.52", 0, VariableType.Int, "Amount", VariableFlag.Normal),
-                new DeviceVariable("MES_ProdTask_Prior", "DB3.54", 0, VariableType.Int, "Prior", VariableFlag.Normal),
+                new DeviceVariable("MES_ProdTask_Productcode", "DB3.40", 10, VariableType.String,  "", "Productcode", VariableFlag.Normal),
+                new DeviceVariable("MES_ProdTask_Amount", "DB3.52", 0, VariableType.Int,  "", "Amount", VariableFlag.Normal),
+                new DeviceVariable("MES_ProdTask_Prior", "DB3.54", 0, VariableType.Int,  "", "Prior", VariableFlag.Normal),
             };
 
         deviceInfo.AddVariables(variables);

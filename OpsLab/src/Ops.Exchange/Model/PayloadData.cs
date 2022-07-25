@@ -8,12 +8,14 @@ public sealed class PayloadData
     /// <summary>
     /// 数据标签（唯一）
     /// </summary>
-    public string Tag { get; set; }
+    [NotNull]
+    public string? Tag { get; set; }
 
     /// <summary>
     /// 变量地址
     /// </summary>
-    public string Address { get; set; }
+    [NotNull]
+    public string? Address { get; set; }
 
     /// <summary>
     /// 变量长度。
@@ -27,6 +29,11 @@ public sealed class PayloadData
     public VariableType VarType { get; set; }
 
     /// <summary>
+    /// 变量名称
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// 额外标志。
     /// </summary>
     public string? ExtraFlag { get; set; }
@@ -34,7 +41,14 @@ public sealed class PayloadData
     /// <summary>
     /// 具体的数据，可能是数组。
     /// </summary>
-    public object Value { get; set; }
+    [NotNull]
+    public object? Value { get; set; }
+
+    /// <summary>
+    /// 是否是附加数据。
+    /// <para>注：对于部分数据，主数据表示主表中存储的，附加标识表示是额外增项。</para>
+    /// </summary>
+    public bool IsAdditional { get; set; }
 
     /// <summary>
     /// 将 DeviceVariable 转换为 PayloadData 对象
@@ -62,7 +76,9 @@ public sealed class PayloadData
             Address = variable.Address,
             Length = variable.Length,
             VarType = variable.VarType,
+            Name = variable.Name,
             ExtraFlag = variable.ExtraFlag,
+            IsAdditional = variable.IsAdditional,
         };
     }
 }

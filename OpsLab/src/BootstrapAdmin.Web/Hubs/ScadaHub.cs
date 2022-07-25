@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using BootstrapAdmin.Web.Models;
+using BootstrapAdmin.Web.Core.Models;
 
 namespace BootstrapAdmin.Web.Hubs;
 
