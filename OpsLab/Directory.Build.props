@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+	<FileVersion>0.2.7</FileVersion>
+	<AssemblyVersion>0.2.7</AssemblyVersion>
+	<Version>0.2.7</Version>
+	<Authors>Gang.Yang</Authors>
+  </PropertyGroup>	
+	
+  <ItemGroup>
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+</Project>
