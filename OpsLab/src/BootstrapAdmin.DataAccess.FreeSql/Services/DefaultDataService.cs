@@ -1,7 +1,7 @@
 ﻿using BootStarpAdmin.DataAccess.FreeSql.Extensions;
 using BootstrapBlazor.Components;
 
-namespace BootStarpAdmin.DataAccess.FreeSql.Service;
+namespace BootStarpAdmin.DataAccess.FreeSql.Services;
 
 class DefaultDataService<TModel> : DataServiceBase<TModel> where TModel : class, new()
 {

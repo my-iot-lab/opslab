@@ -2,7 +2,7 @@
 using BootstrapAdmin.Caching;
 using BootstrapAdmin.Web.Core;
 
-namespace BootStarpAdmin.DataAccess.FreeSql.Service;
+namespace BootStarpAdmin.DataAccess.FreeSql.Services;
 
 class AppService : IApp
 {

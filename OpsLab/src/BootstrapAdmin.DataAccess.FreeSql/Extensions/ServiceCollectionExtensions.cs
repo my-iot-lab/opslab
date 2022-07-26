@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using BootStarpAdmin.DataAccess.FreeSql.Extensions;
-using BootStarpAdmin.DataAccess.FreeSql.Service;
+using BootStarpAdmin.DataAccess.FreeSql.Services;
 using BootstrapAdmin.Web.Core;
 using BootstrapBlazor.Components;
 using FreeSql;

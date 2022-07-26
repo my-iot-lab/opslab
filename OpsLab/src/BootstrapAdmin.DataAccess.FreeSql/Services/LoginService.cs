@@ -1,7 +1,7 @@
 ﻿using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 
-namespace BootStarpAdmin.DataAccess.FreeSql.Service;
+namespace BootStarpAdmin.DataAccess.FreeSql.Services;
 
 class LoginService : ILogin
 {
