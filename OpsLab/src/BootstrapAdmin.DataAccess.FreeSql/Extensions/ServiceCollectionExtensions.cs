@@ -31,6 +31,9 @@ public static class ServiceCollectionExtensions
             return instance;
         });
 
+        // 增加 FreeSql 仓储
+        services.AddFreeRepository();
+
         // 增加数据服务
         services.AddSingleton(typeof(IDataService<>), typeof(DefaultDataService<>));
 
