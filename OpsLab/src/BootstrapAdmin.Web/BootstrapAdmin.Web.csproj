@@ -14,11 +14,12 @@
     <PackageReference Include="BootstrapBlazor.TableExport" Version="6.0.0" />
     <PackageReference Include="Longbow.Logging" Version="6.0.2" />
     <PackageReference Include="Longbow.Tasks" Version="5.2.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="6.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BootstrapAdmin.DataAccess.FreeSql\BootstrapAdmin.DataAccess.FreeSql.csproj" />
+    <ProjectReference Include="..\BootstrapAdmin.DataAccess.PetaPoco\BootstrapAdmin.DataAccess.PetaPoco.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,10 @@
 
   <ItemGroup>
     <Folder Include="logs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

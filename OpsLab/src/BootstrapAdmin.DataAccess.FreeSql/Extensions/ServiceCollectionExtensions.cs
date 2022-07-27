@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using BootStarpAdmin.DataAccess.FreeSql.Extensions;
-using BootStarpAdmin.DataAccess.FreeSql.Services;
-using BootstrapAdmin.Web.Core;
-using BootstrapBlazor.Components;
 using FreeSql;
+using BootstrapAdmin.Web.Core.Services;
+using BootstrapAdmin.DataAccess.FreeSql.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -20,8 +19,6 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddFreeSql(this IServiceCollection services, Action<IServiceProvider, FreeSqlBuilder> freeSqlBuilder)
     {
-        // 增加缓存服务
-        services.AddCacheManager();
         services.TryAddSingleton(provider =>
         {
             var builder = new FreeSqlBuilder();
@@ -34,19 +31,16 @@ public static class ServiceCollectionExtensions
         // 增加 FreeSql 仓储
         services.AddFreeRepository();
 
-        // 增加数据服务
-        services.AddSingleton(typeof(IDataService<>), typeof(DefaultDataService<>));
+        // 增加 scada 业务服务
+        services.AddTransient<IAlarmService, AlarmService>();
+        services.AddTransient<INoticeService, NoticeService>();
+        services.AddTransient<IInboundService, InboundService>();
+        services.AddTransient<IArchiveService, ArchiveService>();
+        services.AddTransient<IMaterialService, MaterialService>();
 
-        // 增加业务服务
-        services.AddSingleton<IApp, AppService>();
-        services.AddSingleton<IDict, DictService>();
-        services.AddSingleton<IException, ExceptionService>();
-        services.AddSingleton<IGroup, GroupService>();
-        services.AddSingleton<ILogin, LoginService>();
-        services.AddSingleton<INavigation, NavigationService>();
-        services.AddSingleton<IRole, RoleService>();
-        services.AddSingleton<IUser, UserService>();
-        services.AddSingleton<ITrace, TraceService>();
+        // 添加主业务
+
+
         return services;
     }
 }

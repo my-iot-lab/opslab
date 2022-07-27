@@ -1,26 +1,113 @@
-﻿using System.Data;
+﻿using System.Data.Common;
 using Microsoft.Extensions.Configuration;
-using Longbow.Security.Cryptography;
 using BootstrapAdmin.Caching;
 using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
+using BootstrapBlazor.Components;
+using Longbow.Security.Cryptography;
+using PetaPoco;
 
-namespace BootStarpAdmin.DataAccess.FreeSql.Services;
+namespace BootstrapAdmin.DataAccess.PetaPoco.Services;
 
 class DictService : IDict
 {
     private const string DictServiceCacheKey = "DictService-GetAll";
 
-    private IFreeSql FreeSql { get; }
+    private IDBManager DBManager { get; }
 
-    private string? AppId { get; set; }
+    private string AppId { get; set; }
 
-    public DictService(IFreeSql freeSql, IConfiguration configuration)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="configuration"></param>
+    public DictService(IDBManager db, IConfiguration configuration)
     {
-        FreeSql = freeSql;
+        DBManager = db;
         AppId = configuration.GetValue("AppId", "BA");
     }
 
+    public List<Dict> GetAll() => CacheManager.GetOrAdd(DictServiceCacheKey, entry =>
+    {
+        using var db = DBManager.Create();
+        return db.Fetch<Dict>();
+    });
+
+    public Dictionary<string, string> GetApps()
+    {
+        var dicts = GetAll();
+        return dicts.Where(d => d.Category == "应用程序").Select(d => new KeyValuePair<string, string>(d.Code, d.Name)).ToDictionary(i => i.Key, i => i.Value);
+    }
+
+    public Dictionary<string, string> GetLogins()
+    {
+        var dicts = GetAll();
+        return dicts.Where(d => d.Category == "系统首页").Select(d => new KeyValuePair<string, string>(d.Code, d.Name)).OrderBy(i => i.Value).ToDictionary(i => i.Key, i => i.Value);
+    }
+
+    public string GetCurrentLogin()
+    {
+        var dicts = GetAll();
+        return dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "登录界面" && d.Define == EnumDictDefine.System)?.Code ?? "Login";
+    }
+
+    public Dictionary<string, string> GetThemes()
+    {
+        var dicts = GetAll();
+        return dicts.Where(d => d.Category == "网站样式").Select(d => new KeyValuePair<string, string>(d.Code, d.Name)).ToDictionary(i => i.Key, i => i.Value);
+    }
+
+    /// <summary>
+    /// 获取 站点 Title 配置信息
+    /// </summary>
+    /// <returns></returns>
+    public string GetWebTitle()
+    {
+        var dicts = GetAll();
+        var title = "网站标题";
+        var name = dicts.FirstOrDefault(d => d.Category == "应用程序" && d.Code == AppId)?.Name;
+        if (!string.IsNullOrEmpty(name))
+        {
+            var dict = dicts.FirstOrDefault(d => d.Category == name && d.Name == "网站标题") ?? dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "网站标题");
+            title = dict?.Code ?? "网站标题";
+        }
+        return title;
+    }
+
+    /// <summary>
+    /// 获取站点 Footer 配置信息
+    /// </summary>
+    /// <returns></returns>
+    public string GetWebFooter()
+    {
+        var dicts = GetAll();
+        var title = "网站页脚";
+        var name = dicts.FirstOrDefault(d => d.Category == "应用程序" && d.Code == AppId)?.Name;
+        if (!string.IsNullOrEmpty(name))
+        {
+            var dict = dicts.FirstOrDefault(d => d.Category == name && d.Name == "网站页脚") ?? dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "网站页脚");
+            title = dict?.Code ?? "网站标题";
+        }
+        return title;
+    }
+
+    /// <summary>
+    /// 获得 应用是否为演示模式
+    /// </summary>
+    /// <returns></returns>
+    public bool IsDemo()
+    {
+        var dicts = GetAll();
+        var code = dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "演示系统" && d.Define == EnumDictDefine.System)?.Code ?? "0";
+        return code == "1";
+    }
+
+    /// <summary>
+    /// 获得当前授权码是否有效可更改网站设置
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
     public bool AuthenticateDemo(string code)
     {
         var ret = false;
@@ -38,18 +125,49 @@ class DictService : IDict
     }
 
     /// <summary>
+    /// 保存当前网站是否为演示系统
+    /// </summary>
+    /// <param name="enable"></param>
+    /// <returns></returns>
+    public bool SaveDemo(bool enable) => SaveDict(new Dict
+    {
+        Category = "网站设置",
+        Name = "演示系统",
+        Code = enable ? "1" : "0",
+        Define = EnumDictDefine.System
+    });
+
+    /// <summary>
     /// 
     /// </summary>
+    /// <param name="enable"></param>
     /// <returns></returns>
-    public List<Dict> GetAll() => CacheManager.GetOrAdd<List<Dict>>(DictServiceCacheKey, entry => FreeSql.Select<Dict>().ToList());
-
-    public Dictionary<string, string> GetApps()
+    public bool SavDefaultApp(bool enable) => SaveDict(new Dict
     {
-        var dicts = GetAll();
+        Category = "网站设置",
+        Name = "默认应用程序",
+        Code = enable ? "1" : "0",
+        Define = EnumDictDefine.System
+    });
 
-        return dicts.Where(d => d.Category == "应用程序").Select(s => new KeyValuePair<string, string>(s.Code, s.Name)).ToDictionary(i => i.Key, i => i.Value);
-    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="enable"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public bool SaveHealthCheck(bool enable = true) => SaveDict(new Dict
+    {
+        Category = "网站设置",
+        Name = "健康检查",
+        Code = enable ? "1" : "0",
+        Define = EnumDictDefine.System
+    });
 
+    /// <summary>
+    /// 获取当前网站 Cookie 保持时长
+    /// </summary>
+    /// <returns></returns>
     public int GetCookieExpiresPeriod()
     {
         var dicts = GetAll();
@@ -58,72 +176,10 @@ class DictService : IDict
         return ret;
     }
 
-    public string GetCurrentLogin()
-    {
-        var dicts = GetAll();
-        return dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "登录界面" && d.Define == EnumDictDefine.System)?.Code ?? "Login";
-    }
-
-    public Dictionary<string, string> GetLogins()
-    {
-        var dicts = GetAll();
-        return dicts.Where(d => d.Category == "系统首页").Select(d => new KeyValuePair<string, string>(d.Code, d.Name)).OrderBy(i => i.Value).ToDictionary(i => i.Key, i => i.Value);
-    }
-
-    public string? GetNotificationUrl(string appId) => GetUrlByName(appId, "系统通知地址");
-
-    public string? GetProfileUrl(string appId) => GetUrlByName(appId, "个人中心地址");
-
-    public string? GetSettingsUrl(string appId) => GetUrlByName(appId, "系统设置地址");
-
-    public Dictionary<string, string> GetThemes()
-    {
-        var dicts = GetAll();
-        return dicts.Where(d => d.Category == "网站样式").Select(d => new KeyValuePair<string, string>(d.Code, d.Name)).ToDictionary(i => i.Key, i => i.Value);
-    }
-
-    public string GetWebFooter()
-    {
-        var dicts = GetAll();
-        var title = "网站页脚";
-        var name = dicts.FirstOrDefault(d => d.Category == "应用程序" && d.Code == AppId)?.Name;
-        if (!string.IsNullOrEmpty(name))
-        {
-            var dict = dicts.FirstOrDefault(d => d.Category == name && d.Name == "网站页脚") ?? dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "网站页脚");
-            title = dict?.Code ?? "网站标题";
-        }
-        return title;
-    }
-
-    public string GetWebTitle()
-    {
-        var dicts = GetAll();
-        var title = "网站标题";
-        var name = dicts.FirstOrDefault(d => d.Category == "应用程序" && d.Code == AppId)?.Name;
-        if (!string.IsNullOrEmpty(name))
-        {
-            var dict = dicts.FirstOrDefault(d => d.Category == name && d.Name == "网站标题") ?? dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "网站标题");
-            title = dict?.Code ?? "网站标题";
-        }
-        return title;
-    }
-
-    public bool IsDemo()
-    {
-        var dicts = GetAll();
-        var code = dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "演示系统" && d.Define == EnumDictDefine.System)?.Code ?? "0";
-        return code == "1";
-    }
-
-    public string RetrieveIconFolderPath()
-    {
-        var dicts = GetAll();
-        return dicts.FirstOrDefault(d => d.Name == "头像路径" && d.Category == "头像地址" && d.Define == EnumDictDefine.System)?.Code ?? "images/uploder/";
-    }
-
     private bool SaveDict(Dict dict)
     {
-        var ret = FreeSql.Update<Dict>().Where(s => s.Category == dict.Category && s.Name == dict.Name).Set(s => s.Code, dict.Code).ExecuteAffrows() > 0;
+        using var db = DBManager.Create();
+        var ret = db.Update<Dict>("set Code = @Code where Category = @Category and Name = @Name", dict) == 1;
         if (ret)
         {
             // 更新缓存
@@ -132,19 +188,28 @@ class DictService : IDict
         return ret;
     }
 
-    public bool SaveCookieExpiresPeriod(int expiresPeriod) => SaveDict(new Dict { Category = "网站设置", Name = "Cookie保留时长", Code = expiresPeriod.ToString() });
-
-    public bool SaveDemo(bool isDemo) => SaveDict(new Dict { Category = "网站设置", Name = "演示系统", Define = EnumDictDefine.System, Code = isDemo ? "1" : "0" });
-
-    public bool SaveHealthCheck(bool enable = true) => SaveDict(new Dict { Category = "网站设置", Name = "演示系统", Define = EnumDictDefine.System, Code = enable ? "1" : "0" });
-
     public bool SaveLogin(string login) => SaveDict(new Dict { Category = "网站设置", Name = "登录界面", Code = login });
 
     public bool SaveTheme(string theme) => SaveDict(new Dict { Category = "网站设置", Name = "使用样式", Code = theme });
 
+    public bool SaveWebTitle(string title) => SaveDict(new Dict { Category = "网站设置", Name = "网站标题", Code = title });
+
     public bool SaveWebFooter(string footer) => SaveDict(new Dict { Category = "网站设置", Name = "网站页脚", Code = footer });
 
-    public bool SaveWebTitle(string title) => SaveDict(new Dict { Category = "网站设置", Name = "网站标题", Code = title });
+    public bool SaveCookieExpiresPeriod(int expiresPeriod) => SaveDict(new Dict { Category = "网站设置", Name = "Cookie保留时长", Code = expiresPeriod.ToString() });
+
+    public string? GetProfileUrl(string appId) => GetUrlByName(appId, "个人中心地址");
+
+    public string? GetSettingsUrl(string appId) => GetUrlByName(appId, "系统设置地址");
+
+    public string? GetNotificationUrl(string appId) => GetUrlByName(appId, "系统通知地址");
+
+    public bool GetEnableDefaultApp()
+    {
+        var dicts = GetAll();
+        var code = dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "默认应用程序")?.Code ?? "0";
+        return code == "1";
+    }
 
     private string? GetUrlByName(string appId, string dictName)
     {
@@ -159,56 +224,34 @@ class DictService : IDict
     }
 
     /// <summary>
-    /// 通过指定 appId 获得配置首页地址
+    /// 获取头像路径
     /// </summary>
-    /// <param name="appId"></param>
     /// <returns></returns>
-    public string? GetHomeUrlByAppId(string appId)
-    {
-        string? url = null;
-        var dicts = GetAll();
-        // appId 为空时读取前台列表取第一个应用作为默认应用
-        url = dicts.FirstOrDefault(d => d.Category == "应用首页" && d.Name.Equals(appId, StringComparison.OrdinalIgnoreCase) && d.Define == EnumDictDefine.System)?.Code;
-        return url;
-    }
-
-    public bool SavDefaultApp(bool enabled) => SaveDict(new Dict
-    {
-        Category = "网站设置",
-        Name = "默认应用程序",
-        Code = enabled ? "1" : "0",
-        Define = EnumDictDefine.System
-    });
-
-    public bool GetEnableDefaultApp()
-    {
-        var dicts = GetAll();
-        var code = dicts.FirstOrDefault(d => d.Category == "网站设置" && d.Name == "默认应用程序")?.Code ?? "0";
-        return code == "1";
-    }
-
     public string GetIconFolderPath()
     {
         var dicts = GetAll();
         return dicts.FirstOrDefault(d => d.Name == "头像路径" && d.Category == "头像地址" && d.Define == EnumDictDefine.System)?.Code ?? "/images/uploder/";
     }
 
+    /// <summary>
+    /// 获取头像路径
+    /// </summary>
+    /// <returns></returns>
     public string GetDefaultIcon()
     {
         var dicts = GetAll();
         return dicts.FirstOrDefault(d => d.Name == "头像文件" && d.Category == "头像地址" && d.Define == EnumDictDefine.System)?.Code ?? "default.jpg";
     }
 
-    public string? GetIpLocatorName()
+    /// <summary>
+    /// 通过指定 appId 获得配置首页地址
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <returns></returns>
+    public string? GetHomeUrlByAppId(string appId)
     {
         var dicts = GetAll();
-        return dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "IP地理位置接口" && s.Define == EnumDictDefine.System)?.Code;
-    }
-
-    public string? GetIpLocatorUrl(string? name)
-    {
-        var dicts = GetAll();
-        return string.IsNullOrWhiteSpace(name) ? null : dicts.FirstOrDefault(s => s.Category == "地理位置" && s.Name == name && s.Define == EnumDictDefine.System)?.Code;
+        return dicts.FirstOrDefault(d => d.Category == "应用首页" && d.Name.Equals(appId, StringComparison.OrdinalIgnoreCase) && d.Define == EnumDictDefine.System)?.Code;
     }
 
     public bool GetAppSiderbar()
@@ -306,7 +349,7 @@ class DictService : IDict
         var dicts = GetAll();
         var value = dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "程序异常保留时长" && s.Define == EnumDictDefine.System)?.Code ?? "0";
         _ = int.TryParse(value, out var ret);
-        return ret;
+        return ret; ;
     }
 
     public bool SaveExceptionExpired(int value) => SaveDict(new Dict { Category = "网站设置", Name = "程序异常保留时长", Code = value.ToString() });
@@ -316,7 +359,7 @@ class DictService : IDict
         var dicts = GetAll();
         var value = dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "操作日志保留时长" && s.Define == EnumDictDefine.System)?.Code ?? "0";
         _ = int.TryParse(value, out var ret);
-        return ret;
+        return ret; ;
     }
 
     public bool SaveOperateExpired(int value) => SaveDict(new Dict { Category = "网站设置", Name = "操作日志保留时长", Code = value.ToString() });
@@ -326,7 +369,7 @@ class DictService : IDict
         var dicts = GetAll();
         var value = dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "登录日志保留时长" && s.Define == EnumDictDefine.System)?.Code ?? "0";
         _ = int.TryParse(value, out var ret);
-        return ret;
+        return ret; ;
     }
 
     public bool SaveLoginExpired(int value) => SaveDict(new Dict { Category = "网站设置", Name = "登录日志保留时长", Code = value.ToString() });
@@ -336,7 +379,7 @@ class DictService : IDict
         var dicts = GetAll();
         var value = dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "访问日志保留时长" && s.Define == EnumDictDefine.System)?.Code ?? "0";
         _ = int.TryParse(value, out var ret);
-        return ret;
+        return ret; ;
     }
 
     public bool SaveAccessExpired(int value) => SaveDict(new Dict { Category = "网站设置", Name = "访问日志保留时长", Code = value.ToString() });
@@ -346,12 +389,12 @@ class DictService : IDict
         var dicts = GetAll();
         var value = dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "IP请求缓存时长" && s.Define == EnumDictDefine.System)?.Code ?? "0";
         _ = int.TryParse(value, out var ret);
-        return ret;
+        return ret; ;
     }
 
     public bool SaveIPCacheExpired(int value) => SaveDict(new Dict { Category = "网站设置", Name = "IP请求缓存时长", Code = value.ToString() });
 
-    public Dictionary<string, string>? GetClients()
+    public Dictionary<string, string> GetClients()
     {
         var dicts = GetAll();
         return dicts.Where(s => s.Category == "应用程序" && s.Code != "BA").ToDictionary(s => s.Name, s => s.Code);
@@ -375,8 +418,10 @@ class DictService : IDict
         if (!string.IsNullOrEmpty(client.AppId))
         {
             DeleteClient(client.AppId);
+            using var db = DBManager.Create();
             try
             {
+                db.BeginTransaction();
                 var items = new List<Dict>()
                 {
                     new Dict { Category = "应用程序", Name = client.AppName, Code = client.AppId, Define = EnumDictDefine.System },
@@ -389,12 +434,13 @@ class DictService : IDict
                     new Dict { Category = client.AppId, Name = "系统设置地址", Code = client.SettingsUrl, Define = EnumDictDefine.Customer },
                     new Dict { Category = client.AppId, Name = "系统通知地址", Code = client.NotificationUrl, Define = EnumDictDefine.Customer }
                 };
-
-                ret = FreeSql.Insert(items).ExecuteAffrows() > 0;
+                db.InsertBatch(items);
+                db.CompleteTransaction();
+                ret = true;
             }
-            catch
+            catch (DbException)
             {
-
+                db.AbortTransaction();
                 throw;
             }
         }
@@ -422,34 +468,55 @@ class DictService : IDict
     public bool DeleteClient(string appId)
     {
         bool ret;
+        using var db = DBManager.Create();
         try
         {
-            FreeSql.Transaction(() =>
+            db.BeginTransaction();
+            db.Execute("delete Dicts where Category=@0 and Name=@1 and Define=@2", "应用首页", appId, EnumDictDefine.System);
+            db.Execute("delete Dicts where Category=@0 and Code=@1 and Define=@2", "应用程序", appId, EnumDictDefine.System);
+            db.Execute("delete Dicts where Category=@Category and Name in (@Names)", new
             {
-                FreeSql.Ado.ExecuteNonQuery("delete Dicts where Category=@Category and Name=@Name and Define=@Define", new { Category = "应用首页", Name = appId, Define = EnumDictDefine.System });
-                FreeSql.Ado.ExecuteNonQuery("delete Dicts where Category=@Category and Code=@Code and Define=@Define", new { Category = "应用程序", Code = appId, Define = EnumDictDefine.System });
-                FreeSql.Ado.ExecuteNonQuery("delete Dicts where Category=@Category and Name in (@Names)", new
+                Category = appId,
+                Names = new List<string>
                 {
-                    Category = appId,
-                    Names = new List<string>
-                    {
-                        "网站标题",
-                        "网站页脚",
-                        "favicon",
-                        "网站图标",
-                        "个人中心地址",
-                        "系统设置地址",
-                        "系统通知地址"
-                    }
-                });
+                    "网站标题",
+                    "网站页脚",
+                    "favicon",
+                    "网站图标",
+                    "个人中心地址",
+                    "系统设置地址",
+                    "系统通知地址"
+                }
             });
-
+            db.CompleteTransaction();
             ret = true;
         }
         catch (Exception)
         {
+            db.AbortTransaction();
             throw;
         }
         return ret;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public string? GetIpLocatorName()
+    {
+        var dicts = GetAll();
+        return dicts.FirstOrDefault(s => s.Category == "网站设置" && s.Name == "IP地理位置接口" && s.Define == EnumDictDefine.System)?.Code;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public string? GetIpLocatorUrl(string? name)
+    {
+        var dicts = GetAll();
+        return string.IsNullOrWhiteSpace(name) ? null : dicts.FirstOrDefault(s => s.Category == "地理位置" && s.Name == name && s.Define == EnumDictDefine.System)?.Code;
     }
 }

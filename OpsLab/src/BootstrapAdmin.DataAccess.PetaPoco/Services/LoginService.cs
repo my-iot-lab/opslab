@@ -1,13 +1,13 @@
 ﻿using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 
-namespace BootStarpAdmin.DataAccess.FreeSql.Services;
+namespace BootstrapAdmin.DataAccess.PetaPoco.Services;
 
 class LoginService : ILogin
 {
-    private IFreeSql FreeSql { get; }
+    private IDBManager DBManager { get; }
 
-    public LoginService(IFreeSql freeSql) => FreeSql = freeSql;
+    public LoginService(IDBManager database) => DBManager = database;
 
     public bool Log(string userName, string? IP, string? OS, string? browser, string? address, string? userAgent, bool result)
     {
@@ -22,7 +22,8 @@ class LoginService : ILogin
             UserAgent = userAgent,
             Result = result ? "登录成功" : "登录失败"
         };
-        FreeSql.Insert(loginUser).ExecuteAffrows();
+        using var db = DBManager.Create();
+        db.Insert(loginUser);
         return true;
     }
 }

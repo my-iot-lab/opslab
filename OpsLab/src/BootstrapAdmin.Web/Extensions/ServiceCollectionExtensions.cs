@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services"></param>
     public static IServiceCollection AddBootstrapBlazorAdmin(this IServiceCollection services)
     {
-        //services.AddLogging(logging => logging.AddFileLogger().AddCloudLogger().AddDBLogger(ExceptionsHelper.Log));
+        services.AddLogging(logging => logging.AddFileLogger().AddCloudLogger().AddDBLogger(ExceptionsHelper.Log));
         services.AddCors();
         services.AddResponseCompression();
 
@@ -44,6 +44,9 @@ public static class ServiceCollectionExtensions
         // 增加 BootstrapApp 上下文服务
         services.AddScoped<BootstrapAppContext>();
 
+        // 增加缓存服务
+        services.AddCacheManager();
+
         // 增加 FreeSql 数据服务
         services.AddFreeSql((provider, builder) =>
         {
@@ -51,7 +54,7 @@ public static class ServiceCollectionExtensions
             var connString = configuration.GetConnectionString("ba");
             builder.UseConnectionString(FreeSql.DataType.MySql, connString);
 #if DEBUG
-            // 调试sql语句输出
+                    // 调试sql语句输出
             builder.UseMonitorCommand(cmd =>
             {
                 var parameters = cmd.Parameters.OfType<System.Data.Common.DbParameter>().Select(p => $"{p.ParameterName}={p.Value}");
@@ -59,6 +62,9 @@ public static class ServiceCollectionExtensions
             });
 #endif
         });
+
+        // 添加 PetaPoco 数据服务（针对基础服务）
+        services.AddPetaPocoDataAccessServices();
 
         return services;
     }

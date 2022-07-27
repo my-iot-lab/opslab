@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="BootstrapBlazor" Version="6.8.17" />
 	<PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.2.665" />
 	<PackageReference Include="FreeSql.Provider.Sqlite" Version="3.2.665" />
 	<PackageReference Include="FreeSql.Provider.SqlServer" Version="3.2.665" />
@@ -17,6 +16,10 @@
   <ItemGroup>
 	<ProjectReference Include="..\BootstrapAdmin.Caching\BootstrapAdmin.Caching.csproj" />
 	<ProjectReference Include="..\BootstrapAdmin.Web.Core\BootstrapAdmin.Web.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>	
 	
 </Project>
