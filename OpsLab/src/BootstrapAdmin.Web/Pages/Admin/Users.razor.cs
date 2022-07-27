@@ -1,14 +1,10 @@
 ﻿using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 using BootstrapAdmin.Web.Extensions;
-using BootstrapAdmin.Web.Services;
 using BootstrapAdmin.Web.Validators;
 
 namespace BootstrapAdmin.Web.Pages.Admin;
 
-/// <summary>
-/// 
-/// </summary>
 public partial class Users
 {
     [Inject]
@@ -31,7 +27,6 @@ public partial class Users
     [NotNull]
     private IUser? UserService { get; set; }
 
-
     [Inject]
     [NotNull]
     private INavigation? NavigationService { get; set; }
@@ -48,9 +43,6 @@ public partial class Users
 
     private List<IValidator> UserRules { get; } = new List<IValidator>();
 
-    /// <summary>
-    /// OnInitialized 方法
-    /// </summary>
     protected override void OnInitialized()
     {
         base.OnInitialized();

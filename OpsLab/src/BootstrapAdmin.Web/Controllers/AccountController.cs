@@ -5,33 +5,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using BootstrapAdmin.Web.Core;
-using BootstrapAdmin.Web.Services;
 using BootstrapAdmin.Web.Services.SMS;
 using BootstrapAdmin.Web.Utils;
 
 namespace BootstrapAdmin.Web.Controllers;
 
-/// <summary>
-/// Account controller.
-/// </summary>
 [AllowAnonymous]
 public class AccountController : Controller
 {
     private const string MobileSchema = "Mobile";
 
     #region UserLogin
-    /// <summary>
-    /// Login the specified userName, password and remember.
-    /// </summary>
-    /// <returns>The login.</returns>
-    /// <param name="userName">User name.</param>
-    /// <param name="password">Password.</param>
-    /// <param name="remember">Remember.</param>
-    /// <param name="returnUrl"></param>
-    /// <param name="appId"></param>
-    /// <param name="context"></param>
-    /// <param name="userService"></param>
-    /// <param name="dictService"></param>
+
     [HttpPost]
     public async Task<IActionResult> Login(string userName, string password, [FromQuery] string? remember, [FromQuery] string? returnUrl, [FromQuery] string? appId,
         [FromServices] BootstrapAppContext context,
@@ -57,7 +42,8 @@ public class AccountController : Controller
         return auth ? await SignInAsync(userName, LoginHelper.GetDefaultUrl(context, returnUrl, appId, userService, dictService), persistent, period) : RedirectLogin(returnUrl);
     }
 
-    private async Task<IActionResult> SignInAsync(string userName, string returnUrl, bool persistent, int period = 0, string authenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme)
+    private async Task<IActionResult> SignInAsync(string userName, string returnUrl, bool persistent, int period = 0, 
+        string authenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme)
     {
         var identity = new ClaimsIdentity(authenticationScheme);
         identity.AddClaim(new Claim(ClaimTypes.Name, userName));
@@ -90,15 +76,11 @@ public class AccountController : Controller
         }
         return Redirect(url);
     }
+
     #endregion
 
     #region Logout
-    /// <summary>
-    /// Logout this instance.
-    /// </summary>
-    /// <param name="returnUrl"></param>
-    /// <param name="appId"></param>
-    /// <returns>The logout.</returns>
+
     [HttpGet]
     public async Task<IActionResult> Logout([FromQuery] string returnUrl, [FromQuery] string appId)
     {
@@ -112,6 +94,7 @@ public class AccountController : Controller
     #endregion
 
     #region Mobile Login
+
     /// <summary>
     /// 短信验证登陆方法
     /// </summary>
@@ -211,6 +194,7 @@ public class AccountController : Controller
     //    var enabled = config.GetValue($"{nameof(WeChatOptions)}:Enabled", false);
     //    return Challenge(enabled ? WeChatDefaults.AuthenticationScheme : CookieAuthenticationDefaults.AuthenticationScheme);
     //}
+    
     ///// <summary>
     ///// 系统锁屏界面
     ///// </summary>

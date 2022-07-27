@@ -155,7 +155,7 @@ public static class Object2ValueHelper
             obj2 = Convert.ToString(obj);
         }
 
-        return (T)obj2;
+        return (T)obj2!;
     }
 
     /// <summary>
@@ -242,6 +242,6 @@ public static class Object2ValueHelper
             }
         }
 
-        return (T)obj;
+        return (T)obj!;
     }
 }

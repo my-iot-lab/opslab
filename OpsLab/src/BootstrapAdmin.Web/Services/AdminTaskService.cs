@@ -4,7 +4,7 @@ using Longbow.Tasks;
 
 namespace BootstrapAdmin.Web.Services;
 
-class AdminTaskService : BackgroundService
+internal class AdminTaskService : BackgroundService
 {
     private readonly IDict _dictService;
 

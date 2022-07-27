@@ -32,11 +32,12 @@ public static class ServiceCollectionExtensions
         services.AddFreeRepository();
 
         // 增加 scada 业务服务
-        services.AddTransient<IAlarmService, AlarmService>();
-        services.AddTransient<INoticeService, NoticeService>();
-        services.AddTransient<IInboundService, InboundService>();
-        services.AddTransient<IArchiveService, ArchiveService>();
-        services.AddTransient<IMaterialService, MaterialService>();
+        services.AddSingleton<IAlarmService, AlarmService>();
+        services.AddSingleton<INoticeService, NoticeService>();
+        services.AddSingleton<IInboundService, InboundService>();
+        services.AddSingleton<IArchiveService, ArchiveService>();
+        services.AddSingleton<IMaterialService, MaterialService>();
+        services.AddSingleton<ICustomService, CustomService>();
 
         // 添加主业务
 

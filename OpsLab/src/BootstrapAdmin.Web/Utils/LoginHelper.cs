@@ -1,5 +1,4 @@
 ﻿using BootstrapAdmin.Web.Core;
-using BootstrapAdmin.Web.Services;
 
 namespace BootstrapAdmin.Web.Utils;
 
@@ -8,15 +7,6 @@ namespace BootstrapAdmin.Web.Utils;
 /// </summary>
 public static class LoginHelper
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="returnUrl"></param>
-    /// <param name="appId"></param>
-    /// <param name="userService"></param>
-    /// <param name="dictService"></param>
-    /// <returns></returns>
     public static string GetDefaultUrl(BootstrapAppContext context, string? returnUrl, string? appId, IUser userService, IDict dictService)
     {
         if (string.IsNullOrEmpty(returnUrl))

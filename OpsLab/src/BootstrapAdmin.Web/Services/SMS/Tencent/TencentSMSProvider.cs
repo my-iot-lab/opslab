@@ -12,9 +12,6 @@ namespace BootstrapAdmin.Web.Services.SMS.Tencent;
 /// </summary>
 public class TencentSMSProvider : ISMSProvider
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public SMSOptions Options { get { return _options; } }
 
     private readonly HttpClient _client;
@@ -34,7 +31,8 @@ public class TencentSMSProvider : ISMSProvider
         _random = new Random();
     }
 
-    private static readonly ConcurrentDictionary<string, AutoExpireValidateCode> _pool = new ConcurrentDictionary<string, AutoExpireValidateCode>();
+    private static readonly ConcurrentDictionary<string, AutoExpireValidateCode> _pool = new();
+
     /// <summary>
     /// 手机下发验证码方法
     /// </summary>

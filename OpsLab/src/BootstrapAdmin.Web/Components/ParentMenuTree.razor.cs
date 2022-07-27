@@ -1,25 +1,15 @@
 ﻿using BootstrapAdmin.Web.Core;
 using BootstrapAdmin.Web.Extensions;
-using BootstrapAdmin.Web.Services;
 
 namespace BootstrapAdmin.Web.Components;
 
-/// <summary>
-/// 
-/// </summary>
 public partial class ParentMenuTree
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [Parameter]
     [EditorRequired]
     [NotNull]
     public string? Value { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
 
@@ -38,9 +28,6 @@ public partial class ParentMenuTree
     [NotNull]
     private BootstrapAppContext? Context { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     protected override void OnInitialized()
     {
         base.OnInitialized();

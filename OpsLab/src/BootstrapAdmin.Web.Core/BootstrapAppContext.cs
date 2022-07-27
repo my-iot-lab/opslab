@@ -1,4 +1,6 @@
-﻿namespace BootstrapAdmin.Web.Services;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace BootstrapAdmin.Web.Core;
 
 /// <summary>
 /// AppContext 实体类
@@ -20,10 +22,10 @@ public class BootstrapAppContext
     /// 获得/设置 当前用户显示名称
     /// </summary>
     [NotNull]
-    public string? DisplayName { get; internal set; }
+    public string? DisplayName { get; set; }
 
     /// <summary>
-    /// 获得/设置 应用程序基础地址 如 http://localhost:5210
+    /// 获得/设置 应用程序基础地址 如 http://localhost:5000
     /// </summary>
     [NotNull]
     public Uri? BaseUri { get; set; }

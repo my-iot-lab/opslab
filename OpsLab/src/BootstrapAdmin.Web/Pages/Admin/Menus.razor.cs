@@ -3,7 +3,6 @@ using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 using BootstrapAdmin.Web.Extensions;
 using BootstrapAdmin.Web.Models;
-using BootstrapAdmin.Web.Services;
 using BootstrapAdmin.Web.Utils;
 
 namespace BootstrapAdmin.Web.Pages.Admin;
@@ -56,9 +55,6 @@ public partial class Menus
 
     private ITableSearchModel? SearchModel { get; set; } = new MenusSearchModel();
 
-    /// <summary>
-    /// OnInitialized 方法
-    /// </summary>
     protected override void OnInitialized()
     {
         base.OnInitialized();

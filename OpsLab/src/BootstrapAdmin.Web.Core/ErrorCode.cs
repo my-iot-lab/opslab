@@ -4,7 +4,7 @@ using System.Reflection;
 namespace BootstrapAdmin.DataAccess.Models;
 
 /// <summary>
-/// 错误代码
+/// 业务异常代码
 /// </summary>
 public sealed class ErrorCode
 {
@@ -26,12 +26,12 @@ public sealed class ErrorCode
     /// SN 为空错误
     /// </summary>
     [Description("SN 不能为空")]
-    public const int ErrSnEmpty = 1001;
+    public const int ErrEmptyOfSn = 401;
 
     /// <summary>
     /// 获取描述
     /// </summary>
-    /// <param name="code"></param>
+    /// <param name="code">错误代码</param>
     /// <returns></returns>
     public static string GetDescription(int code)
     {

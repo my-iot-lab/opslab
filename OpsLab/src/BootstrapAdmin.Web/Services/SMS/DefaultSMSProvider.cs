@@ -12,7 +12,7 @@ namespace BootstrapAdmin.Web.Services.SMS;
 /// </summary>
 public class DefaultSMSProvider : ISMSProvider
 {
-    private static readonly ConcurrentDictionary<string, AutoExpireValidateCode> _pool = new ConcurrentDictionary<string, AutoExpireValidateCode>();
+    private static readonly ConcurrentDictionary<string, AutoExpireValidateCode> _pool = new();
 
     /// <summary>
     /// 获得 短信配置信息

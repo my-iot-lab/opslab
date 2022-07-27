@@ -2,13 +2,9 @@
 using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 using BootstrapAdmin.Web.Extensions;
-using BootstrapAdmin.Web.Services;
 
 namespace BootstrapAdmin.Web.Pages.Admin;
 
-/// <summary>
-/// 
-/// </summary>
 public partial class Profiles
 {
     private bool IsDemo { get; set; }
@@ -16,9 +12,6 @@ public partial class Profiles
     [NotNull]
     private User? CurrentUser { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Inject]
     [NotNull]
     public BootstrapAppContext? AppContext { get; set; }
@@ -56,9 +49,6 @@ public partial class Profiles
     [NotNull]
     private Layout? Layout { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -132,7 +122,7 @@ public partial class Profiles
 
     private async Task OnSaveTheme()
     {
-        var ret = string.IsNullOrEmpty(CurrentUser.Css) ? false : UserService.SaveTheme(AppContext.UserName, CurrentUser.Css);
+        var ret = !string.IsNullOrEmpty(CurrentUser.Css) && UserService.SaveTheme(AppContext.UserName, CurrentUser.Css);
         await ShowToast(ret, "网站样式");
     }
 

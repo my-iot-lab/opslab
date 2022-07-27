@@ -4,7 +4,6 @@ using Bootstrap.Security.Blazor;
 using BootstrapAdmin.DataAccess.Models;
 using BootstrapAdmin.Web.Core;
 using BootstrapAdmin.Web.Extensions;
-using BootstrapAdmin.Web.Services;
 
 namespace BootstrapAdmin.Web.Shared;
 
@@ -47,9 +46,6 @@ public partial class MainLayout : IDisposable
     [NotNull]
     private ITrace? TraceService { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Inject]
     [NotNull]
     private WebClientService? WebClientService { get; set; }
@@ -79,9 +75,6 @@ public partial class MainLayout : IDisposable
     [NotNull]
     private string? Icon { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -151,9 +144,6 @@ public partial class MainLayout : IDisposable
         logger.LogError(ex, "ErrorLogger");
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public Task OnUpdateAsync(string key)
     {
         if (key == "title")
@@ -176,10 +166,6 @@ public partial class MainLayout : IDisposable
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
     public void Dispose()
     {
         Dispose(true);
