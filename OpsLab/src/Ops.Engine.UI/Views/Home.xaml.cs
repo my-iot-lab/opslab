@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Ops.Engine.UI.ViewModels;
 
@@ -28,5 +29,14 @@ public partial class Home : UserControl
                 TimeSpan.FromSeconds(5));
         };
         DataContext = vm;
+
+        // 设置定时器
+        if (vm.TimerHandler != null)
+        {
+            var timer = new DispatcherTimer();
+            timer.Tick += vm.TimerHandler;
+            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.Start();
+        }
     }
 }

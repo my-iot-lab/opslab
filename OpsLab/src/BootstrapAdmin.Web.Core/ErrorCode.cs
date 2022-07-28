@@ -35,7 +35,7 @@ public sealed class ErrorCode
     /// <returns></returns>
     public static string GetDescription(int code)
     {
-        var field = typeof(ErrorCode).GetFields(BindingFlags.Public)
+        var field = typeof(ErrorCode).GetFields()
             .FirstOrDefault(f => f.FieldType == typeof(int) && (int?)f.GetRawConstantValue() == code);
         if (field != null)
         {

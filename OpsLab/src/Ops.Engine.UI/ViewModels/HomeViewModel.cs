@@ -15,11 +15,20 @@ internal sealed class HomeViewModel : ObservableObject
     private Channel<string> _msgChannal = Channel.CreateBounded<string>(32);
 
     private readonly DeviceInfoManager _deviceInfoManager;
+    private readonly DeviceHealthManager _deviceHealthManager;
     private readonly MonitorManager _monitorManager;
 
-    public HomeViewModel(DeviceInfoManager deviceInfoManager, MonitorManager monitorManager)
+    /// <summary>
+    /// 定时器处理对象
+    /// </summary>
+    public EventHandler? TimerHandler { get; set; }
+
+    public HomeViewModel(DeviceInfoManager deviceInfoManager,
+        DeviceHealthManager deviceHealthManager,
+        MonitorManager monitorManager)
     {
         _deviceInfoManager = deviceInfoManager;
+        _deviceHealthManager = deviceHealthManager;
         _monitorManager = monitorManager;
 
         StartCommand = new RelayCommand(async () =>
@@ -63,6 +72,13 @@ internal sealed class HomeViewModel : ObservableObject
                 MessageAutoScrollDelegate?.Invoke();
             }
         }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
+
+        // 状态检测
+        _deviceHealthManager.Check();
+        TimerHandler += (sender, e) =>
+        {
+            ChangeDeviceConnState();
+        };
     }
 
     /// <summary>
@@ -141,11 +157,11 @@ internal sealed class HomeViewModel : ObservableObject
         {
             NoticeDelegate = (e) =>
             {
-                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Schema.Station} {e.Tag}");
+                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Schema.Station}\t{e.Tag}");
             },
             TriggerDelegate = (e) =>
             {
-                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Context.Request.DeviceInfo.Schema.Station} {e.Tag}");
+                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Context.Request.DeviceInfo.Schema.Station}\t{e.Tag}");
             },
         };
 
@@ -167,14 +183,28 @@ internal sealed class HomeViewModel : ObservableObject
         _monitorManager.Stop();
     }
 
+    private void ChangeDeviceConnState()
+    {
+        foreach (var device in Devices)
+        {
+            device.ConnState = _deviceHealthManager.CanConnect(device.Line, device.Station);
+            device.Line = "offine";
+        }
+    }
+
     #endregion
 }
 
 public sealed class DeviceState
 {
-    public string Line { get; set; }
+    [NotNull]
+    public string? Line { get; set; }
 
-    public string Station { get; set; }
+    [NotNull]
+    public string? Station { get; set; }
 
+    /// <summary>
+    /// 设备连接状态
+    /// </summary>
     public bool ConnState { get; set; }
 }

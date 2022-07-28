@@ -8,6 +8,8 @@ using BootstrapAdmin.Web.Core.Services;
 namespace BootstrapAdmin.Web.Controllers;
 
 [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+[AllowAnonymous]
+[ApiController]
 public class ScadaController : Controller
 {
     private readonly IInboundService _inboundService;
@@ -36,9 +38,32 @@ public class ScadaController : Controller
     }
 
     /// <summary>
+    /// 警报
+    /// </summary>
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Alarm([FromBody] ApiData data)
+    {
+        ReBuild(data);
+
+        var ret = await _alarmService.SaveAlarmsAsync(data);
+        return Ok(ret);
+    }
+
+    /// <summary>
+    /// 通知
+    /// </summary>
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Notice([FromBody] ApiData data)
+    {
+        ReBuild(data);
+
+        var ret = await _noticeService.SaveNoticeAsync(data);
+        return Ok(ret);
+    }
+
+    /// <summary>
     /// 进站
     /// </summary>
-    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> Inbound([FromBody] ApiData data)
     {
@@ -51,7 +76,6 @@ public class ScadaController : Controller
     /// <summary>
     /// 出站
     /// </summary>
-    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> Archive([FromBody] ApiData data)
     {
@@ -64,7 +88,6 @@ public class ScadaController : Controller
     /// <summary>
     /// 扫关键物料
     /// </summary>
-    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> MaterialCritical([FromBody] ApiData data)
     {
@@ -77,7 +100,6 @@ public class ScadaController : Controller
     /// <summary>
     /// 扫批次料
     /// </summary>
-    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> MaterialBatch([FromBody] ApiData data)
     {
@@ -92,39 +114,12 @@ public class ScadaController : Controller
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> Custom([FromBody] ApiData data)
     {
         ReBuild(data);
 
         var ret = await _customService.SaveCustomAsync(data);
-        return Ok(ret);
-    }
-
-    /// <summary>
-    /// 警报
-    /// </summary>
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public async Task<IActionResult> Alarm([FromBody] ApiData data)
-    {
-        ReBuild(data);
-
-        var ret = await _alarmService.SaveAlarmsAsync(data);
-        return Ok(ret);
-    }
-
-    /// <summary>
-    /// 通知
-    /// </summary>
-    [AllowAnonymous]
-    [HttpPost("[action]")]
-    public async Task<IActionResult> Notice([FromBody] ApiData data)
-    {
-        ReBuild(data);
-
-        var ret = await _noticeService.SaveNoticeAsync(data);
         return Ok(ret);
     }
 

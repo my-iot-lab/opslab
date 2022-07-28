@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
-using Ops.Exchange.Forwarder;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
@@ -41,6 +40,7 @@ public static class ExchangeServiceCollectionExtensions
         services.AddSingleton<DriverConnectorManager>();
         services.AddSingleton<DeviceInfoManager>();
         services.AddSingleton<MonitorManager>();
+        services.AddSingleton<DeviceHealthManager>();
 
         // Options
         OpsExchangeOptions exOptions = new();

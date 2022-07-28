@@ -108,13 +108,17 @@ public sealed class DriverConnectorManager : IDisposable
     private Timer? _heartbeatTimer;
 
     private readonly DeviceInfoManager _deviceInfoManager;
+    private readonly DeviceHealthManager _deviceHealthManager;
     private readonly ILogger _logger;
 
     private object SyncLock => _connectors;
 
-    public DriverConnectorManager(DeviceInfoManager deviceInfoManager, ILogger<DriverConnectorManager> logger)
+    public DriverConnectorManager(DeviceInfoManager deviceInfoManager,
+        DeviceHealthManager deviceHealthManager,
+        ILogger<DriverConnectorManager> logger)
     {
         _deviceInfoManager = deviceInfoManager;
+        _deviceHealthManager = deviceHealthManager;
         _logger = logger;
     }
 
@@ -195,7 +199,7 @@ public sealed class DriverConnectorManager : IDisposable
                 {
                     networkDevice.SetPersistentConnection(); // 设置为长连接
 
-                    // 每次连接成功或失败后设置状态
+                    // 注册方法，在每次连接成功或失败后重置连接状态。
                     networkDevice.ConnectServerPostDelegate = (ok) =>
                     {
                         connector.ConnectedStatus = ok ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
@@ -217,10 +221,12 @@ public sealed class DriverConnectorManager : IDisposable
 
             _isConnectedServer = true;
 
+            // 健康检测
+            _deviceHealthManager.Check();
+
             // 开启心跳检测
             var state = new WeakReference<DriverConnectorManager>(this);
-            int period = Math.Max(5_000, _connectors.Count * 500 + 2_000); // 计算全部Ping一次的时长
-            _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5s 监听一次是否服务器能 ping 通
+            _heartbeatTimer = new Timer(Heartbeat, state, 1000, 2000); // 2s 监听一次能否 ping 通服务器
         }
     }
 
@@ -305,15 +311,14 @@ public sealed class DriverConnectorManager : IDisposable
             driverConnectors = _connectors.Values.ToArray();
         }
 
-        // 可考虑采用 Task.Run 快速执行执行。
         foreach (var connector in driverConnectors)
         {
+            // 若连接状态处于断开状态，网络检查 OK 后会进行重连。
+            // 对于初始时设备不可用，后续可用的情况下会自动进行连接。
             if (connector.Driver is NetworkDeviceBase networkDevice
                 && connector.ConnectedStatus == ConnectionStatus.Disconnected)
             {
-                var reply = networkDevice.PingIpAddress(500);
-                connector.Available = reply == IPStatus.Success;
-
+                connector.Available = _deviceHealthManager.CanConnect(connector.Id);
                 if (connector.Available)
                 {
                     _ = networkDevice.ConnectServer();

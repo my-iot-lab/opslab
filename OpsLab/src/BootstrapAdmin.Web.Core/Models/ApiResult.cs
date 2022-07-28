@@ -45,7 +45,11 @@ public sealed class ApiResult
 
     public static ApiResult Error(int code = ErrorCode.Error, string? err = null)
     {
-        return Error(code, err ?? ErrorCode.GetDescription(code));
+        return new ApiResult
+        {
+            Code = code,
+            Message = err ?? ErrorCode.GetDescription(code),
+        };
     }
 
     /// <summary>

@@ -150,15 +150,26 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Margin="10,0,0,0">版本号：</TextBlock>
                             <TextBlock Text="{Binding AppVersion}"/>
-                            <TextBlock Margin="20,0,0,0">通讯状态：</TextBlock>
-                            <TextBlock Foreground="Red" Text="已断开" />
+                            <TextBlock Margin="20,0,0,0">MES 通讯状态：</TextBlock>
+                            <TextBlock Text="{Binding ConnHealth}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="已连接">
+                                                <Setter Property="Foreground" Value="Green" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="已断开">
+                                                <Setter Property="Foreground" Value="Red" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock>时间：</TextBlock>
-                            <TextBlock Text=""/>
-                            <TextBlock Margin="20,0,0,0">通讯延迟：</TextBlock>
-                            <TextBlock Text="50"/>
+                            <TextBlock Margin="20,0,0,0">MES 通讯延迟：</TextBlock>
+                            <TextBlock Text="{Binding ConnDelay}"/>
                             <TextBlock Margin="0,0,10,0">ms</TextBlock>
                         </StackPanel>
                     </Grid>

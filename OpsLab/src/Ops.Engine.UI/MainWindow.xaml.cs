@@ -1,9 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.IO;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MaterialDesignThemes.Wpf;
@@ -19,7 +20,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        DataContext = App.Current.Services.GetRequiredService<MainViewModel>();
+        var vm = App.Current.Services.GetRequiredService<MainViewModel>();
+        DataContext = vm;
 
         var paletteHelper = new PaletteHelper();
         var theme = paletteHelper.GetTheme();
@@ -30,6 +32,15 @@ public partial class MainWindow : Window
         {
             themeManager.ThemeChanged += (_, e)
                 => DarkModeToggleButton.IsChecked = e.NewTheme?.GetBaseTheme() == BaseTheme.Dark;
+        }
+
+        // 设置定时器
+        if (vm.TimerHandler != null)
+        {
+            var timer = new DispatcherTimer();
+            timer.Tick += vm.TimerHandler;
+            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.Start();
         }
     }
 

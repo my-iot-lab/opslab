@@ -84,7 +84,20 @@
                                             Width="30"
                                             Padding="2 0 2 0"
                                             materialDesign:RippleAssist.IsCentered="True">
-                                        <materialDesign:PackIcon Kind="LightbulbOnOutline" />
+                                        <materialDesign:PackIcon Kind="LightbulbOnOutline" Foreground="Red">
+                                            <materialDesign:PackIcon.Style>
+                                                <Style TargetType="materialDesign:PackIcon">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="true">
+                                                            <Setter Property="Foreground" Value="Green" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="false">
+                                                            <Setter Property="Foreground" Value="Red" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </materialDesign:PackIcon.Style>
+                                        </materialDesign:PackIcon>
                                     </Button>
                                 </StackPanel>
                             </Grid>

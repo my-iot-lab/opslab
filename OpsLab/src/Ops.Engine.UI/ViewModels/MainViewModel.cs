@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Reflection;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -20,10 +22,17 @@ public class MainViewModel : ObservableObject
     private string? _searchKeyword;
     private bool _controlsEnabled = true;
 
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly OpsUIOptions _opsUIOption;
 
-    public MainViewModel(IOptions<OpsUIOptions> opsUIOption)
+    /// <summary>
+    /// 定时器处理对象
+    /// </summary>
+    public EventHandler? TimerHandler { get; set; }
+
+    public MainViewModel(IHttpClientFactory httpClientFactory, IOptions<OpsUIOptions> opsUIOption)
     {
+        _httpClientFactory = httpClientFactory;
         _opsUIOption = opsUIOption.Value;
 
         MenuItems = GetMenuItems();
@@ -51,6 +60,11 @@ public class MainViewModel : ObservableObject
 
             SelectedIndex++;
         }, () => SelectedIndex < MenuItems.Count - 1);
+
+        TimerHandler += (sender, e) =>
+        {
+            CheckServerHealth();
+        };
     }
 
     #region 绑定属性
@@ -96,6 +110,20 @@ public class MainViewModel : ObservableObject
         set => SetProperty(ref _appVersion, value);
     }
 
+    private string _connHealth = "已断开";
+    public string ConnHealth
+    {
+        get => _connHealth;
+        set => SetProperty(ref _connHealth, value);
+    }
+
+    private long _connDelay;
+    public long ConnDelay
+    {
+        get => _connDelay;
+        set => SetProperty(ref _connDelay, value);
+    }
+
     #endregion
 
     #region 绑定事件
@@ -109,6 +137,34 @@ public class MainViewModel : ObservableObject
     #endregion
 
     #region privates 
+
+    private void CheckServerHealth()
+    {
+        var httpClient = _httpClientFactory.CreateClient();
+        try
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var response = httpClient.Send(new HttpRequestMessage
+            {
+                RequestUri = new($"{_opsUIOption.Api.BaseAddress}/api/health"),
+                Method = HttpMethod.Get,
+            });
+            stopwatch.Stop();
+
+            ConnDelay = stopwatch.ElapsedMilliseconds;
+            if (response.IsSuccessStatusCode && ConnHealth != "已连接")
+            {
+                ConnHealth = "已连接";
+            }
+        }
+        catch
+        {
+            if (ConnHealth != "已断开")
+            {
+                ConnHealth = "已断开";
+            }
+        }
+    }
 
     private bool MenuFilter(object obj)
     {
