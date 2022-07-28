@@ -43,7 +43,7 @@ internal class DBManagerService : IDBManager
         option.UsingConnectionString(conn);
 
         // provider
-        option.UsingProvider<MySqlConnectorDatabaseProvider>();
+        option.UsingProvider<MySqlConnectorDatabaseProvider>(); // 此处注入 MySQL，需要时切换
 
         var db = new Database(option) { KeepConnectionAlive = keepAlive };
 

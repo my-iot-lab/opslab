@@ -10,13 +10,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// 添加示例后台任务
-    /// </summary>
-    /// <param name="services"></param>
     public static IServiceCollection AddBootstrapBlazorAdmin(this IServiceCollection services)
     {
-        services.AddLogging(logging => logging.AddFileLogger().AddCloudLogger().AddDBLogger(ExceptionsHelper.Log));
+        //services.AddLogging(logging => logging.AddFileLogger().AddCloudLogger().AddDBLogger(ExceptionsHelper.Log));
         services.AddCors();
         services.AddResponseCompression();
 
@@ -53,13 +49,18 @@ public static class ServiceCollectionExtensions
         {
             var configuration = provider.GetRequiredService<IConfiguration>();
             var connString = configuration.GetConnectionString("ba");
-            builder.UseConnectionString(FreeSql.DataType.MySql, connString);
+            builder.UseConnectionString(FreeSql.DataType.MySql, connString); // 此处注入 MySQL，需要时切换
+
 #if DEBUG
-                    // 调试sql语句输出
+            ILogger logger = provider.GetRequiredService<ILogger<FreeSql.FreeSqlBuilder>>();
+
+            // 调试sql语句输出
             builder.UseMonitorCommand(cmd =>
             {
                 var parameters = cmd.Parameters.OfType<System.Data.Common.DbParameter>().Select(p => $"{p.ParameterName}={p.Value}");
-                System.Console.WriteLine(cmd.CommandText + "\n" + string.Join("&", parameters) + "\n");
+                //System.Console.WriteLine(cmd.CommandText + "\n" + string.Join("&", parameters) + "\n");
+                logger.LogInformation(cmd.CommandText);
+                logger.LogInformation(string.Join("&", parameters));
             });
 #endif
         });

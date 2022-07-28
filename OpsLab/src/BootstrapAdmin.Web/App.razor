@@ -2,12 +2,16 @@
     <CascadingAuthenticationState>
         <Router AppAssembly="@typeof(App).Assembly">
             <Found Context="routeData">
+                <PageTitle>MES 管理系统</PageTitle>
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 </AuthorizeRouteView>
             </Found>
             <NotFound>
+                <PageTitle>Not found</PageTitle>
                 <LayoutView Layout="@typeof(NotFoundLayout)" />
             </NotFound>
         </Router>
     </CascadingAuthenticationState>
 </BootstrapBlazorRoot>
+
+<BlazorReconnector />
