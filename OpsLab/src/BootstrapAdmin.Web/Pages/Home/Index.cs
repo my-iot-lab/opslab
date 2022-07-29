@@ -34,22 +34,16 @@ public class Index : ComponentBase
     [NotNull]
     private string? Url { get; set; }
 
-    //    protected override void OnInitialized()
-    //    {
-    //        // 查看是否自定义前台
-    //        Url = LoginHelper.GetDefaultUrl(Context, null, null, UsersService, DictsService);
+    protected override void OnInitialized()
+    {
+        // 查看是否自定义前台
+        Url = LoginHelper.GetDefaultUrl(Context, null, null, UsersService, DictsService);
+    }
 
-    //#if !DEBUG
-    //        Redirect();
-    //#endif
-    //    }
-
-    //#if DEBUG
-    //    protected override void OnAfterRender(bool firstRender)
-    //    {
-    //        Redirect();
-    //    }
-    //#endif
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Redirect();
+    }
 
     private void Redirect()
     {

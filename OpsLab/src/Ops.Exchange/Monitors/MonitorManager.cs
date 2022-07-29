@@ -140,19 +140,32 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
+                    // 若读取失败，该信号点不会复位，下次会继续读取执行。
                     var result = await connector.Driver.ReadInt16Async(variable.Address);
                     if (result.IsSuccess && result.Content == ExStatusCode.Trigger)
                     {
                         var normalVariables = variable.NormalVariables;
                         List<PayloadData> datas = new(normalVariables.Count);
 
+                        bool ok = false;
                         foreach (var normalVariable in normalVariables)
                         {
-                            var (ok, data, _) = await ReadDataAsync(connector.Driver, normalVariable);
-                            if (ok)
+                            // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                            ok = ok1;
+
+                            if (!ok)
                             {
-                                datas.Add(data);
+                                _logger.LogError($"[Monitor] 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                break;
                             }
+
+                            datas.Add(data);
+                        }
+
+                        if (!ok)
+                        {
+                            continue;
                         }
 
                         var context = new PayloadContext(new PayloadRequest(deviceInfo));
@@ -186,6 +199,7 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
+                    // 若读取异常，等到下一次再访问即可。
                     var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
                     if (ok)
                     {
@@ -240,7 +254,7 @@ public sealed class MonitorManager : IDisposable
                             for (int i = 0; i < ctx.Response.Values.Count; i++)
                             {
                                 value = ctx.Response.Values[i];
-                                await WriteDataAsync(connector.Driver, value);
+                                await WriteDataAsync(connector.Driver, value); // 考虑某个值回写失败该如何处理
                             }
 
                             ctx.Response.LastDelegate?.Invoke(); // TODO: 回写失败，状态机状态是否要继续设置？若是要重试，一定更改对应的状态。
@@ -293,6 +307,8 @@ public sealed class MonitorManager : IDisposable
 
     private static async Task<(bool ok, PayloadData data, string err)> ReadDataAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
     {
+        bool ok = false;
+        string errMessage = string.Empty;
         var data = PayloadData.From(deviceVariable);
 
         switch (deviceVariable.VarType)
@@ -398,7 +414,7 @@ public sealed class MonitorManager : IDisposable
                 {
                     var resultString1 = await driver1.ReadStringAsync(deviceVariable.Address); // S7 自动计算长度
                     SetValue(resultString1, data);
-                } 
+                }
                 else
                 {
                     var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
@@ -413,21 +429,28 @@ public sealed class MonitorManager : IDisposable
                 }
                 break;
             default:
+                errMessage = "Not match VariableType";
                 break;
         }
 
-        return (true, data, "");
+        return (ok, data, errMessage);
 
-        static void SetValue<T>(Communication.OperateResult<T> result, PayloadData data)
+        void SetValue<T>(Communication.OperateResult<T> result, PayloadData data)
         {
             if (result.IsSuccess)
             {
                 data.Value = result.Content!;
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+                errMessage = result.Message;
             }
         }
     }
 
-    private static async Task WriteDataAsync(IReadWriteNet driver, PayloadData data)
+    private static async Task<(bool ok, string err)> WriteDataAsync(IReadWriteNet driver, PayloadData data)
     {
         switch (data.VarType)
         {
@@ -527,5 +550,7 @@ public sealed class MonitorManager : IDisposable
             default:
                 break;
         }
+
+        return (true, string.Empty);
     }
 }
