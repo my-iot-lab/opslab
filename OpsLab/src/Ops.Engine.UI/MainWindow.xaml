@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local1="clr-namespace:Ops.Engine.UI.Converter"
         mc:Ignorable="d"
         Title="SCADA" Height="800" Width="1100"
         WindowStartupLocation="CenterScreen"
@@ -17,6 +18,9 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <local1:BooleanColorConverter x:Key="BooleanColorConverter" />
+            <local1:BooleanConnectionDescConverter x:Key="BooleanConnectionDescConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -151,20 +155,8 @@
                             <TextBlock Margin="10,0,0,0">版本号：</TextBlock>
                             <TextBlock Text="{Binding AppVersion}"/>
                             <TextBlock Margin="20,0,0,0">MES 通讯状态：</TextBlock>
-                            <TextBlock Text="{Binding ConnHealth}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="已连接">
-                                                <Setter Property="Foreground" Value="Green" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="已断开">
-                                                <Setter Property="Foreground" Value="Red" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <TextBlock Text="{Binding ConnState,Converter={StaticResource BooleanConnectionDescConverter}}" 
+                                       Foreground="{Binding ConnState,Converter={StaticResource BooleanColorConverter}}" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

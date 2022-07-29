@@ -188,14 +188,14 @@ internal sealed class HomeViewModel : ObservableObject
         foreach (var device in Devices)
         {
             device.ConnState = _deviceHealthManager.CanConnect(device.Line, device.Station);
-            device.Line = "offine";
         }
     }
 
     #endregion
 }
 
-public sealed class DeviceState
+// 因为要更新 ObservableCollection 集合中元素的属性，因此对应元素也需要实现 INotifyPropertyChanged 接口。
+public sealed class DeviceState : ObservableObject
 {
     [NotNull]
     public string? Line { get; set; }
@@ -203,8 +203,13 @@ public sealed class DeviceState
     [NotNull]
     public string? Station { get; set; }
 
+    private bool _connState;
     /// <summary>
     /// 设备连接状态
     /// </summary>
-    public bool ConnState { get; set; }
+    public bool ConnState
+    {
+        get => _connState;
+        set { SetProperty(ref _connState, value); }
+    }
 }

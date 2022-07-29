@@ -110,11 +110,11 @@ public class MainViewModel : ObservableObject
         set => SetProperty(ref _appVersion, value);
     }
 
-    private string _connHealth = "已断开";
-    public string ConnHealth
+    private bool _connState;
+    public bool ConnState
     {
-        get => _connHealth;
-        set => SetProperty(ref _connHealth, value);
+        get => _connState;
+        set => SetProperty(ref _connState, value);
     }
 
     private long _connDelay;
@@ -152,16 +152,16 @@ public class MainViewModel : ObservableObject
             stopwatch.Stop();
 
             ConnDelay = stopwatch.ElapsedMilliseconds;
-            if (response.IsSuccessStatusCode && ConnHealth != "已连接")
+            if (response.IsSuccessStatusCode && !ConnState)
             {
-                ConnHealth = "已连接";
+                ConnState = true;
             }
         }
         catch
         {
-            if (ConnHealth != "已断开")
+            if (ConnState)
             {
-                ConnHealth = "已断开";
+                ConnState = false;
             }
         }
     }
