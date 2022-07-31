@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Communication", "src\Op
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Exchange", "src\Ops.Exchange\Ops.Exchange.csproj", "{C3649AA7-4661-41E9-97E7-662B1E2BAD46}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Engine.UI", "src\Ops.Engine.UI\Ops.Engine.UI.csproj", "{9284D410-80F8-4BFF-A282-14F4D65ED2F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Engine.Scada", "src\Ops.Engine.Scada\Ops.Engine.Scada.csproj", "{9284D410-80F8-4BFF-A282-14F4D65ED2F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ops.Common.Tests", "test\Ops.Common.Tests\Ops.Common.Tests.csproj", "{B3AA1538-D1B8-4F1F-987B-6EC0084C8BA0}"
 EndProject
