@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using Ops.Engine.Scada.Managements;
 using Ops.Exchange.Management;
 using Ops.Exchange.Monitors;
 
@@ -12,8 +12,6 @@ namespace Ops.Engine.Scada.ViewModels;
 
 internal sealed class HomeViewModel : ObservableObject
 {
-    private Channel<string> _msgChannal = Channel.CreateBounded<string>(32);
-
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DeviceHealthManager _deviceHealthManager;
     private readonly MonitorManager _monitorManager;
@@ -59,16 +57,17 @@ internal sealed class HomeViewModel : ObservableObject
 
         _ = Task.Factory.StartNew(async () =>
         {
-            while (await _msgChannal.Reader.WaitToReadAsync())
+            var logMsgChannel = GlobalChannelManager.Defalut.LogMessageChannel;
+            while (await logMsgChannel.Reader.WaitToReadAsync())
             {
-                var msg = await _msgChannal.Reader.ReadAsync();
+                var msg = await logMsgChannel.Reader.ReadAsync();
 
                 if (MessageLogs.Count == 512)
                 {
                     MessageLogs.Clear();
                 }
 
-                MessageLogs.Add(msg);
+                MessageLogs.Add($"{msg.CreatedTime:yyyy-MM-dd HH:mm:ss:fff}\t{msg.Line}\t{msg.Station}\t{msg.Tag}\t{msg.Message}");
                 MessageAutoScrollDelegate?.Invoke();
             }
         }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
@@ -153,19 +152,7 @@ internal sealed class HomeViewModel : ObservableObject
         IsRunning = true;
         IsStop = false;
 
-        var startOptions = new MonitorStartOptions
-        {
-            NoticeDelegate = (e) =>
-            {
-                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Schema.Station}\t{e.Tag}");
-            },
-            TriggerDelegate = (e) =>
-            {
-                _msgChannal.Writer.TryWrite($"{e.EventTime:yyyy-MM-dd HH:mm:ss:fff}\t{e.Context.Request.DeviceInfo.Schema.Station}\t{e.Tag}");
-            },
-        };
-
-        await _monitorManager.StartAsync(startOptions);
+        await _monitorManager.StartAsync();
     }
 
     /// <summary>

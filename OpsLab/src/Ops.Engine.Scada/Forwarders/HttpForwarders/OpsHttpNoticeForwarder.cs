@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ops.Engine.Scada.Config;
+using Ops.Engine.Scada.Managements;
 using Ops.Exchange.Forwarder;
 
 namespace Ops.Engine.Scada.Forwarders.HttpForwarders;
@@ -42,6 +43,15 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
 
             action = "alarm";
         }
+
+        // 消息显示
+        GlobalChannelManager.Defalut.LogMessageChannel.Writer.TryWrite(new()
+        {
+            CreatedTime = DateTime.Now,
+            Line = data.Schema.Line,
+            Station = data.Schema.Station,
+            Tag = data.Tag
+        });
 
         _logger.LogInformation("[Notice] HTTP 数据推送，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
                 data.RequestId,

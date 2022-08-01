@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ops.Engine.Scada.Config;
+using Ops.Engine.Scada.Managements;
 using Ops.Exchange;
 using Ops.Exchange.Forwarder;
 
@@ -37,6 +38,15 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
                 data.Schema.Station,
                 data.Tag,
                 JsonSerializer.Serialize(data.Values.Select(s => new { s.Tag, s.Value })));
+
+        // 消息显示
+        GlobalChannelManager.Defalut.LogMessageChannel.Writer.TryWrite(new()
+        {
+            CreatedTime = DateTime.Now,
+            Line = data.Schema.Line,
+            Station = data.Schema.Station,
+            Tag = data.Tag
+        });
 
         // 派发数据
         var action = data.Tag switch
