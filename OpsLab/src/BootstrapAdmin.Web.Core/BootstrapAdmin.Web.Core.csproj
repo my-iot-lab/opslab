@@ -17,5 +17,11 @@
   <ItemGroup>
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\EquipmentManage\" />
+    <Folder Include="Services\Production\" />
+    <Folder Include="Services\ProcessManage\" />
+  </ItemGroup>
 	
 </Project>
