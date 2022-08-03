@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Ops.Exchange.Forwarder;
+using Ops.Host.Core.Services;
 
 namespace Ops.Host.App.Forwarders;
 
@@ -9,10 +11,35 @@ namespace Ops.Host.App.Forwarders;
 /// </summary>
 internal sealed class OpsLocalReplyForwarder : IReplyForwarder
 {
-    public Task<ReplyResult> ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
-    {
-        // Do somethings ...
+    private readonly IInboundService _inboundService;
+    private readonly IArchiveService _archiveService;
+    private readonly IMaterialService _materialService;
+    private readonly ICustomService _customService;
+    private readonly ILogger _logger;
 
-        return Task.FromResult(new ReplyResult());
+    public OpsLocalReplyForwarder(
+        IInboundService inboundService,
+        IArchiveService archiveService,
+        IMaterialService materialService,
+        ICustomService customService,
+        ILogger<OpsLocalReplyForwarder> logger)
+    {
+        _inboundService = inboundService;
+        _archiveService = archiveService;
+        _materialService = materialService;
+        _customService = customService;
+        _logger = logger;
+    }
+
+    public async Task<ReplyResult> ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
+    {
+        return data.Tag switch
+        {
+            OpsSymbol.PLC_Sign_Inbound => await _inboundService.SaveInboundAsync(data),
+            OpsSymbol.PLC_Sign_Archive => await _archiveService.SaveArchiveAsync(data),
+            OpsSymbol.PLC_Sign_Critical_Material => await _materialService.SaveCriticalMaterialAsync(data),
+            OpsSymbol.PLC_Sign_Batch_Material => await _materialService.SaveBactchMaterialAsync(data),
+            _ => await _customService.SaveCustomAsync(data),
+        };
     }
 }

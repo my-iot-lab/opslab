@@ -9,7 +9,7 @@
     </Grid.ColumnDefinitions>
     <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
         <Menu Margin="10,0,0,0" Background="Transparent">
-            <MenuItem Height="29" Header="菜单1">
+            <MenuItem Height="29" Header="设置">
                 <MenuItem Command="hc:ControlCommands.OpenLink" CommandParameter="https://github.com/NaBian/HandyControl" Header="GitHub">
                     <MenuItem.Icon>
                         <Path Data="{StaticResource GithubGeometry}" Fill="{DynamicResource PrimaryTextBrush}" Stretch="Uniform"/>
@@ -21,7 +21,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Height="29" Header="菜单2">
+            <MenuItem Height="29" Header="帮助">
                 <MenuItem Command="{Binding OpenViewCmd}" Header="">
                     <MenuItem.Icon>
                         <Path Data="{StaticResource ContributorsGeometry}" Fill="#ef6c00" Stretch="Uniform"/>
@@ -75,7 +75,7 @@
             </MenuItem>
         </Menu>
         <Border Margin="10,0,0,0" VerticalAlignment="Center" CornerRadius="2" Padding="10,4" Background="{DynamicResource SecondaryRegionBrush}">
-            <TextBlock FontWeight="Bold" Text="3.3.6" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBlock FontWeight="Bold" Text="{Binding AppVersion}" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
         </Border>
     </StackPanel>
     <Button Grid.Column="1" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource ConfigGeometry}"/>

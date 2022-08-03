@@ -51,6 +51,64 @@ public sealed class PayloadData
     public bool IsAdditional { get; set; }
 
     /// <summary>
+    /// 变量是否为数组对象。
+    /// </summary>
+    /// <returns></returns>
+    public bool IsArray()
+    {
+        return VarType != VariableType.String && Length > 0;
+    }
+
+    /// <summary>
+    /// 获取相应的对象值，没有找到对象则为 default。
+    /// 若对象类型不能转换，会抛出异常。
+    /// <para>注：若原始数据为数组，指定类型为 string，会将数组转换为 string，值以逗号隔开。</para>
+    /// </summary>
+    /// <returns></returns>
+    public T? GetValue<T>()
+    {
+        if (Value == null)
+        {
+            return default;
+        }
+
+        // 若不是数组
+        if (!Value.GetType().IsArray)
+        {
+            if (typeof(T) == typeof(string))
+            {
+                object? obj = Value.ToString();
+                return (T?)obj;
+            }
+
+            return (T?)Value;
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            object obj = VarType switch
+            {
+                VariableType.Bit => string.Join(",", (bool[])Value),
+                VariableType.Byte => string.Join(",", (int[])Value),
+                VariableType.Word or VariableType.DWord => string.Join(",", (uint[])Value),
+                VariableType.DInt or VariableType.Int => string.Join(",", (int[])Value),
+                VariableType.Real or VariableType.LReal => string.Join(",", (double[])Value),
+                VariableType.String or VariableType.S7String or VariableType.S7WString => string.Join(",", (string[])Value),
+                _ => throw new NotImplementedException(),
+            };
+
+            return (T)obj;
+        }
+
+        if (typeof(T).IsArray)
+        {
+            return (T?)Value;
+        }
+
+        return default;
+    }
+
+    /// <summary>
     /// 将 DeviceVariable 转换为 PayloadData 对象
     /// </summary>
     /// <param name="variable">被转换的对象</param>

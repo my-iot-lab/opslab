@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Ops.Exchange.Forwarder;
+using Ops.Host.App.Core.Extensions;
 using Ops.Host.App.Forwarders;
 using Ops.Host.App.ViewModels;
 
@@ -15,6 +16,10 @@ public static class ServiceCollectionExtensions
 
         // viewmodels
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<NonClientAreaContentViewModel>();
+
+        // services
+        services.AddHostAppServices();
 
         return services;
     }

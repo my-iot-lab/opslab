@@ -18,10 +18,21 @@ public sealed class MenuItemModel
 
     public object? Content { get; set; }
 
-    public MenuItemModel(string icon, string name, Type? contentType)
+    /// <summary>
+    /// 是否为首页
+    /// </summary>
+    public bool IsHome { get; set; }
+
+    public MenuItemModel()
+    {
+
+    }
+
+    public MenuItemModel(string icon, string name, Type? contentType, bool isHome = false)
     {
         Icon = icon;
         Name = name;
         ContentType = contentType;
+        IsHome = isHome;
     }
 }

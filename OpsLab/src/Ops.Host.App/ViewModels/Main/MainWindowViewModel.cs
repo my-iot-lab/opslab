@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Controls;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Ops.Host.App.Management;
 using Ops.Host.App.Models;
-using Ops.Host.App.UserControls;
 
 namespace Ops.Host.App.ViewModels;
 
@@ -12,6 +13,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public MainWindowViewModel()
     {
         MenuItemList = GetMenuItems();
+        SelectedItem = MenuItemList.FirstOrDefault(s => s.IsHome); // 设置首页
     }
 
     #region 属性绑定
@@ -23,7 +25,7 @@ public sealed class MainWindowViewModel : ObservableObject
         set => SetProperty(ref _menuItemList, value);
     }
 
-    private int _selectedIndex = 0;
+    private int _selectedIndex;
     public int SelectedIndex
     {
         get => _selectedIndex;
@@ -38,12 +40,12 @@ public sealed class MainWindowViewModel : ObservableObject
         {
             SetProperty(ref _selectedItem, value);
 
-            _selectedItem.Content ??= CreatePage(_selectedItem.ContentType!);
+            _selectedItem!.Content ??= CreatePage(_selectedItem.ContentType!);
             SubContent = _selectedItem?.Content;
         }
     }
 
-    private object? _subContent = CreatePage(typeof(Home));
+    private object? _subContent;
     public object? SubContent
     {
         get => _subContent;
@@ -54,14 +56,9 @@ public sealed class MainWindowViewModel : ObservableObject
 
     #region privates
 
-    private ObservableCollection<MenuItemModel> GetMenuItems()
+    private static ObservableCollection<MenuItemModel> GetMenuItems()
     {
-        return new ObservableCollection<MenuItemModel>(new[]
-        {
-            new MenuItemModel("", "首页", typeof(Home)),
-            new MenuItemModel("", "Demo1", typeof(Demo1)),
-            new MenuItemModel("", "首页3", null),
-        });
+        return new ObservableCollection<MenuItemModel>(MenuManager.Menus);
     }
 
     private static object? CreatePage(Type contentType)
