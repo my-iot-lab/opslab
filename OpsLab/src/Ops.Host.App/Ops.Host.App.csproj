@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="HandyControl" Version="3.3.0" />
+	<PackageReference Include="Ops.Exchange" Version="0.2.9" />
+	<PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Ops.Host.Common\Ops.Host.Common.csproj" />
+	<ProjectReference Include="..\Ops.Host.Core\Ops.Host.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Resource Include="Resources\*.jpg" />
+	<Resource Include="Resources\*.png" />
+	<Resource Include="Resources\Images\*.png" />
+	<Resource Include="Resources\favicon.ico" />
+  </ItemGroup>
+
+	<ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Images\" />
+  </ItemGroup>
+
+</Project>

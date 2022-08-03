@@ -1,0 +1,19 @@
+﻿<hc:GlowWindow x:Class="Ops.Host.App.MainWindow"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+           xmlns:hc="https://handyorg.github.io/handycontrol"
+           mc:Ignorable="d"
+           Title="Hi"
+           ShowTitle="False"
+           Style="{StaticResource WindowGlow}"
+           Background="{DynamicResource SecondaryRegionBrush}"
+           ActiveGlowColor="{DynamicResource PrimaryColor}"
+           ResizeMode="CanResizeWithGrip"
+           WindowStartupLocation="CenterScreen"
+           d:DesignHeight="800" 
+           d:DesignWidth="1400" 
+           Icon="/Resources/favicon.ico">
+    <ContentControl Name="ControlMain"/>
+</hc:GlowWindow>
