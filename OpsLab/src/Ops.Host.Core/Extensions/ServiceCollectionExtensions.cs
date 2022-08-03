@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using FreeSql;
 using Ops.Host.Common.Domain;
+using Ops.Host.Core.Services;
 
 namespace Ops.Host.App.Core.Extensions;
 
@@ -56,7 +57,16 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddHostAppServices(this IServiceCollection services)
     {
-        var types = typeof(Ops.Host.Core.Models.User).Assembly.GetTypes()
+        // 添加 SCADA 服务
+        services.AddSingleton<IAlarmService, AlarmService>();
+        services.AddSingleton<INoticeService, NoticeService>();
+        services.AddSingleton<IInboundService, InboundService>();
+        services.AddSingleton<IArchiveService, ArchiveService>();
+        services.AddSingleton<IMaterialService, MaterialService>();
+        services.AddSingleton<ICustomService, CustomService>();
+
+        // 添加自定义服务
+        var types = typeof(IAlarmService).Assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && !t.IsInterface && typeof(IDomainService).IsAssignableFrom(t));
         foreach (var type in types)
         {

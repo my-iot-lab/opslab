@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
+using HandyControl.Controls;
+using Microsoft.Extensions.Options;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
+using Ops.Exchange.Monitors;
+using Ops.Host.App.Config;
 using Ops.Host.App.Management;
 using Ops.Host.App.Models;
 
@@ -10,13 +17,28 @@ namespace Ops.Host.App.ViewModels;
 
 public sealed class MainWindowViewModel : ObservableObject
 {
-    public MainWindowViewModel()
+    private readonly MonitorManager _monitorManager;
+    private readonly OpsHostOptions _opsHostOption;
+
+    public MainWindowViewModel(
+        MonitorManager monitorManager, 
+        IOptions<OpsHostOptions> opsHostOption)
     {
+        _monitorManager = monitorManager;
+        _opsHostOption = opsHostOption.Value;
+
         MenuItemList = GetMenuItems();
         SelectedItem = MenuItemList.FirstOrDefault(s => s.IsHome); // 设置首页
+
+        RunCommand = new RelayCommand(async () =>
+        {
+            await RunAsync();
+        });
     }
 
     #region 属性绑定
+
+    public string Title => _opsHostOption.Title ?? "上位机系统";
 
     private ObservableCollection<MenuItemModel>? _menuItemList;
     public ObservableCollection<MenuItemModel>? MenuItemList
@@ -52,6 +74,19 @@ public sealed class MainWindowViewModel : ObservableObject
         set => SetProperty(ref _subContent, value);
     }
 
+    private bool _isRunning = false;
+    public bool IsRunning
+    {
+        get => _isRunning;
+        set { SetProperty(ref _isRunning, value); }
+    }
+
+    #endregion
+
+    #region 事件绑定
+
+    public ICommand RunCommand { get; }
+
     #endregion
 
     #region privates
@@ -69,6 +104,19 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         return default;
+    }
+
+    private async Task RunAsync()
+    {
+        if (_isRunning)
+        {
+            await _monitorManager.StartAsync();
+            Growl.Info("监控已启动");
+            return;
+        }
+
+        Growl.Info("监控已关闭");
+        _monitorManager.Stop();
     }
 
     #endregion

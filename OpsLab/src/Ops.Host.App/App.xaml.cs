@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Ops.Host.App.Config;
 using Ops.Host.App.Extensions;
+using Ops.Exchange.DependencyInjection;
 
 namespace Ops.Host.App;
 
@@ -74,6 +75,9 @@ public partial class App : Application
     {
         // options
         services.Configure<OpsHostOptions>(configuration.GetSection("OpsHost"));
+
+        // 添加 Exchange
+        services.AddOpsExchange(configuration);
 
         // 添加
         services.AddHostApp();

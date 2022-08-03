@@ -19,8 +19,6 @@ namespace Ops.Exchange.Monitors;
 public sealed class MonitorManager : IDisposable
 {
     private CancellationTokenSource? _cts = new();
-    private bool _isRunning;
-
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
@@ -49,15 +47,20 @@ public sealed class MonitorManager : IDisposable
     }
 
     /// <summary>
+    /// 获取运行状态，是否正在运行中。
+    /// </summary>
+    public bool IsRuning { get; private set; }
+
+    /// <summary>
     /// 启动监听
     /// </summary>
     public async Task StartAsync(MonitorStartOptions? startOptions = null)
     {
-        if (_isRunning)
+        if (IsRuning)
         {
             return;
         }
-        _isRunning = true;
+        IsRuning = true;
 
         _logger.LogInformation("[Monitor] 监控启动");
 
@@ -281,11 +284,11 @@ public sealed class MonitorManager : IDisposable
 
     public void Stop()
     {
-        if (!_isRunning)
+        if (!IsRuning)
         {
             return;
         }
-        _isRunning = false;
+        IsRuning = false;
 
         if (_cts != null)
         {

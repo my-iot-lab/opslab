@@ -23,12 +23,15 @@
         <Grid Grid.Row="0">
             <Border Height="32" Name="BorderTitle" Grid.Row="0" Background="{DynamicResource TitleBrush}" Style="{StaticResource BorderClip}">
                 <hc:SimplePanel>
-                    <ToggleButton Margin="0,0,6,0" IsChecked="{Binding IsOpen,ElementName=DrawerMenu}" 
-                                  Padding="5"  HorizontalAlignment="Left" 
+                    <ToggleButton Margin="6,0,6,0" IsChecked="{Binding IsOpen,ElementName=DrawerMenu}" 
+                                  Padding="6" HorizontalAlignment="Left" 
                                   Foreground="{DynamicResource TextIconBrush}"
                                   Style="{StaticResource ToggleButtonIconTransparent}" 
                                   hc:IconElement.Geometry="{StaticResource DocumentGeometry}"/>
-                    <TextBlock Style="{StaticResource TextBlockSubTitleBold}" Foreground="White" Text="XXX上位机系统"/>
+                    <TextBlock Style="{StaticResource TextBlockSubTitleBold}" Foreground="White" Text="{Binding Title}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <ToggleButton IsChecked="{Binding IsRunning}" Command="{Binding RunCommand}" Margin="8,0,12,0" HorizontalAlignment="Center" Style="{StaticResource ToggleButtonSwitch}"/>
+                    </StackPanel>
                     <hc:Drawer Name="DrawerMenu" Dock="Left">
                         <Border Style="{StaticResource BorderClip}" Margin="0,8,8,8" CornerRadius="0,10,10,0" Background="{DynamicResource RegionBrush}" Width="200">
                             <DockPanel>
