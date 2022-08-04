@@ -13,9 +13,9 @@ internal sealed class InboundService : IInboundService
     {
         await Task.Delay(100);
 
-        var sn = data.GetValue<string>("PLC_Inbound_SN");
-        var formula = data.GetValue<short>("PLC_Inbound_Formula");
-        var pallet = data.GetValue<string>("PLC_Inbound_Pallet");
+        var sn = data.GetValue<string>("PLC_Inbound_SN"); // SN
+        var formula = data.GetValue<short>("PLC_Inbound_Formula"); // PLC 配方号
+        var pallet = data.GetValue<string>("PLC_Inbound_Pallet"); // 托盘码
         if (string.IsNullOrWhiteSpace(sn))
         {
             return ReplyResultHelper.Error();
@@ -30,7 +30,7 @@ internal sealed class InboundService : IInboundService
 
             return ReplyResultHelper.Ok();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return ReplyResultHelper.Error();
         }

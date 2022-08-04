@@ -13,12 +13,12 @@ internal sealed class ArchiveService : IArchiveService
     {
         await Task.Delay(100); // test
 
-        var sn = data.GetValue<string>("PLC_Archive_SN");
-        var pass = data.GetValue<short>("PLC_Archive_Pass");
-        var ct = data.GetValue<short>("PLC_Archive_Cycletime");
-        var @operator = data.GetValue<string>("PLC_Archive_Operator");
-        var shift = data.GetValue<short>("PLC_Archive_Shift");
-        var pallet = data.GetValue<string>("PLC_Archive_Pallet");
+        var sn = data.GetValue<string>("PLC_Archive_SN"); // SN
+        var pass = data.GetValue<short>("PLC_Archive_Pass"); // 结果
+        var ct = data.GetValue<short>("PLC_Archive_Cycletime"); // CT
+        var @operator = data.GetValue<string>("PLC_Archive_Operator"); // 操作人
+        var shift = data.GetValue<short>("PLC_Archive_Shift"); // 班次
+        var pallet = data.GetValue<string>("PLC_Archive_Pallet"); // 托盘号
 
         if (string.IsNullOrWhiteSpace(sn))
         {
@@ -42,7 +42,7 @@ internal sealed class ArchiveService : IArchiveService
 
             return ReplyResultHelper.Ok();
         }
-        catch(Exception ex)
+        catch(Exception)
         {
             return ReplyResultHelper.Error();
         }

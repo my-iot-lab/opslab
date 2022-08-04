@@ -111,11 +111,11 @@ public sealed class MainWindowViewModel : ObservableObject
         if (_isRunning)
         {
             await _monitorManager.StartAsync();
-            Growl.Info("监控已启动");
+            Growl.Info("数据监控已启动");
             return;
         }
 
-        Growl.Info("监控已关闭");
+        Growl.Info("数据监控已关闭");
         _monitorManager.Stop();
     }
 
