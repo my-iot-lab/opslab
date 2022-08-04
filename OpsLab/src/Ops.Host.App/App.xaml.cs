@@ -76,6 +76,9 @@ public partial class App : Application
         // options
         services.Configure<OpsHostOptions>(configuration.GetSection("OpsHost"));
 
+        // 添加缓存
+        services.AddMemoryCache();
+
         // 添加 Exchange
         services.AddOpsExchange(configuration);
 
