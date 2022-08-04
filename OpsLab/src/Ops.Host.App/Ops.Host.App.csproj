@@ -30,6 +30,7 @@
 	<Resource Include="Resources\Images\*.png" />
 	<Resource Include="Resources\Images\Avatar\*.png" />
 	<Resource Include="Resources\Images\DevOps\*.png" />
+	<Resource Include="Resources\Images\thumbs\*.png" />
 	<Resource Include="Resources\favicon.ico" />
   </ItemGroup>
 
