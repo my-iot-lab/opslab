@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Ops.Exchange.Forwarder;
@@ -27,18 +29,27 @@ internal sealed class OpsLocalNoticeForwarder : INoticeForwarder
 
     public async Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
-        // 警报消息，0 表示无任何异常，不用推送
-        if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
+        try
         {
-            if ((uint)data.Values[0].Value == 0)
+            // 警报信息，采用 bool 数组，可以自定义长度。
+            // 警报消息，所有都为 false 表示无任何异常，不用处理。
+            if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
             {
+                var arr = data.Values[0].GetValue<bool[]>();
+                if (arr!.All(s => !s))
+                {
+                    return;
+                }
+
+                await _alarmService.SaveAlarmsAsync(data);
                 return;
             }
 
-            await _alarmService.SaveAlarmsAsync(data);
-            return;
+            await _noticeService.SaveNoticeAsync(data);
         }
-
-        await _noticeService.SaveNoticeAsync(data);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[OpsNoticeForwarder] Handle Error");
+        }
     }
 }

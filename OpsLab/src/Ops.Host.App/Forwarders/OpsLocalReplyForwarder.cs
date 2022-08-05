@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Ops.Exchange;
 using Ops.Exchange.Forwarder;
 using Ops.Host.Core.Services;
 
@@ -33,13 +35,25 @@ internal sealed class OpsLocalReplyForwarder : IReplyForwarder
 
     public async Task<ReplyResult> ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
-        return data.Tag switch
+        try
         {
-            OpsSymbol.PLC_Sign_Inbound => await _inboundService.SaveInboundAsync(data),
-            OpsSymbol.PLC_Sign_Archive => await _archiveService.SaveArchiveAsync(data),
-            OpsSymbol.PLC_Sign_Critical_Material => await _materialService.SaveCriticalMaterialAsync(data),
-            OpsSymbol.PLC_Sign_Batch_Material => await _materialService.SaveBactchMaterialAsync(data),
-            _ => await _customService.SaveCustomAsync(data),
-        };
+            return data.Tag switch
+            {
+                OpsSymbol.PLC_Sign_Inbound => await _inboundService.SaveInboundAsync(data),
+                OpsSymbol.PLC_Sign_Archive => await _archiveService.SaveArchiveAsync(data),
+                OpsSymbol.PLC_Sign_Critical_Material => await _materialService.SaveCriticalMaterialAsync(data),
+                OpsSymbol.PLC_Sign_Batch_Material => await _materialService.SaveBactchMaterialAsync(data),
+                _ => await _customService.SaveCustomAsync(data),
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[OpsReplyForwarder] Handle Error");
+
+            return new()
+            {
+                Result = ExStatusCode.HandlerException,
+            };
+        }
     }
 }

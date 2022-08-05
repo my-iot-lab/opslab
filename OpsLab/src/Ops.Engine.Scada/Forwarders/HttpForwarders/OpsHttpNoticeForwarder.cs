@@ -34,7 +34,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
     {
         string action = "notice";
         // 警报信息，采用 bool 数组，可以自定义长度。
-        // 警报消息，所有都为 0 表示无任何异常，不用推送。
+        // 警报消息，所有都为 false 表示无任何异常，不用推送。
         if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
         {
             var arr = data.Values[0].GetValue<bool[]>();
