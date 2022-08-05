@@ -33,10 +33,12 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
     public async Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
         string action = "notice";
-        // 警报消息，0 表示无任何异常，不用推送
+        // 警报信息，采用 bool 数组，可以自定义长度。
+        // 警报消息，所有都为 0 表示无任何异常，不用推送。
         if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
         {
-            if ((uint)data.Values[0].Value == 0)
+            var arr = data.Values[0].GetValue<bool[]>();
+            if (arr!.All(s => !s)) 
             {
                 return;
             }

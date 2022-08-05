@@ -18,22 +18,14 @@ internal sealed class AlarmService : IAlarmService
             return ReplyResultHelper.Ok();
         }
 
-        var alarmValue = data.Values[0].GetValue<uint>(); // 警报数据
-        if (alarmValue == 0)
-        {
-            return ReplyResultHelper.Ok();
-        }
-
+        var alarmValues = data.Values[0].GetValue<bool[]>(); // 警报数据
         try
         {
-            // 按位解析
-
-            // 根据字典表中的配置，解析 uint32 对应位（从低到高位）警报类型。
-            // 字典配置基数从 1 开始。
-            for (int i = 0; i < 32; i++)
+            for (int i = 0; i < alarmValues!.Length; i++)
             {
-                if ((alarmValue & 1 << i) > 0)
+                if (alarmValues[i])
                 {
+                    // DoSomething...
                 }
             }
         }
