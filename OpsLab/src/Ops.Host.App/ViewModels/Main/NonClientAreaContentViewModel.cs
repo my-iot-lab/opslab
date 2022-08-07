@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Ops.Host.App.ViewModels;
 
