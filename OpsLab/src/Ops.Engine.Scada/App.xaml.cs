@@ -86,7 +86,7 @@ namespace Ops.Engine.Scada
 
             // 添加 ViewModel
             services.AddTransient<MainViewModel>();
-            services.AddTransient<HomeViewModel>();
+            services.AddTransient<KibanaViewModel>();
             services.AddTransient<Home2ViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<AddressViewModel>();

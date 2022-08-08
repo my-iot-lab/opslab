@@ -12,7 +12,7 @@ public partial class Home : UserControl
     {
         InitializeComponent();
 
-        var vm = App.Current.Services.GetRequiredService<HomeViewModel>();
+        var vm = App.Current.Services.GetRequiredService<KibanaViewModel>();
         vm.MessageAutoScrollDelegate = () =>
         {
             this.MessageListBox.ScrollIntoView(this.MessageListBox.Items[this.MessageListBox.Items.Count - 1]);

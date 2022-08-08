@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Extensions.Options;
@@ -14,8 +16,10 @@ using Ops.Engine.Scada.Views;
 
 namespace Ops.Engine.Scada.ViewModels;
 
-public class MainViewModel : ObservableObject
+public class MainViewModel : ObservableObject, IDisposable
 {
+    private readonly CancellationTokenSource _cts = new();
+
     private readonly ICollectionView _menuItemsView;
     private ListItem? _selectedItem;
     private int _selectedIndex;
@@ -24,11 +28,6 @@ public class MainViewModel : ObservableObject
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly OpsScadaOptions _opsUIOption;
-
-    /// <summary>
-    /// 定时器处理对象
-    /// </summary>
-    public EventHandler? TimerHandler { get; set; }
 
     public MainViewModel(IHttpClientFactory httpClientFactory, IOptions<OpsScadaOptions> opsUIOption)
     {
@@ -61,10 +60,17 @@ public class MainViewModel : ObservableObject
             SelectedIndex++;
         }, () => SelectedIndex < MenuItems.Count - 1);
 
-        TimerHandler += (sender, e) =>
+        // 此处不采用 DispatcherTimer 定时器，因为调用若方法耗时长且为同步执行，会导致 UI 卡住。
+        _ = Task.Factory.StartNew(async () =>
         {
-            CheckServerHealth();
-        };
+            var timer = new System.Threading.PeriodicTimer(TimeSpan.FromSeconds(2));
+            while (!_cts.IsCancellationRequested)
+            {
+                await Task.Delay(2000);
+
+                await CheckServerHealthAsync();
+            }
+        }, default, default, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     #region 绑定属性
@@ -138,17 +144,13 @@ public class MainViewModel : ObservableObject
 
     #region privates 
 
-    private void CheckServerHealth()
+    private async Task CheckServerHealthAsync()
     {
         var httpClient = _httpClientFactory.CreateClient();
         try
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            var response = httpClient.Send(new HttpRequestMessage
-            {
-                RequestUri = new($"{_opsUIOption.Api.BaseAddress}/api/health"),
-                Method = HttpMethod.Get,
-            });
+            var response = await httpClient.GetAsync(new Uri($"{_opsUIOption.Api.BaseAddress}/api/health"));
             stopwatch.Stop();
 
             ConnDelay = stopwatch.ElapsedMilliseconds;
@@ -187,4 +189,9 @@ public class MainViewModel : ObservableObject
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+    }
 }

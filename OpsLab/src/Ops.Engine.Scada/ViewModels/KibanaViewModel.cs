@@ -10,7 +10,7 @@ using Ops.Exchange.Monitors;
 
 namespace Ops.Engine.Scada.ViewModels;
 
-internal sealed class HomeViewModel : ObservableObject
+internal sealed class KibanaViewModel : ObservableObject
 {
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DeviceHealthManager _deviceHealthManager;
@@ -21,7 +21,7 @@ internal sealed class HomeViewModel : ObservableObject
     /// </summary>
     public EventHandler? TimerHandler { get; set; }
 
-    public HomeViewModel(DeviceInfoManager deviceInfoManager,
+    public KibanaViewModel(DeviceInfoManager deviceInfoManager,
         DeviceHealthManager deviceHealthManager,
         MonitorManager monitorManager)
     {
