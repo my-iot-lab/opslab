@@ -13,8 +13,6 @@ public sealed class MenuManager
     /// </summary>
     public static MenuItemModel[] Menus => new[]
     {
-        new MenuItemModel("", "首页", typeof(Home), true),
-        new MenuItemModel("", "Demo1", typeof(Demo1)),
-        new MenuItemModel("", "首页3", null),
+        new MenuItemModel("", "设备看板", typeof(Kibana), true),
     };
 }

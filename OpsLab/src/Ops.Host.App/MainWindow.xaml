@@ -5,7 +5,7 @@
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:hc="https://handyorg.github.io/handycontrol"
            mc:Ignorable="d"
-           Title="Hi"
+           Title="MES"
            ShowTitle="False"
            Style="{StaticResource WindowGlow}"
            Background="{DynamicResource SecondaryRegionBrush}"
@@ -14,6 +14,6 @@
            WindowStartupLocation="CenterScreen"
            d:DesignHeight="800" 
            d:DesignWidth="1400" 
-           Icon="/Resources/favicon.ico">
+           Icon="favicon.ico">
     <ContentControl Name="ControlMain"/>
 </hc:GlowWindow>

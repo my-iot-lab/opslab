@@ -9,7 +9,7 @@
         Title="SCADA" Height="800" Width="1100"
         WindowStartupLocation="CenterScreen"
         Style="{StaticResource MaterialDesignWindow}" 
-        Icon="./Resources/favicon.ico">
+        Icon="favicon.ico">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

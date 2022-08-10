@@ -16,8 +16,9 @@ public static class ServiceCollectionExtensions
 
         // viewmodels
         services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<NonClientAreaContentViewModel>();
-
+        services.AddTransient<NonClientAreaContentViewModel>(); 
+        services.AddTransient<KibanaViewModel>();
+        
         // services
         services.AddHostAppServices();
 

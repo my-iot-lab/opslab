@@ -63,7 +63,7 @@ public class MainViewModel : ObservableObject, IDisposable
         // 此处不采用 DispatcherTimer 定时器，因为调用若方法耗时长且为同步执行，会导致 UI 卡住。
         _ = Task.Factory.StartNew(async () =>
         {
-            var timer = new System.Threading.PeriodicTimer(TimeSpan.FromSeconds(2));
+            //var timer = new System.Threading.PeriodicTimer(TimeSpan.FromSeconds(2));
             while (!_cts.IsCancellationRequested)
             {
                 await Task.Delay(2000);

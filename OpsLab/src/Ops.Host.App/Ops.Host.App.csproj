@@ -5,6 +5,11 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+	<ApplicationIcon>favicon.ico</ApplicationIcon>
+	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<FileVersion>1.0.1</FileVersion>
+	<Authors>Gang.Yang</Authors>
+	<Company>OpsLab</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,18 +37,13 @@
 	<Resource Include="Resources\Images\Avatar\*.png" />
 	<Resource Include="Resources\Images\DevOps\*.png" />
 	<Resource Include="Resources\Images\thumbs\*.png" />
-	<Resource Include="Resources\favicon.ico" />
-  </ItemGroup>
-
-	<ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+	<Resource Include="favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\Images\" />
-    <Folder Include="UserControls\Basic\" />
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
