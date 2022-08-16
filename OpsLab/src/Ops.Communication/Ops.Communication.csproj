@@ -12,6 +12,11 @@
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReleaseNotes>Ops.Communication is a library that communicate with popular PLC</PackageReleaseNotes>
     <!--<Nullable>true</Nullable>-->
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1591;1573 </NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

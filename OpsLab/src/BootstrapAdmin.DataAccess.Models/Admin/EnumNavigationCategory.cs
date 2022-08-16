@@ -17,5 +17,5 @@ public enum EnumNavigationCategory
     /// 用户自定义
     /// </summary>
     [Description("前台菜单")]
-    Customer
+    Customer,
 }

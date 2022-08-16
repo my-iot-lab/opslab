@@ -22,7 +22,7 @@ internal sealed class NoticeEventHandler : IEventHandler<NoticeEventData>
 
     public async Task HandleAsync(NoticeEventData eventData, CancellationToken cancellationToken = default)
     {
-        var forwardData = new ForwardData(eventData.RequestId, eventData.Schema, eventData.Tag, new[] { eventData.Value });
+        var forwardData = new ForwardData(eventData.RequestId, eventData.Schema, eventData.Tag, eventData.Name, new[] { eventData.Value });
 
         try
         {

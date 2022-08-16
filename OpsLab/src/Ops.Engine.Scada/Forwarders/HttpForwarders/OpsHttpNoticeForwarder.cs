@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Ops.Engine.Scada.Config;
 using Ops.Engine.Scada.Managements;
 using Ops.Exchange.Forwarder;
+using Ops.Exchange.Model;
 
 namespace Ops.Engine.Scada.Forwarders.HttpForwarders;
 
@@ -37,7 +38,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
         // 警报消息，所有都为 false 表示无任何异常，不用推送。
         if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
         {
-            var arr = data.Values[0].GetValue<bool[]>();
+            var arr = data.Values[0].GetBitArray();
             if (arr!.All(s => !s)) 
             {
                 return;

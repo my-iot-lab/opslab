@@ -42,7 +42,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         try
         {
             ReplyResult replyResult;
-            ForwardData forwardData = new(eventData.Context.Request.RequestId, schema, eventData.Tag, eventData.Values);
+            ForwardData forwardData = new(eventData.Context.Request.RequestId, schema, eventData.Tag, eventData.Name, eventData.Values);
 
             // 采用 Scope 作用域
             var replyForwarder = _serviceProvider.GetRequiredService<IReplyForwarder>();

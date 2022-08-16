@@ -69,8 +69,5 @@ public class Navigation
     [Display(Name = "所属应用")]
     public string? Application { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public bool HasChildren { get; set; }
 }

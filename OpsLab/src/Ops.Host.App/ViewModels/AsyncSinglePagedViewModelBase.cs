@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Win32;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
 using HandyControl.Data;
 using Ops.Host.Common.Utils;
 
@@ -39,8 +43,9 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
 
     protected AsyncSinglePagedViewModelBase()
     {
-        QueryCommand = new RelayCommand(async () => await DoSearchAsync());
+        QueryCommand = new RelayCommand(async () => await DoSearchAsync(1, PageSize));
         PageUpdatedCommand = new RelayCommand<FunctionEventArgs<int>>(async (e) => await PageUpdatedAsync(e!));
+        DownloadCommand = new AsyncRelayCommand<string>(DownloadAsync!);
     }
 
     /// <summary>
@@ -50,7 +55,7 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
     /// <returns></returns>
     protected async Task InitSearchAsync()
     {
-        await DoSearchAsync();
+        await DoSearchAsync(1, PageSize);
     }
 
     #region 绑定属性
@@ -96,23 +101,63 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
     /// </summary>
     public ICommand PageUpdatedCommand { get; }
 
+    /// <summary>
+    /// 导出查询的数据。
+    /// </summary>
+    public ICommand DownloadCommand { get; }
+
     #endregion
 
     /// <summary>
     /// 查询数据。
-    /// <para>其中筛选器和每页数量分别使用 QueryFilter 和 PageSize。</para>
     /// </summary>
     /// <param name="pageIndex">页数</param>
-    protected abstract Task<(IEnumerable<TDataSource> items, long pageCount)> OnSearchAsync(int pageIndex = 1);
+    /// <param name="pageSize">每页数量</param>
+    protected abstract Task<(IEnumerable<TDataSource> items, long pageCount)> OnSearchAsync(int pageIndex, int pageSize);
+
+    /// <summary>
+    /// 导出文件默认名称，默认为 "yyyyMMddHHmmss"。
+    /// </summary>
+    public virtual string DownloadFileName()
+    {
+        return DateTime.Now.ToString("yyyyMMddHHmmss");
+    }
 
     private async Task PageUpdatedAsync(FunctionEventArgs<int> e)
     {
-        await DoSearchAsync(e.Info);
+        await DoSearchAsync(e.Info, PageSize);
     }
 
-    private async Task DoSearchAsync(int pageIndex = 1)
+    private async Task DownloadAsync(string path)
     {
-        var (items, count) = await OnSearchAsync(pageIndex);
+        try
+        {
+            SaveFileDialog saveFile = new()
+            {
+                Filter = "导出文件 （*.xlsx）|*.xlsx",
+                FilterIndex = 0,
+                FileName = DownloadFileName(),
+            };
+
+            if (saveFile.ShowDialog() != true)
+            {
+                return;
+            }
+
+            var fileName = saveFile.FileName;
+
+            var (items, _) = await OnSearchAsync(1, short.MaxValue);
+            ExcelHelper.Export(fileName, Path.GetFileNameWithoutExtension(fileName), items);
+        }
+        catch (Exception ex)
+        {
+            Growl.Error($"数据导出失败, 错误：{ex.Message}");
+        }
+    }
+
+    private async Task DoSearchAsync(int pageIndex, int pageSize)
+    {
+        var (items, count) = await OnSearchAsync(pageIndex, pageSize);
 
         PageCount = PageHelper.GetPageCount(count, PageSize);
         DataSourceList = new ObservableCollection<TDataSource>(items);

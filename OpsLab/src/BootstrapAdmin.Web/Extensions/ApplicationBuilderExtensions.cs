@@ -5,7 +5,7 @@ public static class ApplicationBuilderExtensions
     public static WebApplication UseBootstrapBlazorAdmin(this WebApplication builder)
     {
         // 开启健康检查
-        builder.MapBootstrapHealthChecks();
+        //builder.MapBootstrapHealthChecks();
 
         builder.UseBootstrapBlazor();
 

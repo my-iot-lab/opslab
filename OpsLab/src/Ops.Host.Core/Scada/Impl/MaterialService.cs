@@ -13,8 +13,8 @@ internal sealed class MaterialService : IMaterialService
     {
         await Task.Delay(100);
 
-        var barcode = data.GetValue<string>("PLC_Critical_Material_Barcode"); // 物料条码
-        var index = data.GetValue<short>("PLC_Critical_Material_Index"); // 扫描索引
+        var barcode = data.GetString("PLC_Critical_Material_Barcode"); // 物料条码
+        var index = data.GetInt("PLC_Critical_Material_Index"); // 扫描索引
         if (string.IsNullOrWhiteSpace(barcode))
         {
             return ReplyResultHelper.Error();

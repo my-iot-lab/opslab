@@ -32,9 +32,5 @@ public class Group
     [Display(Name = "群组描述")]
     public string? Description { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     public override string ToString() => $"{GroupName} ({GroupCode})";
 }

@@ -59,8 +59,5 @@ public class Trace
     /// </summary>
     public string? UserAgent { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public string? Referer { get; set; }
 }

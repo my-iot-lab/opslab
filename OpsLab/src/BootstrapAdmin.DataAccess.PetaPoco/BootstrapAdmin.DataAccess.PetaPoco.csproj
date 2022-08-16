@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="BootstrapBlazor" Version="6.8.18" />
+	<PackageReference Include="BootstrapBlazor" Version="6.8.25" />
 	<PackageReference Include="Longbow.Security.Cryptography" Version="6.0.0" />
-	<PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.7" />
+	<PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.8" />
 	<PackageReference Include="MySqlConnector" Version="2.1.11" />
 	<PackageReference Include="PetaPoco.Extensions" Version="6.0.0" />
   </ItemGroup>

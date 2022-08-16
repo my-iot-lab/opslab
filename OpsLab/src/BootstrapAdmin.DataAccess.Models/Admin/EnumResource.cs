@@ -7,19 +7,12 @@ namespace BootstrapAdmin.DataAccess.Models;
 /// </summary>
 public enum EnumResource
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [Description("菜单")]
     Navigation,
-    /// <summary>
-    /// 
-    /// </summary>
+
     [Description("资源")]
     Resource,
-    /// <summary>
-    /// 
-    /// </summary>
+
     [Description("代码块")]
     Block
 }

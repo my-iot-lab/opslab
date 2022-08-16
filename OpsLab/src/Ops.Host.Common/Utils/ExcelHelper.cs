@@ -31,13 +31,41 @@ public static class ExcelHelper
     /// <param name="sheetName">sheet 名称</param>
     /// <param name="data">要导出的数据</param>
     /// <param name="excludes">要排除的列名，列名与类型的属性名一致</param>
-    public static void Export<T>(string path, string sheetName, List<T> data, params string[] excludes)
+    public static void Export<T>(Stream fileStream, string sheetName, IEnumerable<T> data, params string[] excludes)
+    {
+        using var package = new ExcelPackage(fileStream);
+        var sheet = package.Workbook.Worksheets.Add(sheetName);
+
+        ExportToSheet(sheet, data, excludes);
+
+        package.Save();
+    }
+
+    /// <summary>
+    /// 导出 Excel。
+    /// <para>导出 Excel 的 Header 优先使用导出类型的 <see cref="DisplayAttribute"/> 名称，若没有会使用类型的属性名。Excel 列顺序与属性顺序一致。</para>
+    /// </summary>
+    /// <param name="path">路径</param>
+    /// <param name="sheetName">sheet 名称</param>
+    /// <param name="data">要导出的数据</param>
+    /// <param name="excludes">要排除的列名，列名与类型的属性名一致</param>
+    public static void Export<T>(string path, string sheetName, IEnumerable<T> data, params string[] excludes)
     {
         if (File.Exists(path))
         {
             File.Delete(path);
         }
 
+        using var package = new ExcelPackage(path);
+        var sheet = package.Workbook.Worksheets.Add(sheetName);
+
+        ExportToSheet(sheet, data, excludes);
+
+        package.Save();
+    }
+
+    private static void ExportToSheet<T>(ExcelWorksheet sheet, IEnumerable<T> data, params string[] excludes)
+    {
         // 考虑导出功能使用频率低，因此不使用缓存机制。
         List<(string DisplayName, PropertyInfo PropInfo)> columns = new();
         var props = typeof(T).GetProperties();
@@ -52,24 +80,22 @@ public static class ExcelHelper
             columns.Add((attr?.Name ?? prop.Name, prop));
         }
 
-        using var package = new ExcelPackage(path);
-        var sheet = package.Workbook.Worksheets.Add(sheetName);
-
         // 构建头
         for (int i = 0; i < columns.Count; i++)
         {
             sheet.Cells[1, i + 1].Value = columns[i].DisplayName;
         }
 
+        int n = 2; // 从第二行开始
         // 构建主体内容
-        for (int i = 0; i < data.Count; i++)
+        foreach (var item in data)
         {
             for (int j = 0; j < columns.Count; j++)
             {
                 var propInfo = columns[j].PropInfo;
-                var cell = sheet.Cells[i + 2, j + 1];
+                var cell = sheet.Cells[n, j + 1];
 
-                cell.Value = propInfo!.GetValue(data[i]);
+                cell.Value = propInfo!.GetValue(item);
 
                 if (propInfo!.PropertyType == typeof(DateTime))
                 {
@@ -78,8 +104,8 @@ public static class ExcelHelper
 
                 cell.AutoFitColumns();
             }
-        }
 
-        package.Save();
+            n++;
+        }
     }
 }

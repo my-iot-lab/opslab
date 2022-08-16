@@ -22,6 +22,11 @@ public sealed class NoticeEventData : EventData
     /// 事件标签 Tag（唯一）
     /// </summary>
     public string Tag { get; }
+    
+    /// <summary>
+    /// 事件名称
+    /// </summary>
+    public string? Name { get; }
 
     /// <summary>
     /// 要通知的数据。
@@ -33,11 +38,12 @@ public sealed class NoticeEventData : EventData
     /// </summary>
     public int HandleTimeout { get; set; }
 
-    public NoticeEventData(string requestId, DeviceSchema schema, string tag, PayloadData value)
+    public NoticeEventData(string requestId, DeviceSchema schema, string tag, string? name, PayloadData value)
     {
         RequestId = requestId;
         Schema = schema;
         Tag = tag;
+        Name = name;
         Value = value;
     }
 }

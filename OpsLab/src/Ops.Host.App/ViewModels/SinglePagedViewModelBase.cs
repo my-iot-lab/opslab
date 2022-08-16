@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Input;
+using Microsoft.Win32;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
 using HandyControl.Data;
+
 using Ops.Host.Common.Utils;
 
 namespace Ops.Host.App.ViewModels;
@@ -43,8 +48,9 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
 
     protected SinglePagedViewModelBase()
     {
-        QueryCommand = new RelayCommand(() => DoSearch());
+        QueryCommand = new RelayCommand(() => DoSearch(1, PageSize));
         PageUpdatedCommand = new RelayCommand<FunctionEventArgs<int>>((e) => PageUpdated(e!));
+        DownloadCommand = new RelayCommand<string>((path) => Download(path!));
     }
 
     /// <summary>
@@ -52,7 +58,7 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     /// </summary>
     protected void InitSearch()
     {
-        DoSearch();
+        DoSearch(1, PageSize);
     }
 
     #region 绑定属性
@@ -99,23 +105,63 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     /// </summary>
     public ICommand PageUpdatedCommand { get; }
 
+    /// <summary>
+    /// 导出查询的数据。
+    /// </summary>
+    public ICommand DownloadCommand { get; }
+
     #endregion
 
     /// <summary>
     /// 查询数据。
-    /// 其中 <see cref="QueryFilter"/> 为筛选器， <see cref="PageSize"/> 为每页数量。
     /// </summary>
     /// <param name="pageIndex">页数</param>
-    protected abstract (IEnumerable<TDataSource> items, long pageCount) OnSearch(int pageIndex = 1);
+    /// <param name="pageSize">每页数量</param>
+    protected abstract (IEnumerable<TDataSource> items, long pageCount) OnSearch(int pageIndex, int pageSize);
+
+    /// <summary>
+    /// 导出文件默认名称，默认为 "yyyyMMddHHmmss"。
+    /// </summary>
+    public virtual string DownloadFileName()
+    {
+        return DateTime.Now.ToString("yyyyMMddHHmmss");
+    }
 
     private void PageUpdated(FunctionEventArgs<int> e)
     {
-        DoSearch(e.Info);
+        DoSearch(e.Info, PageSize);
     }
 
-    private void DoSearch(int pageIndex = 1)
+    private void Download(string path)
     {
-        var (items, count) = OnSearch(pageIndex);
+        try
+        {
+            SaveFileDialog saveFile = new()
+            {
+                Filter = "导出文件 （*.xlsx）|*.xlsx",
+                FilterIndex = 0,
+                FileName = DownloadFileName(),
+            };
+
+            if (saveFile.ShowDialog() != true)
+            {
+                return;
+            }
+
+            var fileName = saveFile.FileName; 
+
+            var (items, _) = OnSearch(1, short.MaxValue);
+            ExcelHelper.Export(fileName, Path.GetFileNameWithoutExtension(fileName), items);
+        }
+        catch (Exception ex)
+        {
+            Growl.Error($"数据导出失败, 错误：{ex.Message}");
+        }
+    }
+
+    private void DoSearch(int pageIndex, int pageSize)
+    {
+        var (items, count) = OnSearch(pageIndex, pageSize);
 
         PageCount = PageHelper.GetPageCount(count, PageSize);
         DataSourceList = new ObservableCollection<TDataSource>(items);

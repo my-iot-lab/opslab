@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBootstrapBlazorAdmin(this IServiceCollection services)
     {
-        //services.AddLogging(logging => logging.AddFileLogger().AddCloudLogger().AddDBLogger(ExceptionsHelper.Log));
+        //services.AddLogging(logging => logging.AddFileLogger()AddDBLogger(ExceptionsHelper.Log));
         services.AddCors();
         services.AddResponseCompression();
 
@@ -20,8 +20,8 @@ public static class ServiceCollectionExtensions
         services.AddTaskServices();
         services.AddHostedService<AdminTaskService>();
 
-        // 增加 健康检查服务
-        services.AddAdminHealthChecks();
+        // 增加 健康检查服务（健康检查中有检查 Longbow.lic 文件是否存在）
+        //services.AddAdminHealthChecks();
 
         // 增加 BootstrapBlazor 组件
         services.AddBootstrapBlazor();
@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddBootstrapBlazorTableExcelExport();
 
         // 配置地理位置定位器
-        services.ConfigureIPLocatorOption(op => op.LocatorFactory = LocatorHelper.CreateLocator);
+        //services.ConfigureIPLocatorOption(op => op.LocatorFactory = LocatorHelper.CreateLocator);
 
         // 增加手机短信服务
         services.AddSingleton<ISMSProvider, TencentSMSProvider>();

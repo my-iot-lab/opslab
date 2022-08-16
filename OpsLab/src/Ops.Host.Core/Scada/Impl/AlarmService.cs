@@ -1,4 +1,5 @@
 ﻿using Ops.Exchange.Forwarder;
+using Ops.Exchange.Model;
 using Ops.Host.Core.Utils;
 
 namespace Ops.Host.Core.Services;
@@ -18,7 +19,7 @@ internal sealed class AlarmService : IAlarmService
             return ReplyResultHelper.Ok();
         }
 
-        var alarmValues = data.Values[0].GetValue<bool[]>(); // 警报数据
+        var alarmValues = data.Values[0].GetBitArray(); // 警报数据
         try
         {
             for (int i = 0; i < alarmValues!.Length; i++)

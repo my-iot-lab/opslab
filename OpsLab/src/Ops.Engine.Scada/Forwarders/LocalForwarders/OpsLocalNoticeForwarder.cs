@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Ops.Exchange.Forwarder;
+using Ops.Exchange.Model;
 
 namespace Ops.Engine.Scada.Forwarders.LocalForwarders;
 
@@ -28,7 +29,7 @@ internal sealed class OpsLocalNoticeForwarder : INoticeForwarder
             // 警报消息，所有都为 false 表示无任何异常，不用处理。
             if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
             {
-                var arr = data.Values[0].GetValue<bool[]>();
+                var arr = data.Values[0].GetBitArray();
                 if (arr!.All(s => !s))
                 {
                     return Task.CompletedTask;

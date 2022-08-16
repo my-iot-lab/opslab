@@ -108,7 +108,7 @@ public class User
     /// </summary>
     [Display(Name = "确认密码")]
     [Required(ErrorMessage = "{0}不可为空")]
-    [Compare("NewPassword", ErrorMessage = "{0}与{1}不一致")]
+    [Compare(nameof(NewPassword), ErrorMessage = "{0}与{1}不一致")]
     [MaxLength(16, ErrorMessage = "{0}不能超过 16 个字符")]
     [NotNull]
     public string? ConfirmPassword { get; set; }

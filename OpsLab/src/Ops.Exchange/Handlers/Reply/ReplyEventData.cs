@@ -19,6 +19,11 @@ public sealed class ReplyEventData : EventData
     public string Tag { get; }
 
     /// <summary>
+    /// 事件名称
+    /// </summary>
+    public string? Name { get; }
+
+    /// <summary>
     /// 任务处理标识。
     /// 0 --> 初始状态;
     /// 1 --> 已就绪，待被处理;
@@ -34,10 +39,11 @@ public sealed class ReplyEventData : EventData
     /// </summary>
     public int HandleTimeout { get; set; }
 
-    public ReplyEventData(PayloadContext context, string tag, int state, PayloadData[] values)
+    public ReplyEventData(PayloadContext context, string tag, string? name, int state, PayloadData[] values)
     {
         Context = context;
         Tag = tag;
+        Name = name;
         State = state;
         Values = values;
     }

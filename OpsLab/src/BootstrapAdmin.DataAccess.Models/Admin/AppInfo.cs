@@ -3,7 +3,7 @@
 namespace BootstrapAdmin.DataAccess.Models;
 
 /// <summary>
-/// 
+/// APP 信息
 /// </summary>
 public class AppInfo
 {

@@ -172,7 +172,7 @@ public sealed class MonitorManager : IDisposable
                         }
 
                         var context = new PayloadContext(new PayloadRequest(deviceInfo));
-                        var eventData = new ReplyEventData(context, variable.Tag, result.Content, datas.ToArray())
+                        var eventData = new ReplyEventData(context, variable.Tag, variable.Name, result.Content, datas.ToArray())
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
@@ -206,7 +206,7 @@ public sealed class MonitorManager : IDisposable
                     var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
                     if (ok)
                     {
-                        var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, data)
+                        var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
