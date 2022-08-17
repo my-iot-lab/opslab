@@ -43,14 +43,13 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
 
     protected AsyncSinglePagedViewModelBase()
     {
-        QueryCommand = new RelayCommand(async () => await DoSearchAsync(1, PageSize));
-        PageUpdatedCommand = new RelayCommand<FunctionEventArgs<int>>(async (e) => await PageUpdatedAsync(e!));
+        QueryCommand = new AsyncRelayCommand(() => DoSearchAsync(1, PageSize));
+        PageUpdatedCommand = new AsyncRelayCommand<FunctionEventArgs<int>>(e => PageUpdatedAsync(e!));
         DownloadCommand = new AsyncRelayCommand<string>(DownloadAsync!);
     }
 
     /// <summary>
     /// 初始化查询。
-    /// 构造函数中可以使用 InitSearchAsync().ConfigureAwait(false).GetAwaiter().GetResult(); 方式初始化。
     /// </summary>
     /// <returns></returns>
     protected async Task InitSearchAsync()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,13 +20,16 @@ public sealed class MainWindowViewModel : ObservableObject
 {
     private readonly MonitorManager _monitorManager;
     private readonly OpsHostOptions _opsHostOption;
+    private readonly ILogger _logger;
 
     public MainWindowViewModel(
         MonitorManager monitorManager, 
-        IOptions<OpsHostOptions> opsHostOption)
+        IOptions<OpsHostOptions> opsHostOption,
+        ILogger<MainWindowViewModel> logger)
     {
         _monitorManager = monitorManager;
         _opsHostOption = opsHostOption.Value;
+        _logger = logger;
 
         MenuItemList = GetMenuItems();
         SelectedItem = MenuItemList.FirstOrDefault(s => s.IsHome); // 设置首页
@@ -34,6 +38,23 @@ public sealed class MainWindowViewModel : ObservableObject
         {
             await RunAsync();
         });
+
+        Init();
+    }
+
+    void Init()
+    {
+        // 检测是否为自动运行
+        if (_opsHostOption.AutoRunning)
+        {
+            try
+            {
+                _isRunning = true;
+                RunAsync().RunSynchronously();
+            }
+            catch
+            { }
+        }
     }
 
     #region 属性绑定
@@ -60,10 +81,14 @@ public sealed class MainWindowViewModel : ObservableObject
         get => _selectedItem;
         set 
         {
-            SetProperty(ref _selectedItem, value);
-
-            _selectedItem!.Content ??= CreatePage(_selectedItem.ContentType!);
-            SubContent = _selectedItem?.Content;
+            if (SetProperty(ref _selectedItem, value))
+            {
+                if (_selectedItem != null)
+                {
+                    _selectedItem.Content ??= CreatePage(_selectedItem.ContentType);
+                    SubContent = _selectedItem?.Content;
+                }
+            }
         }
     }
 
@@ -110,13 +135,27 @@ public sealed class MainWindowViewModel : ObservableObject
     {
         if (_isRunning)
         {
-            await _monitorManager.StartAsync();
-            Growl.Info("数据监控已启动");
+            try
+            {
+                await _monitorManager.StartAsync();
+                Growl.Info("数据监控已启动");
+
+                IsRunning = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "数据监控启动失败");
+                Growl.Error("监控启动失败，请检测能否访问 PLC 地址，然后再重新启动。");
+
+                IsRunning = false;
+            }
+
             return;
         }
 
-        Growl.Info("数据监控已关闭");
         _monitorManager.Stop();
+        Growl.Info("数据监控已关闭");
+        IsRunning = false;
     }
 
     #endregion

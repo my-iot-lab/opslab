@@ -12,8 +12,10 @@ public sealed class MenuItemModel
     /// <summary>
     /// 菜单名称
     /// </summary>
+    [NotNull]
     public string? Name { get; set; }
 
+    [NotNull]
     public Type? ContentType { get; set; }
 
     public object? Content { get; set; }
@@ -28,7 +30,7 @@ public sealed class MenuItemModel
 
     }
 
-    public MenuItemModel(string icon, string name, Type? contentType, bool isHome = false)
+    public MenuItemModel(string icon, string name, Type contentType, bool isHome = false)
     {
         Icon = icon;
         Name = name;

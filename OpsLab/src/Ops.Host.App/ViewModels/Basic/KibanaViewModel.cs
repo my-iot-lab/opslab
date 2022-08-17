@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ops.Exchange.Management;
 using Ops.Host.App.Models;
 
 namespace Ops.Host.App.ViewModels;
 
-public sealed class KibanaViewModel : ObservableObject
+public sealed class KibanaViewModel : ObservableObject, IDisposable
 {
+    private readonly CancellationTokenSource _cts = new();
+
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DeviceHealthManager _deviceHealthManager;
 
@@ -39,12 +43,17 @@ public sealed class KibanaViewModel : ObservableObject
             });
         }
 
-        // 状态检测
+        // 状态检测，定时器可考虑与 DispatcherTimer 有什么差异
         _deviceHealthManager.Check();
-        TimerHandler += (sender, e) =>
+        _ = Task.Factory.StartNew(async () =>
         {
-            ChangeDeviceConnState();
-        };
+            while (!_cts.IsCancellationRequested)
+            {
+                await Task.Delay(2000);
+                ChangeDeviceConnState();
+            }
+                
+        }, default, TaskCreationOptions.LongRunning, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     #region 绑定属性
@@ -65,9 +74,18 @@ public sealed class KibanaViewModel : ObservableObject
     {
         foreach (var device in DeviceSourceList)
         {
-            device.ConnectedState = _deviceHealthManager.CanConnect(device.Line, device.Station);
+            var state = _deviceHealthManager.CanConnect(device.Line, device.Station);
+            if (device.ConnectedState != state)
+            {
+                device.ConnectedState = state;
+            }
         }
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+    }
 }
