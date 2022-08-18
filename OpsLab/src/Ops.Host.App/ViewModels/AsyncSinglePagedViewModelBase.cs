@@ -44,8 +44,8 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
     protected AsyncSinglePagedViewModelBase()
     {
         QueryCommand = new AsyncRelayCommand(() => DoSearchAsync(1, PageSize));
-        PageUpdatedCommand = new AsyncRelayCommand<FunctionEventArgs<int>>(e => PageUpdatedAsync(e!));
-        DownloadCommand = new AsyncRelayCommand<string>(DownloadAsync!);
+        PageUpdatedCommand = new AsyncRelayCommand<FunctionEventArgs<int>>(PageUpdatedAsync!);
+        DownloadCommand = new AsyncRelayCommand(DownloadAsync!);
     }
 
     /// <summary>
@@ -115,11 +115,12 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
     protected abstract Task<(IEnumerable<TDataSource> items, long pageCount)> OnSearchAsync(int pageIndex, int pageSize);
 
     /// <summary>
-    /// 导出文件默认名称，默认为 "yyyyMMddHHmmss"。
+    /// Excel 下载参数设置。
     /// </summary>
-    public virtual string DownloadFileName()
+    /// <param name="builder"></param>
+    protected virtual void OnExcelCreating(ExcelModelBuilder builder)
     {
-        return DateTime.Now.ToString("yyyyMMddHHmmss");
+
     }
 
     private async Task PageUpdatedAsync(FunctionEventArgs<int> e)
@@ -127,15 +128,20 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
         await DoSearchAsync(e.Info, PageSize);
     }
 
-    private async Task DownloadAsync(string path)
+    private async Task DownloadAsync()
     {
         try
         {
+            ExcelModelBuilder builder = new();
+            OnExcelCreating(builder);
+            builder.ExcelName ??= DateTime.Now.ToString("yyyyMMddHHmmss");
+            builder.SheetName ??= Path.GetFileNameWithoutExtension(builder.ExcelName);
+
             SaveFileDialog saveFile = new()
             {
                 Filter = "导出文件 （*.xlsx）|*.xlsx",
                 FilterIndex = 0,
-                FileName = DownloadFileName(),
+                FileName = builder.ExcelName!,
             };
 
             if (saveFile.ShowDialog() != true)
@@ -146,7 +152,7 @@ public abstract class AsyncSinglePagedViewModelBase<TDataSource, TQueryFilter> :
             var fileName = saveFile.FileName;
 
             var (items, _) = await OnSearchAsync(1, short.MaxValue);
-            ExcelHelper.Export(fileName, Path.GetFileNameWithoutExtension(fileName), items);
+            ExcelHelper.Export(fileName, builder.SheetName, items, builder.ExcludeColumns, builder.IncludeColumns);
         }
         catch (Exception ex)
         {

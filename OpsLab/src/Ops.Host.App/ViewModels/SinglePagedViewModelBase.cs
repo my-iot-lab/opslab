@@ -13,6 +13,29 @@ using Ops.Host.Common.Utils;
 
 namespace Ops.Host.App.ViewModels;
 
+public sealed class ExcelModelBuilder
+{
+    /// <summary>
+    /// 保存的 Excel 默认名称。
+    /// </summary>
+    public string? ExcelName { get; set; }
+
+    /// <summary>
+    /// Excel Sheet 名称。
+    /// </summary>
+    public string? SheetName { get; set; }
+
+    /// <summary>
+    /// 从模型中要排除的列名集合。
+    /// </summary>
+    public string[]? ExcludeColumns { get; set; }
+
+    /// <summary>
+    /// 从模型中要包含的列名集合。
+    /// </summary>
+    public string[]? IncludeColumns { get; set; }
+}
+
 /// <summary>
 /// 空查询筛选器。
 /// </summary>
@@ -50,7 +73,7 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     {
         QueryCommand = new RelayCommand(() => DoSearch(1, PageSize));
         PageUpdatedCommand = new RelayCommand<FunctionEventArgs<int>>((e) => PageUpdated(e!));
-        DownloadCommand = new RelayCommand<string>((path) => Download(path!));
+        DownloadCommand = new RelayCommand(Download);
     }
 
     /// <summary>
@@ -92,7 +115,6 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
 
     #endregion
 
-
     #region 绑定事件
 
     /// <summary>
@@ -120,11 +142,12 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     protected abstract (IEnumerable<TDataSource> items, long pageCount) OnSearch(int pageIndex, int pageSize);
 
     /// <summary>
-    /// 导出文件默认名称，默认为 "yyyyMMddHHmmss"。
+    /// Excel 下载参数设置。
     /// </summary>
-    public virtual string DownloadFileName()
+    /// <param name="builder"></param>
+    protected virtual void OnExcelCreating(ExcelModelBuilder builder)
     {
-        return DateTime.Now.ToString("yyyyMMddHHmmss");
+
     }
 
     private void PageUpdated(FunctionEventArgs<int> e)
@@ -132,15 +155,20 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
         DoSearch(e.Info, PageSize);
     }
 
-    private void Download(string path)
+    private void Download()
     {
         try
         {
+            ExcelModelBuilder builder = new();
+            OnExcelCreating(builder);
+            builder.ExcelName ??= DateTime.Now.ToString("yyyyMMddHHmmss");
+            builder.SheetName ??= Path.GetFileNameWithoutExtension(builder.ExcelName);
+
             SaveFileDialog saveFile = new()
             {
                 Filter = "导出文件 （*.xlsx）|*.xlsx",
                 FilterIndex = 0,
-                FileName = DownloadFileName(),
+                FileName = builder.ExcelName!,
             };
 
             if (saveFile.ShowDialog() != true)
@@ -151,7 +179,7 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
             var fileName = saveFile.FileName; 
 
             var (items, _) = OnSearch(1, short.MaxValue);
-            ExcelHelper.Export(fileName, Path.GetFileNameWithoutExtension(fileName), items);
+            ExcelHelper.Export(fileName, builder.SheetName, items, builder.ExcludeColumns, builder.IncludeColumns);
         }
         catch (Exception ex)
         {

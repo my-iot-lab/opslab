@@ -30,13 +30,14 @@ public static class ExcelHelper
     /// <param name="path">路径</param>
     /// <param name="sheetName">sheet 名称</param>
     /// <param name="data">要导出的数据</param>
-    /// <param name="excludes">要排除的列名，列名与类型的属性名一致</param>
-    public static void Export<T>(Stream fileStream, string sheetName, IEnumerable<T> data, params string[] excludes)
+    /// <param name="excludes">要排除的列名，列名与类型的属性名一致，若 includes 不为 null，会在其基础上再进行排除</param>
+    /// <param name="includes">要包含的列名，列名与类型的属性名一致，若不为 null，会优先使用该选项进行筛选</param>
+    public static void Export<T>(Stream fileStream, string sheetName, IEnumerable<T> data, string[]? excludes = null, string[]? includes = null)
     {
         using var package = new ExcelPackage(fileStream);
         var sheet = package.Workbook.Worksheets.Add(sheetName);
 
-        ExportToSheet(sheet, data, excludes);
+        ExportToSheet(sheet, data, excludes, includes);
 
         package.Save();
     }
@@ -48,8 +49,9 @@ public static class ExcelHelper
     /// <param name="path">路径</param>
     /// <param name="sheetName">sheet 名称</param>
     /// <param name="data">要导出的数据</param>
-    /// <param name="excludes">要排除的列名，列名与类型的属性名一致</param>
-    public static void Export<T>(string path, string sheetName, IEnumerable<T> data, params string[] excludes)
+    /// <param name="excludes">要排除的列名，列名与类型的属性名一致，若 includes 不为 null，会在其基础上再进行排除</param>
+    /// <param name="includes">要包含的列名，列名与类型的属性名一致，若不为 null，会优先使用该选项进行筛选</param>
+    public static void Export<T>(string path, string sheetName, IEnumerable<T> data, string[]? excludes = null, string[]? includes = null)
     {
         if (File.Exists(path))
         {
@@ -59,16 +61,21 @@ public static class ExcelHelper
         using var package = new ExcelPackage(path);
         var sheet = package.Workbook.Worksheets.Add(sheetName);
 
-        ExportToSheet(sheet, data, excludes);
+        ExportToSheet(sheet, data, excludes, includes);
 
         package.Save();
     }
 
-    private static void ExportToSheet<T>(ExcelWorksheet sheet, IEnumerable<T> data, params string[] excludes)
+    private static void ExportToSheet<T>(ExcelWorksheet sheet, IEnumerable<T> data, string[]? excludes, string[]? includes)
     {
         // 考虑导出功能使用频率低，因此不使用缓存机制。
         List<(string DisplayName, PropertyInfo PropInfo)> columns = new();
         var props = typeof(T).GetProperties();
+        if (includes?.Any() == true)
+        {
+            props = props.Where(s => includes.Contains(s.Name)).ToArray();
+        }
+
         if (excludes?.Any() == true)
         {
             props = props.Where(s => !excludes.Contains(s.Name)).ToArray();

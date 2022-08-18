@@ -17,7 +17,7 @@
         <GridSplitter Margin="0,26,0,26" Grid.Column="0" HorizontalAlignment="Right" Width="4" Background="Transparent"/>-->
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="36"/>
+            <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
@@ -30,7 +30,19 @@
                                   hc:IconElement.Geometry="{StaticResource DocumentGeometry}"/>
                     <TextBlock Style="{StaticResource TextBlockSubTitleBold}" Foreground="White" Text="{Binding Title}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <ToggleButton IsChecked="{Binding IsRunning}" Command="{Binding RunCommand}" Margin="8,0,12,0" HorizontalAlignment="Center" Style="{StaticResource ToggleButtonSwitch}"/>
+                        <ToggleButton BorderThickness="0" Margin="8,0,12,0" HorizontalAlignment="Center" 
+                                      Style="{StaticResource ToggleButtonFlip}"
+                                      IsChecked="{Binding IsRunning}"
+                                      Command="{Binding RunCommand}">
+                            <hc:StatusSwitchElement.CheckedElement>
+                                <Border Background="{DynamicResource SuccessBrush}">
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="开" Foreground="{DynamicResource TextIconBrush}"/>
+                                </Border>
+                            </hc:StatusSwitchElement.CheckedElement>
+                            <Border Background="{DynamicResource AccentBrush}">
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="关" Foreground="{DynamicResource TextIconBrush}"/>
+                            </Border>
+                        </ToggleButton>
                     </StackPanel>
                     <hc:Drawer Name="DrawerMenu" Dock="Left">
                         <Border Style="{StaticResource BorderClip}" Margin="0,8,8,8" CornerRadius="0,10,10,0" Background="{DynamicResource RegionBrush}" Width="200">
