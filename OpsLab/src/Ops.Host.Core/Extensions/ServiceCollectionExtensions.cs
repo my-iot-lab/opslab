@@ -70,7 +70,7 @@ public static class ServiceCollectionExtensions
             .Where(t => t.IsClass && !t.IsAbstract && !t.IsInterface && typeof(IDomainService).IsAssignableFrom(t));
         foreach (var type in types)
         {
-            var interfaceType = type.GetInterfaces().FirstOrDefault(t => !typeof(IDomainService).IsAssignableFrom(t));
+            var interfaceType = type.GetInterfaces().FirstOrDefault(t => typeof(IDomainService).IsAssignableFrom(t) && t != typeof(IDomainService));
             if (interfaceType != null)
             {
                 services.AddTransient(interfaceType, type);

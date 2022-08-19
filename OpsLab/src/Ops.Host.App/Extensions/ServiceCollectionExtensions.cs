@@ -14,13 +14,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<INoticeForwarder, OpsLocalNoticeForwarder>();
         services.AddSingleton<IReplyForwarder, OpsLocalReplyForwarder>();
 
+        // services
+        services.AddFreeSql();
+        services.AddHostAppServices();
+
         // viewmodels
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<NonClientAreaContentViewModel>(); 
         services.AddTransient<KibanaViewModel>();
-        
-        // services
-        services.AddHostAppServices();
+        services.AddTransient<UserViewModel>();
 
         return services;
     }
