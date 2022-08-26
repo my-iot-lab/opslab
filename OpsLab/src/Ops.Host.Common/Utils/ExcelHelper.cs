@@ -14,9 +14,9 @@ namespace Ops.Host.Common.Utils;
 public static class ExcelHelper
 {
     /// <summary>
-    /// 全局设置的时间显示格式，默认为 "yyyy/MM/dd HH:mm:ss";
+    /// 全局设置的时间显示格式，默认为 "yyyy-MM-dd HH:mm:ss";
     /// </summary>
-    public static string DateTimeFormat { get; set; } = "yyyy/MM/dd HH:mm:ss";
+    public static string DateTimeFormat { get; set; } = "yyyy-MM-dd HH:mm:ss";
 
     static ExcelHelper()
     {
@@ -104,7 +104,8 @@ public static class ExcelHelper
 
                 cell.Value = propInfo!.GetValue(item);
 
-                if (propInfo!.PropertyType == typeof(DateTime))
+                if (propInfo!.PropertyType == typeof(DateTime) 
+                    || propInfo!.PropertyType == typeof(DateTime?))
                 {
                     cell.Style.Numberformat.Format = DateTimeFormat;
                 }
