@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Threading;
 using System.Windows.Input;
 using Microsoft.Win32;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
-
 using Ops.Host.Common.Utils;
+using Ops.Host.App.Components;
+using Ops.Host.Common.IO;
 
 namespace Ops.Host.App.ViewModels;
 
@@ -25,15 +29,59 @@ public sealed class ExcelModelBuilder
     /// </summary>
     public string? SheetName { get; set; }
 
+    public ExcelSettings Settings { get; } = new();
+
+    public List<RowCustom>? Header { get; set; }
+
+    public List<RowCustom>? Footer { get; set; }
+}
+
+public delegate void DoPrintDelegate(PrintDialog pdlg, DocumentPaginator paginator);
+
+public sealed class PrintModelBuilder
+{
     /// <summary>
-    /// 从模型中要排除的列名集合。
+    /// 打印模式。
     /// </summary>
-    public string[]? ExcludeColumns { get; set; }
+    public PrintMode Mode { get; set; } = PrintMode.Preview;
 
     /// <summary>
-    /// 从模型中要包含的列名集合。
+    /// 要打印的模板路径。
     /// </summary>
-    public string[]? IncludeColumns { get; set; }
+    public string? TemplateUrl { get; set; }
+
+    /// <summary>
+    /// 文档描述
+    /// </summary>
+    public string DocumentDescription { get; set; } = "Document";
+
+    /// <summary>
+    /// 数据上下文
+    /// </summary>
+    public object? DataContext { get; set; }
+
+    /// <summary>
+    /// 文档呈现器。
+    /// </summary>
+    public IDocumentRenderer? Render { get; set; }
+
+    public enum PrintMode
+    {
+        /// <summary>
+        /// 打印预览。
+        /// </summary>
+        Preview,
+
+        /// <summary>
+        /// 弹出打印框。
+        /// </summary>
+        Dialog,
+
+        /// <summary>
+        /// 直接打印。
+        /// </summary>
+        Direct,
+    }
 }
 
 /// <summary>
@@ -69,11 +117,22 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     /// </summary>
     public int PageSize { get; set; } = 20;
 
+    /// <summary>
+    /// 获取或设置控件来源
+    /// </summary>
+    public Control? Owner { get; set; }
+
+    /// <summary>
+    /// 已根据筛选条件查询的所有数据。
+    /// </summary>
+    protected List<TDataSource> SearchedAllData { get; private set; } = new();
+
     protected SinglePagedViewModelBase()
     {
         QueryCommand = new RelayCommand(() => DoSearch(1, PageSize));
         PageUpdatedCommand = new RelayCommand<FunctionEventArgs<int>>((e) => PageUpdated(e!));
         DownloadCommand = new RelayCommand(Download);
+        PrintCommand = new RelayCommand(Print);
     }
 
     /// <summary>
@@ -132,6 +191,11 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     /// </summary>
     public ICommand DownloadCommand { get; }
 
+    /// <summary>
+    /// 打印查询出的数据。
+    /// </summary>
+    public ICommand PrintCommand { get; }
+
     #endregion
 
     /// <summary>
@@ -139,13 +203,21 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     /// </summary>
     /// <param name="pageIndex">页数</param>
     /// <param name="pageSize">每页数量</param>
-    protected abstract (IEnumerable<TDataSource> items, long pageCount) OnSearch(int pageIndex, int pageSize);
+    protected abstract (List<TDataSource> items, long pageCount) OnSearch(int pageIndex, int pageSize);
 
     /// <summary>
     /// Excel 下载参数设置。
     /// </summary>
     /// <param name="builder"></param>
     protected virtual void OnExcelCreating(ExcelModelBuilder builder)
+    {
+
+    }
+
+    /// <summary>
+    /// 打印参数设置。
+    /// </summary>
+    protected virtual void OnPrintCreating(PrintModelBuilder builder)
     {
 
     }
@@ -159,6 +231,8 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
     {
         try
         {
+            DoSearchedMaxData();
+
             ExcelModelBuilder builder = new();
             OnExcelCreating(builder);
             builder.ExcelName ??= DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -177,14 +251,76 @@ public abstract class SinglePagedViewModelBase<TDataSource, TQueryFilter> : Obse
             }
 
             var fileName = saveFile.FileName; 
-
-            var (items, _) = OnSearch(1, short.MaxValue);
-            ExcelHelper.Export(fileName, builder.SheetName, items, builder.ExcludeColumns, builder.IncludeColumns);
+            ExcelExportData<TDataSource> exportData = new()
+            {
+                Header = builder.Header,
+                Body = SearchedAllData,
+                Footer = builder.Footer,
+            };
+            Excel.Export(fileName, builder.SheetName, exportData, builder.Settings);
         }
         catch (Exception ex)
         {
             Growl.Error($"数据导出失败, 错误：{ex.Message}");
         }
+    }
+
+    private void Print()
+    {
+        PrintModelBuilder builder = new();
+        try
+        {
+            DoSearchedMaxData();
+            OnPrintCreating(builder);
+
+            if (builder.Mode == PrintModelBuilder.PrintMode.Preview)
+            {
+                // TODO：若是打开失败后，关闭主窗体应用程序依旧存在的 bug。
+                PrintPreviewWindow? previewWnd = null;
+                try
+                {
+                    previewWnd = new(builder.TemplateUrl!, builder.DataContext, builder.Render);
+                    previewWnd.Owner = System.Windows.Application.Current.MainWindow;
+                    previewWnd.ShowInTaskbar = false;
+                    previewWnd.ShowDialog();
+                }
+                catch
+                {
+                    previewWnd?.Close();
+                    throw;
+                }
+            }
+            else if (builder.Mode == PrintModelBuilder.PrintMode.Dialog)
+            {
+                PrintDialog pdlg = new();
+                if (pdlg.ShowDialog() == true)
+                {
+                    FlowDocument doc = PrintPreviewWindow.LoadDocument(builder.TemplateUrl!, builder.DataContext, builder.Render);
+                    Owner?.Dispatcher.BeginInvoke(new DoPrintDelegate(DoPrint), DispatcherPriority.ApplicationIdle, pdlg, ((IDocumentPaginatorSource)doc).DocumentPaginator);
+                }
+            }
+            else if (builder.Mode == PrintModelBuilder.PrintMode.Direct)
+            {
+                PrintDialog pdlg = new();
+                FlowDocument doc = PrintPreviewWindow.LoadDocument(builder.TemplateUrl!, builder.DataContext, builder.Render);
+                Owner?.Dispatcher.BeginInvoke(new DoPrintDelegate(DoPrint), DispatcherPriority.ApplicationIdle, pdlg, ((IDocumentPaginatorSource)doc).DocumentPaginator);
+            }
+        }
+        catch (Exception ex)
+        {
+            Growl.Error($"数据打印失败, 错误：{ex.Message}");
+        }
+
+        void DoPrint(PrintDialog pdlg, DocumentPaginator paginator)
+        {
+            pdlg.PrintDocument(paginator, builder.DocumentDescription);
+        }
+    }
+
+    private void DoSearchedMaxData()
+    {
+        var (items, _) = OnSearch(1, short.MaxValue);
+        SearchedAllData = items;
     }
 
     private void DoSearch(int pageIndex, int pageSize)
