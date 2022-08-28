@@ -39,6 +39,7 @@
                                            SelectedDate="{Binding QueryFilter.CreatedAtEnd}"/>
                             <Button Content="查询" Command="{Binding QueryCommand}"/>
                             <Button Content="导出" Command="{Binding DownloadCommand}"/>
+                            <Button Content="打印" Command="{Binding PrintCommand}"/>
                         </hc:UniformSpacingPanel>
                     </StackPanel>
                 </ToolBar>
