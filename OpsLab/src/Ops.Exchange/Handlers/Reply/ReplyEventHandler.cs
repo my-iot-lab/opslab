@@ -32,6 +32,8 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
     public async Task HandleAsync(ReplyEventData eventData, CancellationToken cancellationToken = default)
     {
         var schema = eventData.Context.Request.DeviceInfo.Schema;
+
+        // 检查数据是否能下发。当上一次数据还未处理完，此次数据是不能下发的。
         var stateKey = new StateKey(schema.Station, eventData.Tag);
         if (!_stateManager.CanTransfer(stateKey, eventData.State))
         {
@@ -49,6 +51,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
 
             if (eventData.HandleTimeout > 0)
             {
+                // 若触发点有设置超时，会结合两者（监控取消操作）
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 

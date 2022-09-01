@@ -15,15 +15,18 @@ namespace Ops.Host.App.Forwarders;
 internal sealed class OpsLocalNoticeForwarder : INoticeForwarder
 {
     private readonly IAlarmService _alarmService;
+    private readonly IAndonService _andonService;
     private readonly INoticeService _noticeService;
     private readonly ILogger _logger;
 
     public OpsLocalNoticeForwarder(
         IAlarmService alarmService,
+        IAndonService andonService,
         INoticeService noticeService,
         ILogger<OpsLocalNoticeForwarder> logger)
     {
         _alarmService = alarmService;
+        _andonService = andonService;
         _noticeService = noticeService;
         _logger = logger;
     }
@@ -42,11 +45,22 @@ internal sealed class OpsLocalNoticeForwarder : INoticeForwarder
                     return;
                 }
 
-                await _alarmService.SaveAlarmsAsync(data);
+                await _alarmService.HandleAsync(data);
+                return;
+            }
+            else if (data.Tag == OpsSymbol.PLC_Sys_Andon) // 安灯信息，逻辑同警报
+            {
+                var arr = data.Values[0].GetBitArray();
+                if (arr!.All(s => !s))
+                {
+                    return;
+                }
+
+                await _andonService.HandleAsync(data);
                 return;
             }
 
-            await _noticeService.SaveNoticeAsync(data);
+            await _noticeService.HandleAsync(data);
         }
         catch (Exception ex)
         {

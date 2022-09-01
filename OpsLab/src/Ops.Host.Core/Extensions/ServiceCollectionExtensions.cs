@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
     {
         // 添加 SCADA 服务
         services.AddSingleton<IAlarmService, AlarmService>();
+        services.AddSingleton<IAndonService, AndonService>();
         services.AddSingleton<INoticeService, NoticeService>();
         services.AddSingleton<IInboundService, InboundService>();
         services.AddSingleton<IArchiveService, ArchiveService>();

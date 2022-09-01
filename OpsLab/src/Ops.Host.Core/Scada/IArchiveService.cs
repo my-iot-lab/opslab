@@ -12,5 +12,5 @@ public interface IArchiveService
     /// </summary>
     /// <param name="data">数据</param>
     /// <returns></returns>
-    Task<ReplyResult> SaveArchiveAsync(ForwardData data);
+    Task<ReplyResult> HandleAsync(ForwardData data);
 }

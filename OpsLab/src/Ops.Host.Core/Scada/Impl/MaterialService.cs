@@ -1,4 +1,5 @@
 ﻿using Ops.Exchange.Forwarder;
+using Ops.Host.Core.Const;
 using Ops.Host.Core.Utils;
 
 namespace Ops.Host.Core.Services;
@@ -9,12 +10,12 @@ internal sealed class MaterialService : IMaterialService
 
     public MaterialService(IFreeSql freeSql) => _freeSql = freeSql;
 
-    public async Task<ReplyResult> SaveCriticalMaterialAsync(ForwardData data)
+    public async Task<ReplyResult> HandleCriticalMaterialAsync(ForwardData data)
     {
         await Task.Delay(100);
 
-        var barcode = data.GetString("PLC_Critical_Material_Barcode"); // 物料条码
-        var index = data.GetInt("PLC_Critical_Material_Index"); // 扫描索引
+        var barcode = data.GetString(PlcSymbolTag.PLC_Critical_Material_Barcode); // 物料条码
+        var index = data.GetInt(PlcSymbolTag.PLC_Critical_Material_Index); // 扫描索引
         if (string.IsNullOrWhiteSpace(barcode))
         {
             return ReplyResultHelper.Error();
@@ -27,13 +28,13 @@ internal sealed class MaterialService : IMaterialService
 
             return ReplyResultHelper.Ok();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return ReplyResultHelper.Error();
         }
     }
 
-    public Task<ReplyResult> SaveBactchMaterialAsync(ForwardData data)
+    public Task<ReplyResult> HandleBactchMaterialAsync(ForwardData data)
     {
         return Task.FromResult(ReplyResultHelper.Ok());
     }

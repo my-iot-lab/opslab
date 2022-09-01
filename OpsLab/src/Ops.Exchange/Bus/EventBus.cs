@@ -20,7 +20,7 @@ public sealed class EventBus
     }
 
     /// <summary>
-    /// 手动绑定事件源与事件处理
+    /// 手动绑定事件源与事件处理。
     /// </summary>
     public void Register<TEventData, TEventHandler>()
         where TEventData : IEventData
@@ -41,7 +41,7 @@ public sealed class EventBus
     }
 
     /// <summary>
-    /// 手动解除事件源与事件处理的绑定
+    /// 手动解除事件源与事件处理的绑定。
     /// </summary>
     public void UnRegister<TEventData, TEventHandler>()
         where TEventData : IEventData
@@ -61,7 +61,7 @@ public sealed class EventBus
     /// </summary>
     /// <typeparam name="TEventData"></typeparam>
     /// <param name="eventData"></param>
-    public async Task Trigger<TEventData>(TEventData eventData, CancellationToken cancellationToken = default)
+    public async Task TriggerAsync<TEventData>(TEventData eventData, CancellationToken cancellationToken = default)
         where TEventData : IEventData
     {
         if (_eventAndHandlerMapping.TryGetValue(typeof(TEventData), out var handlerTypes))

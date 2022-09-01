@@ -12,5 +12,5 @@ public interface IInboundService
     /// </summary>
     /// <param name="data">数据</param>
     /// <returns></returns>
-    Task<ReplyResult> SaveInboundAsync(ForwardData data);
+    Task<ReplyResult> HandleAsync(ForwardData data);
 }

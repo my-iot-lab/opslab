@@ -26,13 +26,12 @@ public static class OpsSymbol
     public const string PLC_Sys_Heartbeat = nameof(PLC_Sys_Heartbeat);
 
     /// <summary>
-    /// 警报信号。
-    /// 采用 DWord 记录，最多同时发生 64 种警报。
+    /// 警报信号，采用 bit[] 记录。
     /// </summary>
     public const string PLC_Sys_Alarm = nameof(PLC_Sys_Alarm);
 
     /// <summary>
-    /// Andon 信号，采用 DWord 记录，最多同时发生 64 种警报。
+    /// Andon 信号，采用 bit[] 记录。
     /// </summary>
     public const string PLC_Sys_Andon = nameof(PLC_Sys_Andon);
 

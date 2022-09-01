@@ -1,6 +1,5 @@
 ﻿using Ops.Exchange.Forwarder;
 using Ops.Exchange.Model;
-using Ops.Host.Core.Utils;
 
 namespace Ops.Host.Core.Services;
 
@@ -10,13 +9,11 @@ internal sealed class AlarmService : IAlarmService
 
     public AlarmService(IFreeSql freeSql) => _freeSql = freeSql;
 
-    public async Task<ReplyResult> SaveAlarmsAsync(ForwardData data)
+    public Task HandleAsync(ForwardData data)
     {
-        await Task.Delay(100); // test
-
         if (data.Values.Length == 0)
         {
-            return ReplyResultHelper.Ok();
+            return Task.CompletedTask;
         }
 
         var alarmValues = data.Values[0].GetBitArray(); // 警报数据
@@ -32,9 +29,9 @@ internal sealed class AlarmService : IAlarmService
         }
         catch (Exception)
         {
-            return ReplyResultHelper.Error();
+            
         }
 
-        return ReplyResultHelper.Ok();
+        return Task.CompletedTask;
     }
 }

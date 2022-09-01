@@ -34,6 +34,7 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
     public async Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
     {
         string action = "notice";
+
         // 警报信息，采用 bool 数组，可以自定义长度。
         // 警报消息，所有都为 false 表示无任何异常，不用推送。
         if (data.Tag == OpsSymbol.PLC_Sys_Alarm)
@@ -45,6 +46,16 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
             }
 
             action = "alarm";
+        }
+        else if (data.Tag == OpsSymbol.PLC_Sys_Andon) // 安灯信息，逻辑同警报
+        {
+            var arr = data.Values[0].GetBitArray();
+            if (arr!.All(s => !s))
+            {
+                return;
+            }
+
+            action = "andon";
         }
 
         // 消息显示
@@ -70,28 +81,14 @@ internal sealed class OpsHttpNoticeForwarder : INoticeForwarder
         var stopWatch = Stopwatch.StartNew();
         try
         {
-            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/{action}", jsonContent, cancellationToken);
+            var uri = new Uri(new Uri(_opsUIOptions.Api.BaseAddress), $"/api/scada/{action}");
+            using var httpResponseMessage = await httpClient.PostAsync(uri, jsonContent, cancellationToken);
 
             stopWatch.Stop();
 
+            // 推送数据，不会根据返回值进行判断。
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true }; // 需忽略大小写才能反序列成功
-                var result = await JsonSerializer.DeserializeAsync<HttpResult>(contentStream, options, cancellationToken: cancellationToken);
-                if (result?.IsOk() != true)
-                {
-                    // 记录数据推送失败信息
-                    _logger.LogError("[Notice] HTTP 数据推送处理失败，RequestId：{0}，工站：{1}, 触发点：{2}，错误状态码：{3}，错误消息：{4}，Elapsed：{5}ms",
-                            data.RequestId,
-                            data.Schema.Station,
-                            data.Tag,
-                            result?.Code,
-                            result?.Message,
-                            stopWatch.Elapsed.TotalMilliseconds);
-                    return;
-                }
-
                 // 记录成功回执信息
                 _logger.LogInformation("[Notice] HTTP 数据推送成功，RequestId：{0}，工站：{1}, 触发点：{2}，Elapsed：{3}ms",
                             data.RequestId,

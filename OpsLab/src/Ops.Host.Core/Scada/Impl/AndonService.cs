@@ -2,12 +2,8 @@
 
 namespace Ops.Host.Core.Services;
 
-internal sealed class NoticeService : INoticeService
+internal sealed class AndonService : IAndonService
 {
-    private readonly IFreeSql _freeSql;
-
-    public NoticeService(IFreeSql freeSql) => _freeSql = freeSql;
-
     public Task HandleAsync(ForwardData data)
     {
         return Task.CompletedTask;

@@ -19,6 +19,8 @@ namespace Ops.Exchange.Monitors;
 public sealed class MonitorManager : IDisposable
 {
     private CancellationTokenSource? _cts = new();
+    private MonitorStartOptions? _monitorStartOptions;
+
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
@@ -54,7 +56,8 @@ public sealed class MonitorManager : IDisposable
     /// <summary>
     /// 启动监听
     /// </summary>
-    public async Task StartAsync(MonitorStartOptions? startOptions = null)
+    /// <param name="startOptions">监听选项</param>
+    public async Task StartAsync(MonitorStartOptions? startOptions = default)
     {
         if (IsRuning)
         {
@@ -62,12 +65,10 @@ public sealed class MonitorManager : IDisposable
         }
         IsRuning = true;
 
+        _monitorStartOptions = startOptions;
         _logger.LogInformation("[Monitor] 监控启动");
 
-        if (_cts == null)
-        {
-            _cts = new();
-        }
+        _cts ??= new();
 
         await _driverConnectorManager.LoadAsync();
         await _driverConnectorManager.ConnectAsync();
@@ -79,20 +80,20 @@ public sealed class MonitorManager : IDisposable
         foreach (var connector in _driverConnectorManager.GetAllDriver())
         {
             // 心跳数据监控器
-            _ = HeartbeatMonitorAsync(connector, startOptions?.HeartbeatDelegate);
+            _ = HeartbeatMonitorAsync(connector);
 
             // 触发数据监控器
-            _ = TriggerMonitorAsync(connector, startOptions?.TriggerDelegate);
+            _ = TriggerMonitorAsync(connector);
 
             // 通知数据监控器
-            _ = NoticeMonitorAsync(connector, startOptions?.NoticeDelegate);
+            _ = NoticeMonitorAsync(connector);
         }
 
         // 数据回写，如心跳和触发数据（触发点和对应数据）
         _ = CallbackMonitorAsync();
     }
 
-    private async Task HeartbeatMonitorAsync(DriverConnector connector, Action<HeartbeatEventData>? heartbeatDelegate = null)
+    private async Task HeartbeatMonitorAsync(DriverConnector connector)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variable = deviceInfo!.Variables.FirstOrDefault(s => s.Flag == VariableFlag.Heartbeat);
@@ -118,14 +119,14 @@ public sealed class MonitorManager : IDisposable
                 {
                     var context = new PayloadContext(new PayloadRequest(deviceInfo));
                     var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
-                    heartbeatDelegate?.Invoke(eventData);
-                    await _eventBus.Trigger(eventData, _cts.Token);
+                    _monitorStartOptions?.HeartbeatDelegate?.Invoke(eventData);
+                    await _eventBus.TriggerAsync(eventData, _cts.Token);
                 }
             }
         });
     }
 
-    private async Task TriggerMonitorAsync(DriverConnector connector, Action<ReplyEventData>? triggerDelegate = null)
+    private async Task TriggerMonitorAsync(DriverConnector connector)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
@@ -176,15 +177,15 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
-                        triggerDelegate?.Invoke(eventData);
-                        await _eventBus.Trigger(eventData, _cts.Token);
+                        _monitorStartOptions?.TriggerDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
                 }
             });
         }
     }
 
-    private async Task NoticeMonitorAsync(DriverConnector connector, Action<NoticeEventData>? noticeDelegate = null)
+    private async Task NoticeMonitorAsync(DriverConnector connector)
     {
         var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
@@ -210,8 +211,8 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
-                        noticeDelegate?.Invoke(eventData);
-                        await _eventBus.Trigger(eventData, _cts.Token);
+                        _monitorStartOptions?.NoticeDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
                 }
             });
@@ -232,7 +233,7 @@ public sealed class MonitorManager : IDisposable
 
                 try
                 {
-                    // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中允许回写。
+                    // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中执行回写。
                     CancellationTokenSource cts1 = new(_opsCofig.Monitor.CallbackTimeout); // 回写超时
                     using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
                     _ = Task.Run(async () =>
@@ -282,6 +283,9 @@ public sealed class MonitorManager : IDisposable
         });
     }
 
+    /// <summary>
+    /// 停止监控。
+    /// </summary>
     public void Stop()
     {
         if (!IsRuning)

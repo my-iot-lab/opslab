@@ -55,7 +55,7 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
             OpsSymbol.PLC_Sign_Archive => "archive",
             OpsSymbol.PLC_Sign_Critical_Material => "materialcritical",
             OpsSymbol.PLC_Sign_Batch_Material => "materialbatch",
-            _ => "Custom", // 自定义的要推送的触发点，全部通过一个 action 推送。
+            _ => "custom", // 自定义的要推送的触发点，全部通过一个 action 推送。
         };
 
         // TODO: 添加 HTTP 请求验证功能
@@ -65,7 +65,8 @@ internal sealed class OpsHttpReplyForwarder : IReplyForwarder
         var stopWatch = Stopwatch.StartNew();
         try
         {
-            using var httpResponseMessage = await httpClient.PostAsync($"{_opsUIOptions.Api.BaseAddress}/api/scada/{action}", jsonContent, cancellationToken);
+            var uri = new Uri(new Uri(_opsUIOptions.Api.BaseAddress), $"/api/scada/{action}");
+            using var httpResponseMessage = await httpClient.PostAsync(uri, jsonContent, cancellationToken);
 
             stopWatch.Stop();
 
