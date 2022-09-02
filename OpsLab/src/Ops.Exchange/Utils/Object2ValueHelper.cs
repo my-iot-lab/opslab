@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Ops.Exchange.Utils;
+﻿namespace Ops.Exchange.Utils;
 
 /// <summary>
 /// 将对象转换为具体的值

@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Net.NetworkInformation;
-using Microsoft.Extensions.Logging;
-using Ops.Exchange.Model;
+﻿using Ops.Exchange.Model;
 
 namespace Ops.Exchange.Management;
 
@@ -134,11 +131,11 @@ public sealed class DeviceHealthManager
             bool canConnect = false;
             try
             {
-                var reply = ping.Send(deviceInfo.Schema.Host, 500);
+                var reply = ping.Send(deviceInfo.Schema.Host, 500); // 可能会出现异常
                 canConnect = reply.Status == IPStatus.Success;
             }
             catch
-            {
+            { 
             }
             
             Set(deviceInfo, canConnect);

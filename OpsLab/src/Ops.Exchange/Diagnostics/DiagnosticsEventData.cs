@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Ops.Exchange.Diagnostics;
+﻿namespace Ops.Exchange.Diagnostics;
 
 /// <summary>
 /// 表示诊断数据的基类。

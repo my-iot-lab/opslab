@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Ops.Exchange.Model;
+﻿namespace Ops.Exchange.Model;
 
 /// <summary>
 /// 设备地址。

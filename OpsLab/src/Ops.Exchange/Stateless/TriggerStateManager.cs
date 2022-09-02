@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace Ops.Exchange.Stateless;
+﻿namespace Ops.Exchange.Stateless;
 
 /// <summary>
 /// 触发状态管理对象

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Ops.Exchange.Utils;
+﻿namespace Ops.Exchange.Utils;
 
 internal struct ValueStopwatch
 {

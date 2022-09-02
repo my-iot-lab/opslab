@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Ops.Exchange.Common;
 
 namespace Ops.Exchange.Monitors;
 
@@ -22,22 +22,18 @@ public sealed class MonitorLoop
     /// </summary>
     public void Start()
     {
-        _logger.LogInformation($"{nameof(MonitorAsync)} loop is starting.");
+        _logger.LogInformation($"[MonitorLoop] {nameof(MonitorAsync)} loop is starting.");
 
         // Run a console user input loop in a background thread
-        Task.Run(async () => await MonitorAsync());
+        _ = Task.Run(async () => await MonitorAsync());
     }
 
     private async ValueTask MonitorAsync()
     {
         while (!_cancellationToken.IsCancellationRequested)
         {
-            var keyStroke = Console.ReadKey();
-            if (keyStroke.Key == ConsoleKey.W)
-            {
-                // Enqueue a background work item
-                await _taskQueue.QueueBackgroundWorkItemAsync(BuildWorkItemAsync);
-            }
+            // Enqueue a background work item
+            await _taskQueue.QueueAsync(BuildWorkItemAsync);
         }
     }
 
@@ -49,7 +45,7 @@ public sealed class MonitorLoop
         int delayLoop = 0;
         var guid = Guid.NewGuid();
 
-        _logger.LogInformation("Queued work item {Guid} is starting.", guid);
+        _logger.LogInformation("[MonitorLoop] Queued work item {Guid} is starting.", guid);
 
         while (!token.IsCancellationRequested && delayLoop < 3)
         {
@@ -64,7 +60,7 @@ public sealed class MonitorLoop
 
             ++delayLoop;
 
-            _logger.LogInformation("Queued work item {Guid} is running. {DelayLoop}/3", guid, delayLoop);
+            _logger.LogInformation("[MonitorLoop] Queued work item {Guid} is running. {DelayLoop}/3", guid, delayLoop);
         }
     }
 }

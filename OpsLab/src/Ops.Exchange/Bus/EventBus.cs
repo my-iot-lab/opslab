@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace Ops.Exchange.Bus;
+﻿namespace Ops.Exchange.Bus;
 
 /// <summary>
 /// 事件总线。

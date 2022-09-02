@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Ops.Exchange.Bus;
+﻿using Ops.Exchange.Bus;
 using Ops.Exchange.Forwarder;
 
 namespace Ops.Exchange.Handlers.Notice;

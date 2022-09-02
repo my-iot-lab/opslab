@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Ops.Exchange.Bus;
+﻿using Ops.Exchange.Bus;
 using Ops.Exchange.Management;
 
 namespace Ops.Exchange.Handlers.Heartbeat;

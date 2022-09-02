@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Ops.Exchange.Bus;
+﻿using Ops.Exchange.Bus;
 using Ops.Exchange.Forwarder;
 using Ops.Exchange.Management;
 using Ops.Exchange.Stateless;
@@ -51,7 +49,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
 
             if (eventData.HandleTimeout > 0)
             {
-                // 若触发点有设置超时，会结合两者（监控取消操作）
+                // 若触发点有设置超时，会结合两者（前者为监控手动取消操作）。
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 

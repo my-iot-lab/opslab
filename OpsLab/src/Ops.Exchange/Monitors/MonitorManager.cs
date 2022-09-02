@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Ops.Communication.Core;
+﻿using Ops.Communication.Core;
 using Ops.Communication.Profinet.Siemens;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;

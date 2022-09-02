@@ -1,6 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using Microsoft.Extensions.Logging;
-using Ops.Communication.Core;
+﻿using Ops.Communication.Core;
 using Ops.Communication.Core.Net;
 using Ops.Communication.Modbus;
 using Ops.Communication.Profinet.AllenBradley;

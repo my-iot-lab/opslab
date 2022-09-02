@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Ops.Exchange.Bus;
+﻿using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
