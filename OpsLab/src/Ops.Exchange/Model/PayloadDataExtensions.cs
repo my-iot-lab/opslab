@@ -3,6 +3,11 @@
 public static class PayloadDataExtensions
 {
     /// <summary>
+    /// 拼接数组的分隔符。
+    /// </summary>
+    public const char ArraySeparatorChar = ',';
+
+    /// <summary>
     /// 获取相应的对象值，没有找到对象则为 default。
     /// 取值时给定的类型必须与实际类型一致，期间会进行强制转换。若对象类型不能转换，会抛出异常。
     /// <para>注：若原始数据为数组，目标类型为 string，会将数组转换为 string，值以逗号隔开。</para>
@@ -35,14 +40,14 @@ public static class PayloadDataExtensions
         {
             object obj = payload.VarType switch
             {
-                VariableType.Bit => string.Join(",", (bool[])payload.Value),
-                VariableType.Byte => string.Join(",", (byte[])payload.Value),
-                VariableType.Word => string.Join(",", (ushort[])payload.Value),
-                VariableType.DWord => string.Join(",", (uint[])payload.Value),
-                VariableType.Int => string.Join(",", (short[])payload.Value),
-                VariableType.DInt => string.Join(",", (int[])payload.Value),
-                VariableType.Real => string.Join(",", (float[])payload.Value),
-                VariableType.LReal => string.Join(",", (double[])payload.Value),
+                VariableType.Bit => string.Join(ArraySeparatorChar, (bool[])payload.Value),
+                VariableType.Byte => string.Join(ArraySeparatorChar, (byte[])payload.Value),
+                VariableType.Word => string.Join(ArraySeparatorChar, (ushort[])payload.Value),
+                VariableType.DWord => string.Join(ArraySeparatorChar, (uint[])payload.Value),
+                VariableType.Int => string.Join(ArraySeparatorChar, (short[])payload.Value),
+                VariableType.DInt => string.Join(ArraySeparatorChar, (int[])payload.Value),
+                VariableType.Real => string.Join(ArraySeparatorChar, (float[])payload.Value),
+                VariableType.LReal => string.Join(ArraySeparatorChar, (double[])payload.Value),
                 VariableType.String or VariableType.S7String or VariableType.S7WString => string.Join(",", (string[])payload.Value),
                 _ => throw new NotImplementedException(),
             };

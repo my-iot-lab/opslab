@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Ops.Exchange.Model;
+﻿namespace Ops.Exchange.Model;
 
 /// <summary>
 /// 设备 PLC 地址变量
@@ -76,6 +74,19 @@ public class DeviceVariable : IEquatable<DeviceVariable>
         Desc = desc;
         Flag = flag;
         PollingInterval = pollingInterval;
+    }
+
+    /// <summary>
+    /// 变量是否为数组对象。
+    /// 当值不为 String 类型（包含 S7String 和 S7WString）且设定的长度大于 0 时，判定为数组。
+    /// </summary>
+    /// <returns></returns>
+    public bool IsArray()
+    {
+        return VarType != VariableType.String
+                && VarType != VariableType.S7String
+                && VarType != VariableType.S7WString
+                && Length > 0;
     }
 
     #region override
