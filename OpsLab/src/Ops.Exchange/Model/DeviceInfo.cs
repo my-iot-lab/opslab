@@ -8,17 +8,24 @@ public class DeviceInfo
     /// <summary>
     /// 设备唯一编号，建议以 "[产线]_[工站]" 方式命名。
     /// </summary>
-    public string Name { get; }
+    [NotNull]
+    public string? Name { get; set; }
 
     /// <summary>
     /// 设备 Schema 基础信息。
     /// </summary>
-    public DeviceSchema Schema { get; }
+    [NotNull]
+    public DeviceSchema? Schema { get; set; }
 
     /// <summary>
     /// 设备包含的地址变量集合。
     /// </summary>
     public List<DeviceVariable> Variables { get; set; } = new(0);
+
+    public DeviceInfo()
+    {
+
+    }
 
     public DeviceInfo(string name, DeviceSchema schema)
     {

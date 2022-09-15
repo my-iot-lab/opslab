@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-	<FileVersion>0.3.7</FileVersion>
-	<AssemblyVersion>0.3.7</AssemblyVersion>
-	<Version>0.3.7</Version>
+	<FileVersion>0.3.9</FileVersion>
+	<AssemblyVersion>0.3.9</AssemblyVersion>
+	<Version>0.3.9</Version>
 	<Authors>Gang.Yang</Authors>
   </PropertyGroup>
 </Project>

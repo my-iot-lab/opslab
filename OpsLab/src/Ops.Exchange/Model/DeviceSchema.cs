@@ -9,27 +9,32 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
     /// <summary>
     /// 线体编号
     /// </summary>
-    public string Line { get; }
+    [NotNull]
+    public string? Line { get; set; }
 
     /// <summary>
     /// 线体名称
     /// </summary>
-    public string LineName { get; }
+    [NotNull]
+    public string? LineName { get; set; }
 
     /// <summary>
     /// 工站编号，每条产线工站编号唯一。
     /// </summary>
-    public string Station { get; }
+    [NotNull]
+    public string? Station { get; set; }
 
     /// <summary>
     /// 工站名称
     /// </summary>
-    public string StationName { get; }
+    [NotNull]
+    public string? StationName { get; set; }
 
     /// <summary>
     /// 设备主机（IP地址）。
     /// </summary>
-    public string Host { get; }
+    [NotNull]
+    public string? Host { get; set; }
 
     /// <summary>
     /// 设备网络端口，0 表示会按驱动默认端口设置。
@@ -40,7 +45,13 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
     /// 设备驱动类型
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DriverModel DriverModel { get; }
+    [NotNull]
+    public DriverModel? DriverModel { get; set; }
+
+    public DeviceSchema()
+    {
+
+    }
 
     public DeviceSchema(string line, string lineName, string station, string stationName, string host, DriverModel driverModel)
     {

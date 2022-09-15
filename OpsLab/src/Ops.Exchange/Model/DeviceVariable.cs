@@ -8,24 +8,26 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     /// <summary>
     /// 地址的标签名。注意：标签名在每个 PLC 地址中 (或是每个工站中) 必须是唯一的（在不同的DB块中不一定唯一）。
     /// </summary>
-    public string Tag { get; }
+    [NotNull]
+    public string? Tag { get; set; }
 
     /// <summary>
     /// 地址 (字符串格式)。
     /// </summary>
-    public string Address { get; }
+    [NotNull]
+    public string? Address { get; set; }
 
     /// <summary>
     /// 变量长度。
     /// 注：普通类型默认长度设置为 0，当为数组或字符串时，需指定长度。
     /// </summary>
-    public int Length { get; }
+    public int Length { get; set; }
 
     /// <summary>
     /// 地址变量类型
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public VariableType VarType { get; }
+    public VariableType VarType { get; set; }
 
     /// <summary>
     /// 变量名称
@@ -41,7 +43,7 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     /// 变量类型标识。
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public VariableFlag Flag { get; }
+    public VariableFlag Flag { get; set; }
 
     /// <summary>
     /// 额外标志。
@@ -63,6 +65,11 @@ public class DeviceVariable : IEquatable<DeviceVariable>
     /// 若本地址为 <see cref="VariableFlag.Trigger"/> 类型，该地址表示其负载数据的地址。
     /// </summary>
     public List<DeviceVariable> NormalVariables { get; set; } = new(0);
+
+    public DeviceVariable()
+    {
+
+    }
 
     public DeviceVariable(string tag, string address, int length, VariableType varType, string? name, string? desc, VariableFlag flag, int pollingInterval = 0)
     {
