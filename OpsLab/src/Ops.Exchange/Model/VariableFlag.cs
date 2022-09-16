@@ -9,21 +9,25 @@ public enum VariableFlag
     /// 常规地址。
     /// 只会随 <see cref="Trigger"/> 改变而附加相应的数
     /// </summary>
+    [Description("常规")]
     Normal = 0,
 
     /// <summary>
     /// 表示该地址触发数据发送。
     /// 该地址值改变时，会触发数据发送行为。
     /// </summary>
+    [Description("触发")]
     Trigger = 1,
 
     /// <summary>
     /// 表示该地址用于心跳。
     /// </summary>
+    [Description("心跳")]
     Heartbeat = 2,
 
     /// <summary>
     /// 表示该地址数据会不间断发送，如警报。
     /// </summary>
+    [Description("通知")]
     Notice = 3,
 }
