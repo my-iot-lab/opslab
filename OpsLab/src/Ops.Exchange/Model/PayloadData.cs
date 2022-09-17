@@ -19,8 +19,8 @@ public sealed class PayloadData
 
     /// <summary>
     /// 变量长度。
-    /// 注：普通类型默认长度设置为 0，当为数组或字符串时，需指定长度。
     /// </summary>
+    /// <remarks>普通类型默认长度设置为 0，当为数组或字符串时，需指定长度。</remarks>
     public int Length { get; set; }
 
     /// <summary>
@@ -46,9 +46,15 @@ public sealed class PayloadData
 
     /// <summary>
     /// 是否是附加数据。
-    /// <para>注：对于部分数据，主数据表示主表中存储的，附加标识表示是额外增项。</para>
     /// </summary>
+    /// <remarks>可用于部分数据（如出站/存档），可用于主数据表示在主表中存储，附加数据表示是额外的、可动态变化的增项（如过程数据）。</remarks>
     public bool IsAdditional { get; set; }
+
+    /// <summary>
+    /// 程序配方号。
+    /// </summary>
+    /// <remarks>与 PLC 配方对应，可用于表示该地址变量在哪些配方中有效；空表示适用于所有配方。</remarks>
+    public int[] Formulas { get; set; } = Array.Empty<int>();
 
     /// <summary>
     /// 变量是否为数组对象。
@@ -92,6 +98,7 @@ public sealed class PayloadData
             Name = variable.Name,
             ExtraFlag = variable.ExtraFlag,
             IsAdditional = variable.IsAdditional,
+            Formulas = variable.Formulas,
         };
     }
 }
