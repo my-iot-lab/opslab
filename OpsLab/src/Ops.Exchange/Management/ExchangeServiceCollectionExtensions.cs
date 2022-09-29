@@ -1,4 +1,5 @@
-﻿using Ops.Exchange.Bus;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
@@ -9,8 +10,15 @@ using Ops.Exchange.Stateless;
 
 namespace Ops.Exchange.DependencyInjection;
 
+/// <summary>
+/// 选项
+/// </summary>
 public class OpsExchangeOptions
 {
+    /// <summary>
+    /// 事件处理器注入时采用的生命周期。
+    /// </summary>
+    public ServiceLifetime? EventHandlerLifetime { get; set; }
 }
 
 public static class ExchangeServiceCollectionExtensions
@@ -41,8 +49,9 @@ public static class ExchangeServiceCollectionExtensions
         services.AddSingleton<DeviceHealthManager>();
 
         // Options
-        OpsExchangeOptions exOptions = new();
-        configureDelegate?.Invoke(exOptions);
+        //OpsExchangeOptions exOptions = new();
+        //configureDelegate?.Invoke(exOptions);
+        //services.AddSingleton(exOptions);
 
         return services;
     }
