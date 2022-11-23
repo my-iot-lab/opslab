@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Ops.Exchange.Bus;
+﻿using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
+using Ops.Exchange.Handlers.Switch;
 using Ops.Exchange.Management;
 using Ops.Exchange.Monitors;
 using Ops.Exchange.Stateless;
@@ -40,6 +40,7 @@ public static class ExchangeServiceCollectionExtensions
         services.AddSingleton<HeartbeatEventHandler>();
         services.AddSingleton<ReplyEventHandler>();
         services.AddSingleton<NoticeEventHandler>();
+        services.AddSingleton<SwitchEventHandler>();
 
         // Managers
         services.AddSingleton<TriggerStateManager>();

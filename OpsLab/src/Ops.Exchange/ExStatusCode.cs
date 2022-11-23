@@ -30,6 +30,11 @@ public sealed class ExStatusCode
     public const short Trigger = 1;
 
     /// <summary>
+    /// 开发开启状态
+    /// </summary>
+    public const short SwitchOn = 1;
+
+    /// <summary>
     /// 事件处理异常
     /// </summary>
     public const short HandlerException = 2;

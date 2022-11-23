@@ -30,4 +30,10 @@ public enum VariableFlag
     /// </summary>
     [Description("通知")]
     Notice = 3,
+
+    /// <summary>
+    /// 若该地址值是开启状态，其附属数据会实时不间断发送，主要用于实时数据场景，如曲线数据。
+    /// </summary>
+    [Description("开关")]
+    Switch = 4,
 }

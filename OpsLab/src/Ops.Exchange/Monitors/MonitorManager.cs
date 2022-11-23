@@ -5,9 +5,11 @@ using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
+using Ops.Exchange.Handlers.Switch;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
 using Ops.Exchange.Utils;
+using System.Data;
 
 namespace Ops.Exchange.Monitors;
 
@@ -44,6 +46,7 @@ public sealed class MonitorManager : IDisposable
         _eventBus.Register<HeartbeatEventData, HeartbeatEventHandler>();
         _eventBus.Register<NoticeEventData, NoticeEventHandler>();
         _eventBus.Register<ReplyEventData, ReplyEventHandler>();
+        _eventBus.Register<SwitchEventData, SwitchEventHandler>();
     }
 
     /// <summary>
@@ -63,7 +66,7 @@ public sealed class MonitorManager : IDisposable
         }
         IsRuning = true;
 
-        _monitorStartOptions = startOptions;
+        _monitorStartOptions = startOptions ?? new MonitorStartOptions();
         _logger.LogInformation("[Monitor] 监控启动");
 
         _cts ??= new();
@@ -85,6 +88,9 @@ public sealed class MonitorManager : IDisposable
 
             // 通知数据监控器
             _ = NoticeMonitorAsync(connector);
+
+            // 开关数据监控器
+            _ = SwitchMonitorAsync(connector);
         }
 
         // 数据回写，如心跳和触发数据（触发点和对应数据）
@@ -117,7 +123,7 @@ public sealed class MonitorManager : IDisposable
                 {
                     var context = new PayloadContext(new PayloadRequest(deviceInfo));
                     var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
-                    _monitorStartOptions?.HeartbeatDelegate?.Invoke(eventData);
+                    _monitorStartOptions!.HeartbeatDelegate?.Invoke(eventData);
                     await _eventBus.TriggerAsync(eventData, _cts.Token);
                 }
             }
@@ -175,7 +181,7 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
-                        _monitorStartOptions?.TriggerDelegate?.Invoke(eventData);
+                        _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
                         await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
                 }
@@ -209,9 +215,123 @@ public sealed class MonitorManager : IDisposable
                         {
                             HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                         };
-                        _monitorStartOptions?.NoticeDelegate?.Invoke(eventData);
+                        _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
                         await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
+                }
+            });
+        }
+    }
+
+    private async Task SwitchMonitorAsync(DriverConnector connector)
+    {
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Switch).ToList();
+        foreach (var variable in variables)
+        {
+            ManualResetEvent mre = new(false); // 手动事件
+            _ = Task.Run(async () =>
+            {
+                int pollingInterval = _monitorStartOptions!.SwitchPollingInterval;
+                while (mre.WaitOne() && !_cts!.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(pollingInterval, _cts.Token);
+
+                    if (!connector.CanConnect)
+                    {
+                        continue;
+                    }
+
+                    var normalVariables = variable.NormalVariables;
+                    List<PayloadData> datas = new(normalVariables.Count);
+
+                    bool ok = false;
+                    foreach (var normalVariable in normalVariables)
+                    {
+                        // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                        var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                        ok = ok1;
+
+                        if (!ok)
+                        {
+                            _logger.LogError($"[Monitor] 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                            break;
+                        }
+
+                        datas.Add(data);
+                    }
+
+                    if (!ok)
+                    {
+                        continue;
+                    }
+
+                    var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.On, datas)
+                    {
+                        HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                    };
+                    _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
+                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                }
+            });
+
+            _ = Task.Run(async () =>
+            {
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
+                bool isOn = false; // 开关开启状态
+                while (!_cts!.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(pollingInterval, _cts.Token);
+
+                    if (!connector.CanConnect)
+                    {
+                        continue;
+                    }
+
+                    // 若读取失败，该信号点不会复位，下次会继续读取执行。
+                    var result = await connector.Driver.ReadInt16Async(variable.Address);
+                    if (result.IsSuccess)
+                    {
+                        if (result.Content == ExStatusCode.SwitchOn)
+                        {
+                            if (!isOn)
+                            {
+                                // 发送 On 信号
+                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.Ready)
+                                {
+                                    HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                                };
+                                await _eventBus.TriggerAsync(eventData, _cts.Token);
+
+                                // 开关开启时，发送信号，让子任务执行。
+                                mre.Set(); 
+                                isOn = true;
+                            }
+                        }
+                        else
+                        {
+                            if (isOn)
+                            {
+                                // 发送 Off 信号
+                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.Off)
+                                {
+                                    HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                                };
+                                await _eventBus.TriggerAsync(eventData, _cts.Token);
+
+                                // 读取失败或开关关闭时，重置信号，让子任务阻塞。
+                                mre.Reset(); 
+                                isOn = false;
+                            }
+                        }
+                    }
+                }
+
+                // 任务取消后，发送信号，让子任务能退出任务
+                if (!isOn)
+                {
+                    mre.Set();
+                    isOn = true;
                 }
             });
         }
