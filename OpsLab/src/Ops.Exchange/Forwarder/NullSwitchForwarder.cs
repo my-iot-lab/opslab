@@ -2,7 +2,7 @@
 
 internal sealed class NullSwitchForwarder : ISwitchForwarder
 {
-    public Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default)
+    public Task ExecuteAsync(SwitchForwardData data, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }

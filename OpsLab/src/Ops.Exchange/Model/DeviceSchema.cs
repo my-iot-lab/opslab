@@ -53,6 +53,15 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
 
     }
 
+    /// <summary>
+    /// 初始化设备 Schema。
+    /// </summary>
+    /// <param name="line">产线</param>
+    /// <param name="lineName">产线名称</param>
+    /// <param name="station">工站</param>
+    /// <param name="stationName">工站名称</param>
+    /// <param name="host">主机地址</param>
+    /// <param name="driverModel">驱动类型</param>
     public DeviceSchema(string line, string lineName, string station, string stationName, string host, DriverModel driverModel)
     {
         Line = line;
@@ -60,6 +69,27 @@ public sealed class DeviceSchema : IEquatable<DeviceSchema>
         Station = station;
         StationName = stationName;
         Host = host;
+        DriverModel = driverModel;
+    }
+
+    /// <summary>
+    /// 初始化设备 Schema。
+    /// </summary>
+    /// <param name="line">产线</param>
+    /// <param name="lineName">产线名称</param>
+    /// <param name="station">工站</param>
+    /// <param name="stationName">工站名称</param>
+    /// <param name="host">主机地址</param>
+    /// <param name="port">主机端口</param>
+    /// <param name="driverModel">驱动类型</param>
+    public DeviceSchema(string line, string lineName, string station, string stationName, string host, int port, DriverModel driverModel)
+    {
+        Line = line;
+        LineName = lineName;
+        Station = station;
+        StationName = stationName;
+        Host = host;
+        Port = port;
         DriverModel = driverModel;
     }
 

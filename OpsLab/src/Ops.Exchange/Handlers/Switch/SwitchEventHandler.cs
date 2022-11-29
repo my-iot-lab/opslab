@@ -21,6 +21,7 @@ internal sealed class SwitchEventHandler : IEventHandler<SwitchEventData>
     public async Task HandleAsync(SwitchEventData eventData, CancellationToken cancellationToken = default)
     {
         var forwardData = new ForwardData(eventData.RequestId, eventData.Schema, eventData.Tag, eventData.Name, eventData.Values.ToArray());
+        var forwardData2 = new SwitchForwardData(eventData.State, forwardData);
 
         try
         {
@@ -31,11 +32,11 @@ internal sealed class SwitchEventHandler : IEventHandler<SwitchEventData>
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 
-                await switchForwarder.ExecuteAsync(forwardData, cts0.Token);
+                await switchForwarder.ExecuteAsync(forwardData2, cts0.Token);
             }
             else
             {
-                await switchForwarder.ExecuteAsync(forwardData, cancellationToken);
+                await switchForwarder.ExecuteAsync(forwardData2, cancellationToken);
             }
         }
         catch (OperationCanceledException)

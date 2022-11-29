@@ -10,5 +10,5 @@ public interface ISwitchForwarder : IForwarder
     /// </summary>
     /// <param name="data">注：其中 Values 会包含一条数据，此数据为通知数据（触发信号）本身。</param>
     /// <returns></returns>
-    Task ExecuteAsync(ForwardData data, CancellationToken cancellationToken = default);
+    Task ExecuteAsync(SwitchForwardData data, CancellationToken cancellationToken = default);
 }

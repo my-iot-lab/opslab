@@ -9,7 +9,6 @@ using Ops.Exchange.Handlers.Switch;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
 using Ops.Exchange.Utils;
-using System.Data;
 
 namespace Ops.Exchange.Monitors;
 
@@ -232,7 +231,7 @@ public sealed class MonitorManager : IDisposable
             ManualResetEvent mre = new(false); // 手动事件
             _ = Task.Run(async () =>
             {
-                int pollingInterval = _monitorStartOptions!.SwitchPollingInterval;
+                int pollingInterval = _monitorStartOptions!.SwitchPollingInterval > 0 ? _monitorStartOptions!.SwitchPollingInterval : 10;
                 while (mre.WaitOne() && !_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
@@ -266,7 +265,8 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
-                    var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.On, datas)
+                    // 发送 On 信号
+                    var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOn, datas)
                     {
                         HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                     };
@@ -296,8 +296,8 @@ public sealed class MonitorManager : IDisposable
                         {
                             if (!isOn)
                             {
-                                // 发送 On 信号
-                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.Ready)
+                                // 发送 Ready 信号
+                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateReady)
                                 {
                                     HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                                 };
@@ -313,7 +313,7 @@ public sealed class MonitorManager : IDisposable
                             if (isOn)
                             {
                                 // 发送 Off 信号
-                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchState.Off)
+                                var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOff)
                                 {
                                     HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
                                 };

@@ -8,6 +8,12 @@ namespace Ops.Exchange.Handlers.Switch;
 /// </summary>
 public sealed class SwitchEventData : EventData
 {
+    public const int StateReady = 0;
+
+    public const int StateOn = 1;
+
+    public const int StateOff = -1;
+
     /// <summary>
     /// 请求的 Id，可用于追踪数据。
     /// </summary>
@@ -34,17 +40,19 @@ public sealed class SwitchEventData : EventData
     public List<PayloadData> Values { get; }
 
     /// <summary>
-    /// 开关连通状态。
-    /// <para>根据开关连通状态，可以判定数据的来源以及区分数据的开始与结束。</para>
+    /// 开关连通状态。根据开关连通状态，可以判定数据的来源以及区分数据的开始与结束。
+    /// <para>-1: 终止状态</para>
+    /// <para>0: 启动状态</para>
+    /// <para>1: 通电状态</para>
     /// </summary>
-    public SwitchState State { get; set; }
+    public int State { get; set; }
 
     /// <summary>
     /// 处理任务超时时间，单位毫秒。
     /// </summary>
     public int HandleTimeout { get; set; }
 
-    public SwitchEventData(string requestId, DeviceSchema schema, string tag, string? name, SwitchState state, List<PayloadData>? values = default)
+    public SwitchEventData(string requestId, DeviceSchema schema, string tag, string? name, int state, List<PayloadData>? values = default)
     {
         RequestId = requestId;
         Schema = schema;
@@ -53,25 +61,4 @@ public sealed class SwitchEventData : EventData
         State = state;
         Values = values ?? new(0);
     }
-}
-
-/// <summary>
-/// 开关连通状态。
-/// </summary>
-public enum SwitchState
-{
-    /// <summary>
-    /// 启动信号，表示开关刚闭合。
-    /// </summary>
-    Ready,
-
-    /// <summary>
-    /// 启动信号，表示开关连通中。
-    /// </summary>
-    On,
-
-    /// <summary>
-    /// 终止状态，表示开关已断开。
-    /// </summary>
-    Off,
 }

@@ -7,7 +7,7 @@ using Ops.Test.ConsoleApp.Forwarder;
 using Ops.Test.ConsoleApp.Suits;
 using Serilog;
 
-string logformat = @"{Timestamp:yyyy-MM-dd HH:mm:ss }[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+string logformat = @"{Timestamp:yyyy-MM-dd HH:mm:ss:fff }[{Level:u3}] {Message:lj}{NewLine}{Exception}";
 Log.Logger = new LoggerConfiguration()
               .Enrich.FromLogContext()
               .MinimumLevel.Information()
@@ -25,9 +25,13 @@ try
     //await modbusTcpSuit.InitAsync();
     //await modbusTcpSuit.RunAsync();
 
-    var s7Suit = host.Services.GetRequiredService<SimaticS7Suit>();
-    await s7Suit.InitAsync();
-    await s7Suit.RunAsync();
+    //var s7Suit = host.Services.GetRequiredService<SimaticS7Suit>();
+    //await s7Suit.InitAsync();
+    //await s7Suit.RunAsync();
+
+    var melsecMCSuit = host.Services.GetRequiredService<MelsecMCSuit>();
+    await melsecMCSuit.InitAsync();
+    await melsecMCSuit.RunAsync();
 
     Console.ReadLine();
 }
@@ -52,6 +56,9 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddOpsExchange(configuration);
     services.AddSingleton<INoticeForwarder, MyNoticeForwarder>();
     services.AddSingleton<IReplyForwarder, MyReplyForwarder>();
+    services.AddSingleton<ISwitchForwarder, MySwitchForwarder>();
 
+    services.AddTransient<ModbusTcpSuit>();
     services.AddTransient<SimaticS7Suit>();
+    services.AddTransient<MelsecMCSuit>();
 }
