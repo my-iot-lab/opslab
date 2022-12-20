@@ -34,4 +34,19 @@ public sealed class MonitorStartOptions
     /// 开关子任务循环事件间隔（单位：毫秒），默认50ms。
     /// </summary>
     public int SwitchPollingInterval { get; set; } = 50;
+
+    /// <summary>
+    /// 是否在 Heartbeat 触发信号读取数据时的异常记录日志，默认为 false。
+    /// </summary>
+    public bool IsLoggerHeartbeatError { get; set; } = false;
+
+    /// <summary>
+    /// 是否在 Notice 触发信号读取数据时的异常记录日志，默认为 true。
+    /// </summary>
+    public bool IsLoggerNoticeError { get; set; } = true;
+
+    /// <summary>
+    /// 是否在 Notice 触发信号读取数据时的异常记录日志，默认为 true。
+    /// </summary>
+    public bool IsLoggerTriggerError { get; set; } = true;
 }

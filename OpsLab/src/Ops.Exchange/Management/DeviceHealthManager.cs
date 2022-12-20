@@ -45,7 +45,7 @@ public sealed class DeviceHealthManager
         // 开启心跳检测
         var state = new WeakReference<DeviceHealthManager>(this);
         int period = Math.Max(5_000, _deviceInfos.Count * 500 + 1_000); // 计算全部Ping一次的时长
-        _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5s 监听一次能否 ping 通服务器
+        _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5+s 监听一次能否 ping 通服务器
     }
 
     /// <summary>
@@ -131,11 +131,16 @@ public sealed class DeviceHealthManager
             bool canConnect = false;
             try
             {
-                var reply = ping.Send(deviceInfo.Schema.Host, 500); // 可能会出现异常
+                var reply = ping.Send(deviceInfo.Schema.Host, 1000); // 可能会出现异常
                 canConnect = reply.Status == IPStatus.Success;
+                if (!canConnect)
+                {
+                    _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 失败, 返回状态：{reply.Status}");
+                }
             }
-            catch
-            { 
+            catch (PingException ex)
+            {
+                _logger.LogError(ex, $"Ping '{deviceInfo.Schema.Host}' 异常");
             }
             
             Set(deviceInfo, canConnect);

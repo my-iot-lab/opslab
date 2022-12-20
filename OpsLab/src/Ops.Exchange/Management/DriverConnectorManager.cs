@@ -260,7 +260,7 @@ public sealed class DriverConnectorManager : IDisposable
     }
 
     /// <summary>
-    /// 关闭并释放所有连接。
+    /// 关闭并释放所有连接，同时会清空连接缓存。
     /// </summary>
     public void Close()
     {

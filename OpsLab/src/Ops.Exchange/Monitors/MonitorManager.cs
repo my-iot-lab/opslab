@@ -118,7 +118,17 @@ public sealed class MonitorManager : IDisposable
                 }
 
                 var result = await connector.Driver.ReadInt16Async(variable.Address);
-                if (result.IsSuccess && result.Content == 1)
+                if (!result.IsSuccess)
+                {
+                    if (_monitorStartOptions!.IsLoggerHeartbeatError)
+                    {
+                        _logger.LogError($"[Monitor] Heartbeat 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                    }
+
+                    continue;
+                }
+
+                if (result.Content == 1)
                 {
                     var context = new PayloadContext(new PayloadRequest(deviceInfo));
                     var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
@@ -149,8 +159,21 @@ public sealed class MonitorManager : IDisposable
 
                     // 若读取失败，该信号点不会复位，下次会继续读取执行。
                     var result = await connector.Driver.ReadInt16Async(variable.Address);
-                    if (result.IsSuccess && result.Content == ExStatusCode.Trigger)
+                    if (!result.IsSuccess)
                     {
+                        if (_monitorStartOptions!.IsLoggerTriggerError)
+                        {
+                            _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                        }
+
+                        continue;
+                    }
+
+                    if (result.Content == ExStatusCode.Trigger)
+                    {
+                        // TODO: 此处校验是否能下发，若能，再去获取其明细数据。
+                        // 由于数据处于触发状态的时间很短（取决于后端执行的速度），目前暂时可按获取全部数据来处理。
+
                         var normalVariables = variable.NormalVariables;
                         List<PayloadData> datas = new(normalVariables.Count);
 
@@ -163,7 +186,7 @@ public sealed class MonitorManager : IDisposable
 
                             if (!ok)
                             {
-                                _logger.LogError($"[Monitor] 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
                                 break;
                             }
 
@@ -207,16 +230,23 @@ public sealed class MonitorManager : IDisposable
                     }
 
                     // 若读取异常，等到下一次再访问即可。
-                    var (ok, data, _) = await ReadDataAsync(connector.Driver, variable);
-                    if (ok)
+                    var (ok, data, err) = await ReadDataAsync(connector.Driver, variable);
+                    if (!ok)
                     {
-                        var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
+                        if (_monitorStartOptions!.IsLoggerNoticeError)
                         {
-                            HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
-                        };
-                        _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
-                        await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            _logger.LogError($"[Monitor] Notice 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err}");
+                        }
+
+                        continue;
                     }
+
+                    var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
+                    {
+                        HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                    };
+                    _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
+                    await _eventBus.TriggerAsync(eventData, _cts.Token);
                 }
             });
         }
@@ -253,7 +283,7 @@ public sealed class MonitorManager : IDisposable
 
                         if (!ok)
                         {
-                            _logger.LogError($"[Monitor] 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                            _logger.LogError($"[Monitor] Switch 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
                             break;
                         }
 
@@ -376,7 +406,16 @@ public sealed class MonitorManager : IDisposable
                             for (int i = 0; i < ctx.Response.Values.Count; i++)
                             {
                                 value = ctx.Response.Values[i];
-                                await WriteDataAsync(connector.Driver, value); // 考虑某个值回写失败该如何处理
+                                var (ok, err) = await WriteDataAsync(connector.Driver, value); // 考虑某个值回写失败该如何处理
+                                if (!ok)
+                                {
+                                    _logger.LogError("[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}, 错误：{4}",
+                                        ctx.Request.RequestId,
+                                        ctx.Request.DeviceInfo.Schema.Station,
+                                        value?.Tag ?? "",
+                                        value?.Value ?? "",
+                                        err);
+                                }
                             }
 
                             ctx.Response.LastDelegate?.Invoke(); // TODO: 回写失败，状态机状态是否要继续设置？若是要重试，一定更改对应的状态。
