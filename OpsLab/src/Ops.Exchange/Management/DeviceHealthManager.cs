@@ -10,10 +10,12 @@ public sealed class DeviceHealthManager
     private readonly ConcurrentDictionary<string, DeviceHealthItem> _map = new(); // Key 为设备编号
 
     private readonly DeviceInfoManager _deviceInfoManager;
+    private readonly IMemoryCache _memoryCache;
     private readonly ILogger _logger;
 
     private List<DeviceInfo>? _deviceInfos;
     private Timer? _heartbeatTimer;
+    private PeriodicTimer? _heartbeatTimer2;
     private bool _isChecking;
 
     private object SyncLock => _map;
@@ -23,9 +25,10 @@ public sealed class DeviceHealthManager
     /// </summary>
     public EventHandler<HealthEventArgs>? OnChecked { get; set; }
 
-    public DeviceHealthManager(DeviceInfoManager deviceInfoManager, ILogger<DeviceHealthManager> logger)
+    public DeviceHealthManager(DeviceInfoManager deviceInfoManager, IMemoryCache memoryCache, ILogger<DeviceHealthManager> logger)
     {
         _deviceInfoManager = deviceInfoManager;
+        _memoryCache = memoryCache;
         _logger = logger;
     }
 
@@ -45,7 +48,20 @@ public sealed class DeviceHealthManager
         // 开启心跳检测
         var state = new WeakReference<DeviceHealthManager>(this);
         int period = Math.Max(5_000, _deviceInfos.Count * 500 + 1_000); // 计算全部Ping一次的时长
-        _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5+s 监听一次能否 ping 通服务器
+        _heartbeatTimer = new Timer(Heartbeat, state, 1000, period); // 5s+ 监听一次能否 ping 通服务器
+    }
+
+    /// <summary>
+    /// 开始检测，如果已开启检查，则不再运行。
+    /// </summary>
+    public async ValueTask CheckAsync(CancellationToken cancellationToken = default)
+    {
+        // 此计时器可异步执行，且在当前任务还没有结束之前下一次任务是不会开始的。
+        _heartbeatTimer2 = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        while (await _heartbeatTimer2.WaitForNextTickAsync(cancellationToken))
+        {
+            Heartbeat2();
+        }
     }
 
     /// <summary>
@@ -87,6 +103,8 @@ public sealed class DeviceHealthManager
             if (_isChecking)
             {
                 _heartbeatTimer?.Dispose();
+                _heartbeatTimer2?.Dispose();
+
                 _map.Clear();
                 _isChecking = false;
             }
@@ -98,6 +116,15 @@ public sealed class DeviceHealthManager
         _map.AddOrUpdate(deviceInfo.Name, k => new(), (k, v) =>
         {
             v.CanConnect = canConnect;
+            if (canConnect)
+            {
+                v.Retry = 1;
+            }
+            else
+            {
+                v.Retry++;
+            }
+
             return v;
         });
 
@@ -128,21 +155,35 @@ public sealed class DeviceHealthManager
 
         foreach (var deviceInfo in _deviceInfos)
         {
-            bool canConnect = false;
-            try
+            var cacheName = $"__heartbeat_ping:{deviceInfo.Schema.Host}";
+            bool canConnect = _memoryCache.TryGetValue(cacheName, out _);
+            if (!canConnect)
             {
-                var reply = ping.Send(deviceInfo.Schema.Host, 1000); // 可能会出现异常
-                canConnect = reply.Status == IPStatus.Success;
-                if (!canConnect)
+                try
                 {
-                    _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 失败, 返回状态：{reply.Status}");
+                    var reply = ping.Send(deviceInfo.Schema.Host, 1000); // 可能会出现异常
+                    canConnect = reply.Status == IPStatus.Success;
+                    if (canConnect)
+                    {
+                        _memoryCache.Set(cacheName, "", TimeSpan.FromSeconds(5)); // 5秒内不重复 Ping 同一服务器
+                    }
+                    else
+                    {
+                        if (_map.TryGetValue(deviceInfo.Name, out var item) && item.Retry % 10 == 0)
+                        {
+                            _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 失败, 返回状态：{reply.Status}");
+                        }
+                    }
+                }
+                catch (PingException ex)
+                {
+                    if (_map.TryGetValue(deviceInfo.Name, out var item) && item.Retry % 10 == 0)
+                    {
+                        _logger.LogError(ex, $"Ping '{deviceInfo.Schema.Host}' 异常");
+                    }
                 }
             }
-            catch (PingException ex)
-            {
-                _logger.LogError(ex, $"Ping '{deviceInfo.Schema.Host}' 异常");
-            }
-            
+
             Set(deviceInfo, canConnect);
         }
     }
@@ -153,6 +194,11 @@ public sealed class DeviceHealthManager
         /// 是否可连接
         /// </summary>
         public bool CanConnect { get; set; }
+
+        /// <summary>
+        /// 尝试连接次数
+        /// </summary>
+        public long Retry { get; set; }
     }
 }
 
