@@ -25,7 +25,9 @@ internal sealed class SwitchEventHandler : IEventHandler<SwitchEventData>
 
         try
         {
-            var switchForwarder = _serviceProvider.GetRequiredService<ISwitchForwarder>();
+            // 采用 Scope 作用域
+            using var scope = _serviceProvider.CreateScope();
+            var switchForwarder = scope.ServiceProvider.GetRequiredService<ISwitchForwarder>();
 
             if (eventData.HandleTimeout > 0)
             {

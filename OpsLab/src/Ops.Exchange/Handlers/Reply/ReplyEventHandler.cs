@@ -45,7 +45,8 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
             ForwardData forwardData = new(eventData.Context.Request.RequestId, schema, eventData.Tag, eventData.Name, eventData.Values);
 
             // 采用 Scope 作用域
-            var replyForwarder = _serviceProvider.GetRequiredService<IReplyForwarder>();
+            using var scope = _serviceProvider.CreateScope();
+            var replyForwarder = scope.ServiceProvider.GetRequiredService<IReplyForwarder>();
 
             if (eventData.HandleTimeout > 0)
             {

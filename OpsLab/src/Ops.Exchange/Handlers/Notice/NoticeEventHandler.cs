@@ -24,7 +24,9 @@ internal sealed class NoticeEventHandler : IEventHandler<NoticeEventData>
 
         try
         {
-            var noticeForwarder = _serviceProvider.GetRequiredService<INoticeForwarder>();
+            // 采用 Scope 作用域
+            using var scope = _serviceProvider.CreateScope();
+            var noticeForwarder = scope.ServiceProvider.GetRequiredService<INoticeForwarder>();
 
             if (eventData.HandleTimeout > 0)
             {
