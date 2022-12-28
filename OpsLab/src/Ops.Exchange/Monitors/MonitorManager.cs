@@ -177,7 +177,7 @@ public sealed class MonitorManager : IDisposable
                         var normalVariables = variable.NormalVariables;
                         List<PayloadData> datas = new(normalVariables.Count);
 
-                        bool ok = false;
+                        bool ok = true;
                         foreach (var normalVariable in normalVariables)
                         {
                             // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
