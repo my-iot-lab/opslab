@@ -36,4 +36,10 @@ public enum VariableFlag
     /// </summary>
     [Description("开关")]
     Switch = 4,
+
+    /// <summary>
+    /// API 底层触发，类似 Trigger，但不会受跳变影响发送数据。
+    /// </summary>
+    [Description("底层")]
+    Underly = 9,
 }

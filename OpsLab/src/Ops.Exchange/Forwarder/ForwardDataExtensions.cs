@@ -27,6 +27,16 @@ public static class ForwardDataExtensions
     }
 
     /// <summary>
+    /// 获取自身数据，只有通知事件和Underly事件包含触发信号本身数据。
+    /// </summary>
+    /// <param name="forward"></param>
+    /// <returns></returns>
+    public static PayloadData Self(this ForwardData forward)
+    {
+        return forward.Values[0]; // 通知事件只有一个值，Underly 事件自身值在起始位置。
+    }
+
+    /// <summary>
     /// 获取相应的对象值，没有找到对象则返回 default。
     /// 若对象类型不能转换，会抛出异常。
     /// <para>注：若原始数据为数组，指定类型为 string，会将数组转换为 string，值以逗号隔开。</para>
@@ -55,7 +65,7 @@ public static class ForwardDataExtensions
     public static bool? GetBit(this ForwardData forward, string tag)
     {
         var payload = forward.GetPayloadData(tag);
-        return payload != null ? payload.GetBit() : default;
+        return payload != null && payload.GetBit();
     }
 
     /// <summary>

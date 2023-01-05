@@ -422,15 +422,15 @@ public interface IReadWriteNet
 	/// </summary>
 	/// <param name="address">数据地址</param>
 	/// <param name="length">数据长度</param>
-	/// <returns>带有成功标识的byte[]数组</returns>
+	/// <returns>带有成功标识的bool数组</returns>
 	Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length);
 
-	/// <summary>
-	/// 异步读取单个的<see cref="Boolean" />数据信息。
-	/// </summary>
-	/// <param name="address">数据地址</param>
-	/// <returns>带有成功标识的byte[]数组</returns>
-	Task<OperateResult<bool>> ReadBoolAsync(string address);
+    /// <summary>
+    /// 异步读取单个的<see cref="Boolean" />数据信息。
+    /// </summary>
+    /// <param name="address">数据地址</param>
+    /// <returns>带有成功标识的bool数据</returns>
+    Task<OperateResult<bool>> ReadBoolAsync(string address);
 
 	/// <summary>
 	/// 异步批量写入<see cref="Boolean" />数组数据，返回是否成功。

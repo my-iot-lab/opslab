@@ -6,6 +6,7 @@ using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Handlers.Switch;
+using Ops.Exchange.Handlers.Underly;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
 using Ops.Exchange.Utils;
@@ -24,7 +25,7 @@ public sealed class MonitorManager : IDisposable
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
     private readonly CallbackTaskQueueManager _callbackTaskQueue;
-    private readonly OpsConfig _opsCofig;
+    private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
     public MonitorManager(DeviceInfoManager deviceInfoManager,
@@ -38,7 +39,7 @@ public sealed class MonitorManager : IDisposable
         _driverConnectorManager = driverConnectorManager;
         _eventBus = eventBus;
         _callbackTaskQueue = callbackTaskQueue;
-        _opsCofig = opsConfig.Value;
+        _opsConfig = opsConfig.Value;
         _logger = logger;
 
         // TODO: 在其他地方注册
@@ -46,6 +47,7 @@ public sealed class MonitorManager : IDisposable
         _eventBus.Register<NoticeEventData, NoticeEventHandler>();
         _eventBus.Register<ReplyEventData, ReplyEventHandler>();
         _eventBus.Register<SwitchEventData, SwitchEventHandler>();
+        _eventBus.Register<UnderlyEventData, UnderlyEventHandler>();
     }
 
     /// <summary>
@@ -90,6 +92,9 @@ public sealed class MonitorManager : IDisposable
 
             // 开关数据监控器
             _ = SwitchMonitorAsync(connector);
+
+            // 底层数据监控器
+            _ = UnderlyMonitorAsync(connector);
         }
 
         // 数据回写，如心跳和触发数据（触发点和对应数据）
@@ -107,7 +112,7 @@ public sealed class MonitorManager : IDisposable
 
         _ = Task.Run(async () =>
         {
-            int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
+            int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
             while (!_cts!.Token.IsCancellationRequested)
             {
                 await Task.Delay(pollingInterval, _cts.Token);
@@ -147,7 +152,7 @@ public sealed class MonitorManager : IDisposable
         {
             _ = Task.Run(async () =>
             {
-                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
@@ -201,7 +206,7 @@ public sealed class MonitorManager : IDisposable
                         var context = new PayloadContext(new PayloadRequest(deviceInfo));
                         var eventData = new ReplyEventData(context, variable.Tag, variable.Name, result.Content, datas.ToArray())
                         {
-                            HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                            HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
                         };
                         _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
                         await _eventBus.TriggerAsync(eventData, _cts.Token);
@@ -219,7 +224,7 @@ public sealed class MonitorManager : IDisposable
         {
             _ = Task.Run(async () =>
             {
-                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (!_cts!.Token.IsCancellationRequested)
                 {
                     await Task.Delay(pollingInterval, _cts.Token);
@@ -243,7 +248,7 @@ public sealed class MonitorManager : IDisposable
 
                     var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
                     {
-                        HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
                     };
                     _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
                     await _eventBus.TriggerAsync(eventData, _cts.Token);
@@ -298,7 +303,7 @@ public sealed class MonitorManager : IDisposable
                     // 发送 On 信号
                     var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOn, datas)
                     {
-                        HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
                     };
                     _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
                     await _eventBus.TriggerAsync(eventData, _cts.Token);
@@ -307,7 +312,7 @@ public sealed class MonitorManager : IDisposable
 
             _ = Task.Run(async () =>
             {
-                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsCofig.Monitor.DefaultPollingInterval;
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 bool isOn = false; // 开关开启状态
                 while (!_cts!.Token.IsCancellationRequested)
                 {
@@ -329,7 +334,7 @@ public sealed class MonitorManager : IDisposable
                                 // 发送 Ready 信号
                                 var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateReady)
                                 {
-                                    HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                                    HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
                                 };
                                 await _eventBus.TriggerAsync(eventData, _cts.Token);
 
@@ -345,7 +350,7 @@ public sealed class MonitorManager : IDisposable
                                 // 发送 Off 信号
                                 var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOff)
                                 {
-                                    HandleTimeout = _opsCofig.Monitor.EventHandlerTimeout,
+                                    HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
                                 };
                                 await _eventBus.TriggerAsync(eventData, _cts.Token);
 
@@ -367,6 +372,75 @@ public sealed class MonitorManager : IDisposable
         }
     }
 
+    private async Task UnderlyMonitorAsync(DriverConnector connector)
+    {
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Underly).ToList();
+        foreach (var variable in variables)
+        {
+            _ = Task.Run(async () =>
+            {
+                int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
+                while (!_cts!.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(pollingInterval, _cts.Token);
+
+                    if (!connector.CanConnect)
+                    {
+                        continue;
+                    }
+
+                    // 若读取异常，等到下一次再访问即可。
+                    var (ok0, data0, err0) = await ReadDataAsync(connector.Driver, variable);
+                    if (!ok0)
+                    {
+                        if (_monitorStartOptions!.IsLoggerUnderlyError)
+                        {
+                            _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err0}");
+                        }
+
+                        continue;
+                    }
+
+                    var normalVariables = variable.NormalVariables;
+                    List<PayloadData> datas = new(normalVariables.Count + 1)
+                    {
+                        [0] = data0,
+                    };
+
+                    bool ok = true;
+                    foreach (var normalVariable in normalVariables)
+                    {
+                        // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                        var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                        ok = ok1;
+
+                        if (!ok)
+                        {
+                            _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                            break;
+                        }
+
+                        datas.Add(data);
+                    }
+
+                    if (!ok)
+                    {
+                        continue;
+                    }
+
+                    var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                    var eventData = new UnderlyEventData(context, variable.Tag, variable.Name, datas.ToArray())
+                    {
+                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
+                    };
+                    _monitorStartOptions!.UnderlyDelegate?.Invoke(eventData);
+                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                }
+            });
+        }
+    }
+
     private Task CallbackMonitorAsync()
     {
         return Task.Run(async () =>
@@ -382,7 +456,7 @@ public sealed class MonitorManager : IDisposable
                 try
                 {
                     // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中执行回写。
-                    CancellationTokenSource cts1 = new(_opsCofig.Monitor.CallbackTimeout); // 回写超时
+                    CancellationTokenSource cts1 = new(_opsConfig.Monitor.CallbackTimeout); // 回写超时
                     using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
                     _ = Task.Run(async () =>
                     {
@@ -716,5 +790,27 @@ public sealed class MonitorManager : IDisposable
         }
 
         return (true, string.Empty);
+    }
+
+    /// <summary>
+    /// 读取触发值
+    /// </summary>
+    /// <returns></returns>
+    private static async Task<(bool success, bool canTrigger, string err)> ReadTriggerAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
+    {
+        if (deviceVariable.VarType == VariableType.Int)
+        {
+            var result = await driver.ReadInt16Async(deviceVariable.Address);
+            return (result.IsSuccess, result.Content == ExStatusCode.Trigger, result.Message);
+        }
+        else if (deviceVariable.VarType == VariableType.Bit)
+        {
+            var result = await driver.ReadBoolAsync(deviceVariable.Address);
+            return (result.IsSuccess, result.Content, result.Message);
+        }
+        else
+        {
+            return (false, false, "触发值或开关值类型必须为 Int 或 Bit 类型");
+        }
     }
 }

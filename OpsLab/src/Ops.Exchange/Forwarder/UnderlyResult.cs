@@ -1,16 +1,10 @@
 ﻿namespace Ops.Exchange.Forwarder;
 
 /// <summary>
-/// 触发响应事件响应结果
+/// 底层响应事件响应结果
 /// </summary>
-public sealed class ReplyResult
+public sealed class UnderlyResult
 {
-    /// <summary>
-    /// 返回的结果。
-    /// <para>注：该值会回写给 PLC 对应的触发位。</para>
-    /// </summary>
-    public short Result { get; set; }
-
     /// <summary>
     /// 要回写给 PLC 的其他值。
     /// <para>注：Key 必须在地址定义中有存在，值必须与地址定义的类型保持一致（包括数组）。</para>

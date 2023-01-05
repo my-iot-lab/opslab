@@ -49,7 +49,7 @@ internal sealed class NoticeEventHandler : IEventHandler<NoticeEventData>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"[NoticeEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError(ex, "[NoticeEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
                 eventData.RequestId,
                 eventData.Schema.Station,
                 eventData.Tag);
