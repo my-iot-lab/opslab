@@ -173,6 +173,9 @@ public sealed class DriverConnectorManager : IDisposable
                 DriverModel.Melsec_MC => new MelsecMcNet(schema.Host, schema.Port),
                 DriverModel.Melsec_MCR => new MelsecMcRNet(schema.Host, schema.Port),
                 DriverModel.Omron_FinsTcp => new OmronFinsNet(schema.Host, schema.Port),
+                DriverModel.Omron_CipNet => new OmronCipNet(schema.Host, schema.Port),
+                DriverModel.Omron_HostLinkOverTcp => new OmronHostLinkOverTcp(schema.Host, schema.Port),
+                DriverModel.Omron_HostLinkCModeOverTcp => new OmronHostLinkCModeOverTcp(schema.Host, schema.Port),
                 DriverModel.AllenBradley_CIP => new AllenBradleyNet(schema.Host),
                 _ => throw new NotImplementedException(),
             };

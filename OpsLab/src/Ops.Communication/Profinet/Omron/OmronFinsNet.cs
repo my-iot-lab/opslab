@@ -189,8 +189,8 @@ public class OmronFinsNet : NetworkDeviceBase
 	/// 指定ip地址和端口号来实例化一个欧姆龙PLC Fins帧协议的通讯对象。
 	/// </summary>
 	/// <param name="ipAddress">PLCd的Ip地址</param>
-	/// <param name="port">PLC的端口</param>
-	public OmronFinsNet(string ipAddress, int port)
+	/// <param name="port">PLC的端口, 默认 9600</param>
+	public OmronFinsNet(string ipAddress, int port = 9600)
 		: this()
 	{
 		IpAddress = ipAddress;
