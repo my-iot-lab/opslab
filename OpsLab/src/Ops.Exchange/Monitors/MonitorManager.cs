@@ -1,5 +1,6 @@
 ﻿using Ops.Communication.Core;
 using Ops.Communication.Profinet.Siemens;
+using Ops.Exchange.Adapter;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
@@ -122,23 +123,30 @@ public sealed class MonitorManager : IDisposable
                     continue;
                 }
 
-                var result = await connector.Driver.ReadInt16Async(variable.Address);
-                if (!result.IsSuccess)
+                try
                 {
-                    if (_monitorStartOptions!.IsLoggerHeartbeatError)
+                    var result = await connector.Driver.ReadInt16Async(variable.Address);
+                    if (!result.IsSuccess)
                     {
-                        _logger.LogError($"[Monitor] Heartbeat 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                        if (_monitorStartOptions!.IsLoggerHeartbeatError)
+                        {
+                            _logger.LogError($"[Monitor] Heartbeat 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                        }
+
+                        continue;
                     }
 
-                    continue;
+                    if (result.Content == 1)
+                    {
+                        var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                        var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
+                        _monitorStartOptions!.HeartbeatDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
+                    }
                 }
-
-                if (result.Content == 1)
+                catch (Exception ex)
                 {
-                    var context = new PayloadContext(new PayloadRequest(deviceInfo));
-                    var eventData = new HeartbeatEventData(context, variable.Tag, result.Content);
-                    _monitorStartOptions!.HeartbeatDelegate?.Invoke(eventData);
-                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                    _logger.LogError(ex, $"[Monitor] Heartbeat 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
                 }
             }
         });
@@ -162,54 +170,62 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
-                    // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                    var result = await connector.Driver.ReadInt16Async(variable.Address);
-                    if (!result.IsSuccess)
+                    try
                     {
-                        if (_monitorStartOptions!.IsLoggerTriggerError)
+                        // 若读取失败，该信号点不会复位，下次会继续读取执行。
+                        var result = await connector.Driver.ReadInt16Async(variable.Address);
+                        if (!result.IsSuccess)
                         {
-                            _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
-                        }
-
-                        continue;
-                    }
-
-                    if (result.Content == ExStatusCode.Trigger)
-                    {
-                        // TODO: 此处校验是否能下发，若能，再去获取其明细数据。
-                        // 由于数据处于触发状态的时间很短（取决于后端执行的速度），目前暂时可按获取全部数据来处理。
-
-                        var normalVariables = variable.NormalVariables;
-                        List<PayloadData> datas = new(normalVariables.Count);
-
-                        bool ok = true;
-                        foreach (var normalVariable in normalVariables)
-                        {
-                            // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
-                            ok = ok1;
-
-                            if (!ok)
+                            if (_monitorStartOptions!.IsLoggerTriggerError)
                             {
-                                _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
-                                break;
+                                _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
                             }
 
-                            datas.Add(data);
-                        }
-
-                        if (!ok)
-                        {
                             continue;
                         }
 
-                        var context = new PayloadContext(new PayloadRequest(deviceInfo));
-                        var eventData = new ReplyEventData(context, variable.Tag, variable.Name, result.Content, datas.ToArray())
+                        if (result.Content == ExStatusCode.Trigger)
                         {
-                            HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
-                        };
-                        _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
-                        await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            // TODO: 此处校验是否能下发，若能，再去获取其明细数据。
+                            // 由于数据处于触发状态的时间很短（取决于后端执行的速度），目前暂时可按获取全部数据来处理。
+
+                            var normalVariables = variable.NormalVariables;
+                            List<PayloadData> datas = new(normalVariables.Count);
+
+                            bool ok = true;
+                            foreach (var normalVariable in normalVariables)
+                            {
+                                // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                                var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                                ok = ok1;
+
+                                if (!ok)
+                                {
+                                    _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                    break;
+                                }
+
+                                datas.Add(data);
+                            }
+
+                            if (!ok)
+                            {
+                                continue;
+                            }
+
+                            var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                            var eventData = new ReplyEventData(context, variable.Tag, variable.Name, result.Content, datas.ToArray())
+                            {
+                                HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
+                            };
+                            _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
+                            await _eventBus.TriggerAsync(eventData, _cts.Token);
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"[Monitor] Trigger 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
                     }
                 }
             });
@@ -234,24 +250,31 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
-                    // 若读取异常，等到下一次再访问即可。
-                    var (ok, data, err) = await ReadDataAsync(connector.Driver, variable);
-                    if (!ok)
+                    try
                     {
-                        if (_monitorStartOptions!.IsLoggerNoticeError)
+                        // 若读取异常，等到下一次再访问即可。
+                        var (ok, data, err) = await ReadDataAsync(connector.Driver, variable);
+                        if (!ok)
                         {
-                            _logger.LogError($"[Monitor] Notice 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err}");
+                            if (_monitorStartOptions!.IsLoggerNoticeError)
+                            {
+                                _logger.LogError($"[Monitor] Notice 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err}");
+                            }
+
+                            continue;
                         }
 
-                        continue;
+                        var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
+                        {
+                            HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
+                        };
+                        _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
-
-                    var eventData = new NoticeEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, data)
+                    catch (Exception ex)
                     {
-                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
-                    };
-                    _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
-                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                        _logger.LogError(ex, $"[Monitor] Notice 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
+                    }
                 }
             });
         }
@@ -276,37 +299,45 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
-                    var normalVariables = variable.NormalVariables;
-                    List<PayloadData> datas = new(normalVariables.Count);
-
-                    bool ok = false;
-                    foreach (var normalVariable in normalVariables)
+                    try
                     {
-                        // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                        var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
-                        ok = ok1;
+                        var normalVariables = variable.NormalVariables;
+                        List<PayloadData> datas = new(normalVariables.Count);
+
+                        bool ok = false;
+                        foreach (var normalVariable in normalVariables)
+                        {
+                            // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                            ok = ok1;
+
+                            if (!ok)
+                            {
+                                _logger.LogError($"[Monitor] Switch 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                break;
+                            }
+
+                            datas.Add(data);
+                        }
 
                         if (!ok)
                         {
-                            _logger.LogError($"[Monitor] Switch 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
-                            break;
+                            continue;
                         }
 
-                        datas.Add(data);
-                    }
+                        // 发送 On 信号
+                        var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOn, datas)
+                        {
+                            HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
+                        };
+                        _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
 
-                    if (!ok)
-                    {
-                        continue;
                     }
-
-                    // 发送 On 信号
-                    var eventData = new SwitchEventData(GuidIdGenerator.NextId(), deviceInfo.Schema, variable.Tag, variable.Name, SwitchEventData.StateOn, datas)
+                    catch (Exception ex)
                     {
-                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
-                    };
-                    _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
-                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                        _logger.LogError(ex, $"[Monitor] Switch 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}");
+                    }
                 }
             });
 
@@ -390,52 +421,59 @@ public sealed class MonitorManager : IDisposable
                         continue;
                     }
 
-                    // 若读取异常，等到下一次再访问即可。
-                    var (ok0, data0, err0) = await ReadDataAsync(connector.Driver, variable);
-                    if (!ok0)
+                    try
                     {
-                        if (_monitorStartOptions!.IsLoggerUnderlyError)
+                        // 若读取异常，等到下一次再访问即可。
+                        var (ok0, data0, err0) = await ReadDataAsync(connector.Driver, variable);
+                        if (!ok0)
                         {
-                            _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err0}");
+                            if (_monitorStartOptions!.IsLoggerUnderlyError)
+                            {
+                                _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err0}");
+                            }
+
+                            continue;
                         }
 
-                        continue;
-                    }
+                        var normalVariables = variable.NormalVariables;
+                        List<PayloadData> datas = new()
+                        {
+                            [0] = data0,
+                        };
 
-                    var normalVariables = variable.NormalVariables;
-                    List<PayloadData> datas = new(normalVariables.Count + 1)
-                    {
-                        [0] = data0,
-                    };
+                        bool ok = true;
+                        foreach (var normalVariable in normalVariables)
+                        {
+                            // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
+                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                            ok = ok1;
 
-                    bool ok = true;
-                    foreach (var normalVariable in normalVariables)
-                    {
-                        // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                        var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
-                        ok = ok1;
+                            if (!ok)
+                            {
+                                _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                break;
+                            }
+
+                            datas.Add(data);
+                        }
 
                         if (!ok)
                         {
-                            _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
-                            break;
+                            continue;
                         }
 
-                        datas.Add(data);
+                        var context = new PayloadContext(new PayloadRequest(deviceInfo));
+                        var eventData = new UnderlyEventData(context, variable.Tag, variable.Name, datas.ToArray())
+                        {
+                            HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
+                        };
+                        _monitorStartOptions!.UnderlyDelegate?.Invoke(eventData);
+                        await _eventBus.TriggerAsync(eventData, _cts.Token);
                     }
-
-                    if (!ok)
+                    catch (Exception ex)
                     {
-                        continue;
+                        _logger.LogError(ex, $"[Monitor] Underly 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
                     }
-
-                    var context = new PayloadContext(new PayloadRequest(deviceInfo));
-                    var eventData = new UnderlyEventData(context, variable.Tag, variable.Name, datas.ToArray())
-                    {
-                        HandleTimeout = _opsConfig.Monitor.EventHandlerTimeout,
-                    };
-                    _monitorStartOptions!.UnderlyDelegate?.Invoke(eventData);
-                    await _eventBus.TriggerAsync(eventData, _cts.Token);
                 }
             });
         }
