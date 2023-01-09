@@ -21,26 +21,36 @@ public class MelsecMCSuit : IDisposable
 
         List<DeviceVariable> variables = new()
             {
-                new DeviceVariable("PLC_Sys_Connected", "D100", 0, VariableType.Int,  "心跳", "", VariableFlag.Heartbeat, 500),
+                //new DeviceVariable("PLC_Sys_Connected", "D100", 0, VariableType.Int,  "心跳", "", VariableFlag.Heartbeat, 500),
 
                 // 开关信号，拉铆曲线数据
-                new DeviceVariable("PLC_Sys_Switch_PullRiveting", "D1000", 0, VariableType.Int,  "拉铆曲线", "", VariableFlag.Switch, 200)
-                {
-                     NormalVariables = new()
-                     {
-                         new DeviceVariable("PLC_Switch_PullRiveting_PullingForce", "D1010", 0, VariableType.Real,  "拉力", "", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Switch_PullRiveting_Displacement", "D1020", 0, VariableType.Int,  "位移", "", VariableFlag.Normal),
-                     },
-                },
+                //new DeviceVariable("PLC_Sys_Switch_PullRiveting", "D1000", 0, VariableType.Int,  "拉铆曲线", "", VariableFlag.Switch, 200)
+                //{
+                //     NormalVariables = new()
+                //     {
+                //         new DeviceVariable("PLC_Switch_PullRiveting_PullingForce", "D1010", 0, VariableType.Real,  "拉力", "", VariableFlag.Normal),
+                //         new DeviceVariable("PLC_Switch_PullRiveting_Displacement", "D1020", 0, VariableType.Int,  "位移", "", VariableFlag.Normal),
+                //     },
+                //},
 
                 // 开关信号，拧紧曲线数据
-                new DeviceVariable("PLC_Sys_Switch_ScrewUp", "D1100", 0, VariableType.Int,  "拉铆曲线", "", VariableFlag.Switch, 200)
+                //new DeviceVariable("PLC_Sys_Switch_ScrewUp", "D1100", 0, VariableType.Int,  "拉铆曲线", "", VariableFlag.Switch, 200)
+                //{
+                //     NormalVariables = new()
+                //     {
+                //         new DeviceVariable("PLC_Switch_ScrewUp_Angle ", "D1110", 0, VariableType.Real,  "角度", "", VariableFlag.Normal),
+                //         new DeviceVariable("PLC_Switch_ScrewUp_Torsion ", "D1120", 0, VariableType.Real,  "扭矩", "", VariableFlag.Normal),
+                //     },
+                //},
+
+                // Underly 测试
+                new DeviceVariable("PLC_Custom_Underly_01", "D100", 0, VariableType.Int,  "", "", VariableFlag.Underly, 500)
                 {
-                     NormalVariables = new()
-                     {
-                         new DeviceVariable("PLC_Switch_ScrewUp_Angle ", "D1110", 0, VariableType.Real,  "角度", "", VariableFlag.Normal),
-                         new DeviceVariable("PLC_Switch_ScrewUp_Torsion ", "D1120", 0, VariableType.Real,  "扭矩", "", VariableFlag.Normal),
-                     },
+                     //NormalVariables = new()
+                     //{
+                     //    new DeviceVariable("PLC_Switch_ScrewUp_Angle ", "D110", 0, VariableType.Real,  "", "", VariableFlag.Normal),
+                     //    new DeviceVariable("PLC_Switch_ScrewUp_Torsion ", "D120", 0, VariableType.Real,  "", "", VariableFlag.Normal),
+                     //},
                 },
             };
 

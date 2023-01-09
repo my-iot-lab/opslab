@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Ops.Exchange.Forwarder;
-using Ops.Exchange.Utils;
 
 namespace Ops.Test.ConsoleApp.Forwarder
 {

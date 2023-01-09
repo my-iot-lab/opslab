@@ -436,10 +436,8 @@ public sealed class MonitorManager : IDisposable
                         }
 
                         var normalVariables = variable.NormalVariables;
-                        List<PayloadData> datas = new()
-                        {
-                            [0] = data0,
-                        };
+                        List<PayloadData> datas = new(normalVariables.Count + 1);
+                        datas.Add(data0);
 
                         bool ok = true;
                         foreach (var normalVariable in normalVariables)
@@ -828,27 +826,5 @@ public sealed class MonitorManager : IDisposable
         }
 
         return (true, string.Empty);
-    }
-
-    /// <summary>
-    /// 读取触发值
-    /// </summary>
-    /// <returns></returns>
-    private static async Task<(bool success, bool canTrigger, string err)> ReadTriggerAsync(IReadWriteNet driver, DeviceVariable deviceVariable)
-    {
-        if (deviceVariable.VarType == VariableType.Int)
-        {
-            var result = await driver.ReadInt16Async(deviceVariable.Address);
-            return (result.IsSuccess, result.Content == ExStatusCode.Trigger, result.Message);
-        }
-        else if (deviceVariable.VarType == VariableType.Bit)
-        {
-            var result = await driver.ReadBoolAsync(deviceVariable.Address);
-            return (result.IsSuccess, result.Content, result.Message);
-        }
-        else
-        {
-            return (false, false, "触发值或开关值类型必须为 Int 或 Bit 类型");
-        }
     }
 }

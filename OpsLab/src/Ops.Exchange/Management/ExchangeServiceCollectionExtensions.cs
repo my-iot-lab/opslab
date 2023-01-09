@@ -4,6 +4,7 @@ using Ops.Exchange.Handlers.Heartbeat;
 using Ops.Exchange.Handlers.Notice;
 using Ops.Exchange.Handlers.Reply;
 using Ops.Exchange.Handlers.Switch;
+using Ops.Exchange.Handlers.Underly;
 using Ops.Exchange.Management;
 using Ops.Exchange.Monitors;
 using Ops.Exchange.Stateless;
@@ -37,10 +38,11 @@ public static class ExchangeServiceCollectionExtensions
         services.AddSingleton<CallbackTaskQueueManager>();
 
         // EventHandlers
-        services.AddSingleton<HeartbeatEventHandler>();
-        services.AddSingleton<ReplyEventHandler>();
-        services.AddSingleton<NoticeEventHandler>();
-        services.AddSingleton<SwitchEventHandler>();
+        services.AddTransient<HeartbeatEventHandler>();
+        services.AddTransient<ReplyEventHandler>();
+        services.AddTransient<NoticeEventHandler>();
+        services.AddTransient<SwitchEventHandler>();
+        services.AddTransient<UnderlyEventHandler>();
 
         // Managers
         services.AddSingleton<TriggerStateManager>();

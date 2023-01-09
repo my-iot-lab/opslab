@@ -54,9 +54,11 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     //services.AddHostedService<Worker>();
 
     services.AddOpsExchange(configuration);
-    services.AddSingleton<INoticeForwarder, MyNoticeForwarder>();
-    services.AddSingleton<IReplyForwarder, MyReplyForwarder>();
-    services.AddSingleton<ISwitchForwarder, MySwitchForwarder>();
+
+    services.AddTransient<INoticeForwarder, MyNoticeForwarder>();
+    services.AddTransient<IReplyForwarder, MyReplyForwarder>();
+    services.AddTransient<ISwitchForwarder, MySwitchForwarder>();
+    services.AddTransient<IUnderlyForwarder, MyUnderlyForwarder>();
 
     services.AddTransient<ModbusTcpSuit>();
     services.AddTransient<SimaticS7Suit>();
