@@ -155,21 +155,23 @@ public sealed class DeviceHealthManager
 
         foreach (var deviceInfo in _deviceInfos)
         {
+            // 采用缓存，同一主机在规定时间内不重复 Ping
             var cacheName = $"__heartbeat_ping:{deviceInfo.Schema.Host}";
-            bool canConnect = _memoryCache.TryGetValue(cacheName, out _);
-            if (!canConnect)
+            bool hasPing = _memoryCache.TryGetValue(cacheName, out bool canConnect);
+            if (!hasPing)
             {
                 try
                 {
-                    var reply = ping.Send(deviceInfo.Schema.Host, 1000); // 可能会出现异常
+                    var reply = ping.Send(deviceInfo.Schema.Host, 1000); // 可能会出现异常（如网线）
                     canConnect = reply.Status == IPStatus.Success;
                     if (canConnect)
                     {
-                        _memoryCache.Set(cacheName, "", TimeSpan.FromSeconds(5)); // 5秒内不重复 Ping 同一服务器
+                        _memoryCache.Set(cacheName, true, TimeSpan.FromSeconds(5)); // 指定时间内不重复 Ping 同一服务器
                     }
                     else
                     {
-                        if (_map.TryGetValue(deviceInfo.Name, out var item) && item.Retry % 10 == 0)
+                        _memoryCache.Set(cacheName, false, TimeSpan.FromSeconds(3));
+                        if (_map.TryGetValue(deviceInfo.Name, out var item))
                         {
                             _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 失败, 返回状态：{reply.Status}");
                         }
@@ -177,9 +179,10 @@ public sealed class DeviceHealthManager
                 }
                 catch (PingException ex)
                 {
-                    if (_map.TryGetValue(deviceInfo.Name, out var item) && item.Retry % 10 == 0)
+                    _memoryCache.Set(cacheName, false, TimeSpan.FromSeconds(3));
+                    if (_map.TryGetValue(deviceInfo.Name, out var item))
                     {
-                        _logger.LogError(ex, $"Ping '{deviceInfo.Schema.Host}' 异常");
+                        _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 异常, 消息：{ex.Message}");
                     }
                 }
             }

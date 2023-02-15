@@ -1,6 +1,5 @@
 ﻿using Ops.Communication.Core;
 using Ops.Communication.Profinet.Siemens;
-using Ops.Exchange.Adapter;
 using Ops.Exchange.Bus;
 using Ops.Exchange.Configuration;
 using Ops.Exchange.Handlers.Heartbeat;
