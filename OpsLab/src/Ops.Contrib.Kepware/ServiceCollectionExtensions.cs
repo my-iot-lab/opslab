@@ -6,30 +6,67 @@ namespace Ops.Contrib.Kepware;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 添加
+    /// 添加 IotGateway RESTful Client 服务。
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddIotGatewayRESTful(this IServiceCollection services)
+    public static IServiceCollection AddIotGatewayRESTfulClient(this IServiceCollection services)
     {
         services.AddHttpClient(RESTServer.HttpClientName, (sp, httpClient) =>
         {
-            var options = sp.GetRequiredService<IOptions<RESTfulOptions>>().Value;
+            var options = sp.GetRequiredService<IOptions<RESTfulClientOptions>>().Value;
+            httpClient.BaseAddress = new Uri($"{options.RESTClientBaseAddress}");
+            if (!string.IsNullOrEmpty(options.UserName) && !string.IsNullOrEmpty(options.Password))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue(
+                        "Basic",
+                        $"{options.UserName}:{options.Password}");
+            }
+        }).ConfigureHttpMessageHandlerBuilder(builder =>
+        {
+            var options = builder.Services.GetRequiredService<IOptions<RESTfulClientOptions>>().Value;
+            // SocketsHttpHandler
+            if (builder.PrimaryHandler is HttpClientHandler httpHandler)
+            {
+                if (options.DisableCertificateValidationCheck)
+                {
+                    httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                }
+            }
+        });
+
+        return services;
+    }
+
+    /// <summary>
+    /// 添加 IotGateway RESTful Server 服务。
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddIotGatewayRESTfulServer(this IServiceCollection services)
+    {
+        services.AddHttpClient(RESTServer.HttpClientName, (sp, httpClient) =>
+        {
+            var options = sp.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
             httpClient.BaseAddress = new Uri($"{options.RESTServerBaseAddress}/iotgateway");
         })
         .ConfigureHttpMessageHandlerBuilder(builder =>
         {
-            var options = builder.Services.GetRequiredService<IOptions<RESTfulOptions>>().Value;
-            if (!options.AllowAnonymous)
+            var options = builder.Services.GetRequiredService<IOptions<RESTfulServerOptions>>().Value;
+
+            // SocketsHttpHandler
+            if (builder.PrimaryHandler is HttpClientHandler httpHandler)
             {
-                var certificate = new System.Security.Cryptography.X509Certificates.X509Certificate(options.CertificatePath);
-                if (builder.PrimaryHandler is HttpClientHandler handler1)
+                if (options.DisableCertificateValidationCheck)
                 {
-                    handler1.ClientCertificates.Add(certificate);
+                    httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                 }
-                else if (builder.PrimaryHandler is SocketsHttpHandler handler2)
+
+                if (!options.AllowAnonymous)
                 {
-                    (handler2.SslOptions.ClientCertificates ??= new()).Add(certificate);
+                    var certificate = new System.Security.Cryptography.X509Certificates.X509Certificate(options.CertificatePath);
+                    httpHandler.ClientCertificates.Add(certificate);
                 }
             }
         });

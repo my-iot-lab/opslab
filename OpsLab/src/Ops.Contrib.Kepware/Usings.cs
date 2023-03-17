@@ -6,6 +6,7 @@ global using System.ComponentModel;
 global using System.Diagnostics;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Linq;
+global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Net.NetworkInformation;
 global using System.Text;
