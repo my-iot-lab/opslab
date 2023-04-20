@@ -320,7 +320,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		OperateResult<byte[]> read;
 		do
 		{
-			read = await base.ReadFromCoreServerAsync(socket, send, hasResponseData, usePackHeader);
+			read = await base.ReadFromCoreServerAsync(socket, send, hasResponseData, usePackHeader).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -332,13 +332,13 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		OperateResult<byte[]> read_first = await ReadFromCoreServerAsync(socket, plcHead1);
+		OperateResult<byte[]> read_first = await ReadFromCoreServerAsync(socket, plcHead1).ConfigureAwait(false);
 		if (!read_first.IsSuccess)
 		{
 			return read_first;
 		}
 
-		OperateResult<byte[]> read_second = await ReadFromCoreServerAsync(socket, plcHead2);
+		OperateResult<byte[]> read_second = await ReadFromCoreServerAsync(socket, plcHead2).ConfigureAwait(false);
 		if (!read_second.IsSuccess)
 		{
 			return read_second;
@@ -362,7 +362,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public async Task<OperateResult<string>> ReadOrderNumberAsync()
 	{
-		return ByteTransformHelper.GetSuccessResultFromOther(await ReadFromCoreServerAsync(plcOrderNumber), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
+		return ByteTransformHelper.GetSuccessResultFromOther(await ReadFromCoreServerAsync(plcOrderNumber).ConfigureAwait(false), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
 	}
 
 	private OperateResult CheckStartResult(byte[] content)
@@ -428,17 +428,17 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public async Task<OperateResult> HotStartAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_HOT_START), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_HOT_START).ConfigureAwait(false), CheckStartResult);
 	}
 
 	public async Task<OperateResult> ColdStartAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_COLD_START), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_COLD_START).ConfigureAwait(false), CheckStartResult);
 	}
 
 	public async Task<OperateResult> StopAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_STOP), CheckStopResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_STOP).ConfigureAwait(false), CheckStopResult);
 	}
 
 	/// <summary>
@@ -639,7 +639,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		{
 			ushort readLength = (ushort)Math.Min(length - alreadyFinished, 200);
 			addressResult.Content.Length = readLength;
-			var read = await ReadAsync(new S7AddressData[1] { addressResult.Content });
+			var read = await ReadAsync(new S7AddressData[1] { addressResult.Content }).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -667,7 +667,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(command);
 		}
 
-		var read = await ReadFromCoreServerAsync(command.Content);
+		var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -687,7 +687,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			}
 			addressResult[i] = tmp.Content;
 		}
-		return await ReadAsync(addressResult);
+		return await ReadAsync(addressResult).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadAsync(S7AddressData[] s7Addresses)
@@ -698,7 +698,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			var groups = SoftBasic.ArraySplitByLength(s7Addresses, 19);
 			for (int i = 0; i < groups.Count; i++)
 			{
-				OperateResult<byte[]> read = await ReadAsync(groups[i]);
+				OperateResult<byte[]> read = await ReadAsync(groups[i]).ConfigureAwait(false);
 				if (!read.IsSuccess)
 				{
 					return read;
@@ -718,7 +718,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(command.Content);
+		var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -751,7 +751,7 @@ public class SiemensS7Net : NetworkDeviceBase
 				return command;
 			}
 
-			OperateResult write = await WriteBaseAsync(command.Content);
+			OperateResult write = await WriteBaseAsync(command.Content).ConfigureAwait(false);
 			if (!write.IsSuccess)
 			{
 				return write;
@@ -844,7 +844,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadBitFromPLCAsync(address), (byte[] m) => m[0] != 0);
+		return ByteTransformHelper.GetResultFromBytes(await ReadBitFromPLCAsync(address).ConfigureAwait(false), (byte[] m) => m[0] != 0);
 	}
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
@@ -858,7 +858,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		OpsHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
 		analysis.Content.AddressStart = newStart;
 		analysis.Content.Length = byteLength;
-		var read = await ReadAsync(new S7AddressData[1] { analysis.Content });
+		var read = await ReadAsync(new S7AddressData[1] { analysis.Content }).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -878,7 +878,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] values)
 	{
-		return await WriteAsync(address, SoftBasic.BoolArrayToByte(values));
+		return await WriteAsync(address, SoftBasic.BoolArrayToByte(values)).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -904,7 +904,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public async Task<OperateResult<byte>> ReadByteAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, byte value)
@@ -914,10 +914,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public override OperateResult Write(string address, string value, Encoding encoding)
 	{
-		if (value == null)
-		{
-			value = string.Empty;
-		}
+		value ??= string.Empty;
 
 		byte[] array = encoding.GetBytes(value);
 		if (encoding == Encoding.Unicode)
@@ -1062,10 +1059,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, string value, Encoding encoding)
 	{
-		if (value == null)
-		{
-			value = string.Empty;
-		}
+		value ??= string.Empty;
 		byte[] buffer = encoding.GetBytes(value);
 		if (encoding == Encoding.Unicode)
 		{
@@ -1074,7 +1068,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 		if (CurrentPlc != SiemensPLCS.S200Smart)
 		{
-			var readLength = await ReadAsync(address, 2);
+			var readLength = await ReadAsync(address, 2).ConfigureAwait(false);
 			if (!readLength.IsSuccess)
 			{
 				return readLength;
@@ -1096,30 +1090,30 @@ public class SiemensS7Net : NetworkDeviceBase
 			{
 				readLength.Content[0],
 				(byte)value.Length
-			}, buffer));
+			}, buffer)).ConfigureAwait(false);
 		}
-		return await WriteAsync(address, SoftBasic.SpliceArray(new byte[1] { (byte)value.Length }, buffer));
+		return await WriteAsync(address, SoftBasic.SpliceArray(new byte[1] { (byte)value.Length }, buffer)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteWStringAsync(string address, string value)
 	{
-		return await WriteAsync(address, value, Encoding.Unicode);
+		return await WriteAsync(address, value, Encoding.Unicode).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
 	{
 		if (length == 0)
 		{
-			return await ReadStringAsync(address);
+			return await ReadStringAsync(address).ConfigureAwait(false);
 		}
-		return await base.ReadStringAsync(address, length, encoding);
+		return await base.ReadStringAsync(address, length, encoding).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<string>> ReadStringAsync(string address)
 	{
 		if (CurrentPlc != SiemensPLCS.S200Smart)
 		{
-			OperateResult<byte[]> read2 = await ReadAsync(address, 2);
+			OperateResult<byte[]> read2 = await ReadAsync(address, 2).ConfigureAwait(false);
 			if (!read2.IsSuccess)
 			{
 				return OperateResult.Error<string>(read2);
@@ -1129,7 +1123,7 @@ public class SiemensS7Net : NetworkDeviceBase
 				return new OperateResult<string>(ErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
 
-			OperateResult<byte[]> readString2 = await ReadAsync(address, (ushort)(2 + read2.Content[1]));
+			OperateResult<byte[]> readString2 = await ReadAsync(address, (ushort)(2 + read2.Content[1])).ConfigureAwait(false);
 			if (!readString2.IsSuccess)
 			{
 				return OperateResult.Error<string>(readString2);
@@ -1137,13 +1131,13 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Ok(Encoding.ASCII.GetString(readString2.Content, 2, readString2.Content.Length - 2));
 		}
 
-		var read = await ReadAsync(address, 1);
+		var read = await ReadAsync(address, 1).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
 		}
 
-		var readString = await ReadAsync(address, (ushort)(1 + read.Content[0]));
+		var readString = await ReadAsync(address, (ushort)(1 + read.Content[0])).ConfigureAwait(false);
 		if (!readString.IsSuccess)
 		{
 			return OperateResult.Error<string>(readString);
@@ -1155,7 +1149,7 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		if (CurrentPlc != SiemensPLCS.S200Smart)
 		{
-			var read2 = await ReadAsync(address, 2);
+			var read2 = await ReadAsync(address, 2).ConfigureAwait(false);
 			if (!read2.IsSuccess)
 			{
 				return OperateResult.Error<string>(read2);
@@ -1179,7 +1173,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<string>(read);
 		}
 
-		var readString = await ReadAsync(address, (ushort)(1 + read.Content[0] * 2));
+		var readString = await ReadAsync(address, (ushort)(1 + read.Content[0] * 2)).ConfigureAwait(false);
 		if (!readString.IsSuccess)
 		{
 			return OperateResult.Error<string>(readString);
@@ -1210,12 +1204,12 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public async Task<OperateResult<DateTime>> ReadDateTimeAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 8), SiemensDateTime.FromByteArray);
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 8).ConfigureAwait(false), SiemensDateTime.FromByteArray);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, DateTime dateTime)
 	{
-		return await WriteAsync(address, SiemensDateTime.ToByteArray(dateTime));
+		return await WriteAsync(address, SiemensDateTime.ToByteArray(dateTime)).ConfigureAwait(false);
 	}
 
 	public override string ToString()

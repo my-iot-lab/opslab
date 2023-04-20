@@ -11,7 +11,7 @@ namespace Ops.Communication.Profinet.Siemens;
 /// 适用于西门子200的通信，非常感谢 合肥-加劲 的测试，让本类库圆满完成。注意：M地址范围有限 0-31地址<br />
 /// 在本类的<see cref="SiemensPPIOverTcp" />实现类里，如果使用了Async的异步方法，没有增加同步锁，多线程调用可能会引发数据错乱的情况。
 /// </remarks>
-public class SiemensPPI : SerialDeviceBase
+public sealed class SiemensPPI : SerialDeviceBase
 {
 	private byte station = 2;
 

@@ -30,7 +30,7 @@ public class BackgroundTaskQueue<T> : IDisposable
     /// <returns></returns>
     public async ValueTask QueueAsync(T item, CancellationToken cancellationToken = default)
     {
-        await _queue.Writer.WriteAsync(item, cancellationToken);
+        await _queue.Writer.WriteAsync(item, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public class BackgroundTaskQueue<T> : IDisposable
     /// <returns></returns>
     public async ValueTask<T> DequeueAsync(CancellationToken cancellationToken = default)
     {
-        var item = await _queue.Reader.ReadAsync(cancellationToken);
+        var item = await _queue.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
         return item;
     }
 
@@ -52,7 +52,7 @@ public class BackgroundTaskQueue<T> : IDisposable
         // 当 Channel 未 Completed，会阻塞直到有可读的数据。
         if (await _queue.Reader.WaitToReadAsync(cancellationToken))
         {
-            var item = await _queue.Reader.ReadAsync(cancellationToken);
+            var item = await _queue.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
             return (true, item);
         }
 

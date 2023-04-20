@@ -8,7 +8,7 @@ namespace Ops.Communication.Core;
 /// <summary>
 /// 一些静态辅助方法。
 /// </summary>
-public class OpsHelper
+public static class OpsHelper
 {
 	/// <summary>
 	/// 解析地址的附加参数方法，比如你的地址是s=100;D100，可以提取出"s"的值的同时，修改地址本身，如果"s"不存在的话，返回给定的默认值。

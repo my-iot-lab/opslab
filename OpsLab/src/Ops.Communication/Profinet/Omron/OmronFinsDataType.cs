@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <summary>
 /// 欧姆龙的Fins协议的数据类型
 /// </summary>
-public class OmronFinsDataType
+public sealed class OmronFinsDataType
 {
 	/// <summary>
 	/// DM Area

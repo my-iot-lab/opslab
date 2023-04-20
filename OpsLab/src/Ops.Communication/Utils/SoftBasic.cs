@@ -6,7 +6,7 @@ namespace Ops.Communication.Utils;
 /// <summary>
 /// 一个软件基础类，提供常用的一些静态方法，比如字符串转换，字节转换的方法
 /// </summary>
-public class SoftBasic
+public static class SoftBasic
 {
 	/// <summary>
 	/// 从一个时间差返回带单位的描述，主要是用于显示操作。
@@ -51,7 +51,7 @@ public class SoftBasic
 	/// <param name="array">数组信息</param>
 	/// <param name="format">格式化的信息</param>
 	/// <returns>最终显示的信息</returns>
-	public static string ArrayFormat<T>(T[]? array, string format)
+	public static string ArrayFormat<T>(T[] array, string format)
 	{
 		if (array == null)
 		{
@@ -266,7 +266,7 @@ public class SoftBasic
 			}
 		}
 
-		if (segment != 0 && stringBuilder.Length > 1 && stringBuilder[stringBuilder.Length - 1] == segment)
+		if (segment != 0 && stringBuilder.Length > 1 && stringBuilder[^1] == segment)
 		{
 			stringBuilder.Remove(stringBuilder.Length - 1, 1);
 		}

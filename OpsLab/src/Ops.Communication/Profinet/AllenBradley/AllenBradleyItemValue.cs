@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// AB PLC的数据
 /// </summary>
-public class AllenBradleyItemValue
+public sealed class AllenBradleyItemValue
 {
 	/// <summary>
 	/// 真实的数组缓存

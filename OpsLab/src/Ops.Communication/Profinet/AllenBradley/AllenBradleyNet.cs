@@ -113,7 +113,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.RegisterSessionHandle(), true, false);
+		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.RegisterSessionHandle(), true, false).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -131,7 +131,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> ExtraOnDisconnectAsync(Socket socket)
 	{
-		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false);
+		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -353,22 +353,6 @@ public class AllenBradleyNet : NetworkDeviceBase
 		}
 	}
 
-	private OperateResult<byte[]> ReadByCips(params byte[][] cips)
-	{
-		OperateResult<byte[]> operateResult = ReadCipFromServer(cips);
-		if (!operateResult.IsSuccess)
-		{
-			return operateResult;
-		}
-
-		var operateResult2 = AllenBradleyHelper.ExtractActualData(operateResult.Content, isRead: true);
-		if (!operateResult2.IsSuccess)
-		{
-			return OperateResult.Error<byte[]>(operateResult2);
-		}
-		return OperateResult.Ok(operateResult2.Content1);
-	}
-
 	/// <summary>
 	/// 使用CIP报文和服务器进行核心的数据交换
 	/// </summary>
@@ -470,7 +454,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 	{
 		if (length > 1)
 		{
-			return await ReadSegmentAsync(address, 0, length);
+			return await ReadSegmentAsync(address, 0, length).ConfigureAwait(false);
 		}
 		return await ReadAsync(new string[1] { address }, new int[1] { length });
 	}
@@ -487,12 +471,12 @@ public class AllenBradleyNet : NetworkDeviceBase
 		{
 			length[i] = 1;
 		}
-		return await ReadAsync(address, length);
+		return await ReadAsync(address, length).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadAsync(string[] address, int[] length)
 	{
-		var read = await ReadWithTypeAsync(address, length);
+		var read = await ReadWithTypeAsync(address, length).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -508,7 +492,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			return OperateResult.Error<byte[], ushort, bool>(command);
 		}
 
-		var read = await ReadFromCoreServerAsync(command.Content);
+		var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[], ushort, bool>(read);
@@ -530,7 +514,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			OperateResult<byte[], ushort, bool> analysis;
 			do
 			{
-				var read = await ReadCipFromServerAsync(AllenBradleyHelper.PackRequestReadSegment(address, startIndex, length));
+				var read = await ReadCipFromServerAsync(AllenBradleyHelper.PackRequestReadSegment(address, startIndex, length)).ConfigureAwait(false);
 				if (!read.IsSuccess)
 				{
 					return read;
@@ -559,7 +543,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 	public async Task<OperateResult<byte[]>> ReadCipFromServerAsync(params byte[][] cips)
 	{
 		byte[] commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, Slot }, cips.ToArray()));
-		var read = await ReadFromCoreServerAsync(commandSpecificData);
+		var read = await ReadFromCoreServerAsync(commandSpecificData).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -576,7 +560,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 	public async Task<OperateResult<byte[]>> ReadEipFromServerAsync(params byte[][] eip)
 	{
 		byte[] commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(eip);
-		var read = await ReadFromCoreServerAsync(commandSpecificData);
+		var read = await ReadFromCoreServerAsync(commandSpecificData).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -596,7 +580,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 		{
 			address = address[2..];
 			address = AllenBradleyHelper.AnalysisArrayIndex(address, out var bitIndex);
-			var read2 = await ReadBoolArrayAsync(address + $"[{bitIndex / 32}]");
+			var read2 = await ReadBoolArrayAsync(address + $"[{bitIndex / 32}]").ConfigureAwait(false);
 			if (!read2.IsSuccess)
 			{
 				return OperateResult.Error<bool>(read2);
@@ -604,7 +588,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			return OperateResult.Ok(read2.Content[bitIndex % 32]);
 		}
 
-		var read = await ReadAsync(address, 1);
+		var read = await ReadAsync(address, 1).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool>(read);
@@ -614,7 +598,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	public async Task<OperateResult<bool[]>> ReadBoolArrayAsync(string address)
 	{
-		var read = await ReadAsync(address, 1);
+		var read = await ReadAsync(address, 1).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -688,7 +672,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 		ushort instansAddress = 0;
 		while (true)
 		{
-			var readCip = await ReadCipFromServerAsync(AllenBradleyHelper.GetEnumeratorCommand(instansAddress));
+			var readCip = await ReadCipFromServerAsync(AllenBradleyHelper.GetEnumeratorCommand(instansAddress)).ConfigureAwait(false);
 			if (!readCip.IsSuccess)
 			{
 				return OperateResult.Error<AbTagItem[]>(readCip);
@@ -708,7 +692,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			int index4 = 44;
 			while (index4 < readCip.Content.Length)
 			{
-				AbTagItem td = new AbTagItem
+				AbTagItem td = new()
 				{
 					InstanceID = BitConverter.ToUInt32(readCip.Content, index4)
 				};
@@ -731,143 +715,6 @@ public class AllenBradleyNet : NetworkDeviceBase
 			}
 		}
 		return new OperateResult<AbTagItem[]>(ErrorCode.UnknownError.Desc());
-	}
-
-	private OperateResult<AbStructHandle> ReadTagStructHandle(AbTagItem structTag)
-	{
-		var operateResult = ReadByCips(AllenBradleyHelper.GetStructHandleCommand(structTag.SymbolType));
-		if (!operateResult.IsSuccess)
-		{
-			return OperateResult.Error<AbStructHandle>(operateResult);
-		}
-
-		if (operateResult.Content.Length >= 43 && BitConverter.ToInt32(operateResult.Content, 40) == 131)
-		{
-			var abStructHandle = new AbStructHandle
-			{
-				Count = BitConverter.ToUInt16(operateResult.Content, 44),
-				TemplateObjectDefinitionSize = BitConverter.ToUInt32(operateResult.Content, 50),
-				TemplateStructureSize = BitConverter.ToUInt32(operateResult.Content, 58),
-				MemberCount = BitConverter.ToUInt16(operateResult.Content, 66),
-				StructureHandle = BitConverter.ToUInt16(operateResult.Content, 72)
-			};
-			return OperateResult.Ok(abStructHandle);
-		}
-		return new OperateResult<AbStructHandle>(ErrorCode.UnknownError.Desc());
-	}
-
-	private List<AbTagItem> EnumSysStructItemType(byte[] Struct_Item_Type_buff, AbStructHandle structHandle)
-	{
-		var list = new List<AbTagItem>();
-		if (Struct_Item_Type_buff.Length > 41 && Struct_Item_Type_buff[40] == 204 && Struct_Item_Type_buff[41] == 0 && Struct_Item_Type_buff[42] == 0)
-		{
-			int num = Struct_Item_Type_buff.Length - 40;
-			byte[] array = new byte[num - 4];
-			Array.Copy(Struct_Item_Type_buff, 44, array, 0, num - 4);
-			byte[] array2 = new byte[structHandle.MemberCount * 8];
-			Array.Copy(array, 0, array2, 0, structHandle.MemberCount * 8);
-			byte[] array3 = new byte[array.Length - array2.Length + 1];
-			Array.Copy(array, array2.Length - 1, array3, 0, array.Length - array2.Length + 1);
-			ushort memberCount = structHandle.MemberCount;
-			for (int i = 0; i < memberCount; i++)
-			{
-				AbTagItem abTagItem = new AbTagItem();
-				int num2;
-				abTagItem.SymbolType = BitConverter.ToUInt16(array2, num2 = 8 * i + 2);
-				list.Add(abTagItem);
-			}
-
-			var list2 = new List<int>();
-			for (int j = 0; j < array3.Length; j++)
-			{
-				if (array3[j] == 0)
-				{
-					list2.Add(j);
-				}
-			}
-
-			list2.Add(array3.Length);
-			for (int k = 0; k < list2.Count; k++)
-			{
-				if (k != 0)
-				{
-					int num3 = (k + 1 < list2.Count) ? (list2[k + 1] - list2[k] - 1) : 0;
-					if (num3 > 0)
-					{
-						list[k - 1].Name = Encoding.ASCII.GetString(array3, list2[k] + 1, num3);
-					}
-				}
-			}
-		}
-
-		return list;
-	}
-
-	private List<AbTagItem> EnumUserStructItemType(byte[] Struct_Item_Type_buff, AbStructHandle structHandle)
-	{
-		var list = new List<AbTagItem>();
-		bool flag = false;
-		int num = 0;
-		if ((Struct_Item_Type_buff.Length > 41) & (Struct_Item_Type_buff[40] == 204) & (Struct_Item_Type_buff[41] == 0) & (Struct_Item_Type_buff[42] == 0))
-		{
-			int num2 = Struct_Item_Type_buff.Length - 40;
-			byte[] array = new byte[num2 - 4];
-			Array.ConstrainedCopy(Struct_Item_Type_buff, 44, array, 0, num2 - 4);
-			for (int i = 0; i < array.Length; i++)
-			{
-				if (array[i] == 0 && !flag)
-				{
-					num = i;
-				}
-
-				if (array[i] != 59 || array[i + 1] != 110)
-				{
-					continue;
-				}
-
-				flag = true;
-				int num3 = i - num - 1;
-				byte[] destinationArray = new byte[num3];
-				Array.Copy(array, num + 1, destinationArray, 0, num3);
-				byte[] array2 = new byte[i + 1];
-				Array.Copy(array, 0, array2, 0, i + 1);
-				byte[] array3 = new byte[array.Length - i - 1];
-				Array.Copy(array, i + 1, array3, 0, array.Length - i - 1);
-				if ((num + 1) % 8 != 0)
-				{
-					break;
-				}
-
-				int num4 = (num + 1) / 8 - 1;
-				for (int j = 0; j <= num4; j++)
-				{
-					var abTagItem = new AbTagItem();
-					abTagItem.SymbolType = BitConverter.ToUInt16(array2, 8 * j + 2);
-					list.Add(abTagItem);
-				}
-
-				var list2 = new List<int>();
-				for (int k = 0; k < array3.Length; k++)
-				{
-					if (array3[k] == 0)
-					{
-						list2.Add(k);
-					}
-				}
-
-				list2.Add(array3.Length);
-				for (int l = 0; l < list2.Count; l++)
-				{
-					int num6 = ((l + 1 < list2.Count) ? (list2[l + 1] - list2[l] - 1) : 0);
-					if (num6 > 0)
-					{
-						list[l].Name = Encoding.ASCII.GetString(array3, list2[l] + 1, num6);
-					}
-				}
-				break;
-			}
-		}
-		return list;
 	}
 
 	public override OperateResult<short[]> ReadInt16(string address, ushort length)
@@ -940,52 +787,52 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt16(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, 0, length));
 	}
 
 	public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransSingle(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransSingle(m, 0, length));
 	}
 
 	public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransDouble(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransDouble(m, 0, length));
 	}
 
 	public async Task<OperateResult<string>> ReadStringAsync(string address)
 	{
-		return await ReadStringAsync(address, 1, Encoding.ASCII);
+		return await ReadStringAsync(address, 1, Encoding.ASCII).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
 	{
-		OperateResult<byte[]> read = await ReadAsync(address, length);
+		OperateResult<byte[]> read = await ReadAsync(address, length).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -1041,7 +888,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		return await Task.Run(() => Write(address, value));
+		return await Task.Run(() => Write(address, value)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
@@ -1052,7 +899,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1169,42 +1016,42 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, short[] values)
 	{
-		return await WriteTagAsync(address, 195, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 195, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ushort[] values)
 	{
-		return await WriteTagAsync(address, 199, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 199, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, int[] values)
 	{
-		return await WriteTagAsync(address, 196, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 196, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, uint[] values)
 	{
-		return await WriteTagAsync(address, 200, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 200, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, float[] values)
 	{
-		return await WriteTagAsync(address, 202, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 202, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, long[] values)
 	{
-		return await WriteTagAsync(address, 197, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 197, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
 	{
-		return await WriteTagAsync(address, 201, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 201, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, double[] values)
 	{
-		return await WriteTagAsync(address, 203, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 203, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, string value)
@@ -1215,12 +1062,12 @@ public class AllenBradleyNet : NetworkDeviceBase
 		}
 
 		byte[] data = Encoding.ASCII.GetBytes(value);
-		OperateResult write = await WriteAsync($"{address}.LEN", data.Length);
+		OperateResult write = await WriteAsync($"{address}.LEN", data.Length).ConfigureAwait(false);
 		if (!write.IsSuccess)
 		{
 			return write;
 		}
-		return await WriteTagAsync($"{address}.DATA[0]", 194, SoftBasic.ArrayExpandToLengthEven(data), data.Length);
+		return await WriteTagAsync($"{address}.DATA[0]", 194, SoftBasic.ArrayExpandToLengthEven(data), data.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, bool value)
@@ -1233,7 +1080,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 				return command;
 			}
 
-			OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+			OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -1247,12 +1094,12 @@ public class AllenBradleyNet : NetworkDeviceBase
 			return AllenBradleyHelper.ExtractActualData(read.Content, isRead: false);
 		}
 
-		return await WriteTagAsync(address, 193, (!value) ? new byte[2] : new byte[2] { 255, 255 });
+		return await WriteTagAsync(address, 193, (!value) ? new byte[2] : new byte[2] { 255, 255 }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 194, new byte[2] { value, 0 });
+		return await WriteTagAsync(address, 194, new byte[2] { value, 0 }).ConfigureAwait(false);
 	}
 
 	protected virtual byte[] PackCommandService(byte[] portSlot, params byte[][] cips)

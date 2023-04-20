@@ -46,10 +46,6 @@ public static class SoftLRC
 		byte[] array = new byte[num - 1];
 		Array.Copy(value, 0, array, 0, array.Length);
 		byte[] array2 = LRC(array);
-		if (array2[num - 1] == value[num - 1])
-		{
-			return true;
-		}
-		return false;
+		return array2[num - 1] == value[num - 1];
 	}
 }

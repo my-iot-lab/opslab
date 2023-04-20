@@ -72,8 +72,8 @@ public sealed class MonitorManager : IDisposable
 
         _cts ??= new();
 
-        await _driverConnectorManager.LoadAsync();
-        await _driverConnectorManager.ConnectAsync();
+        await _driverConnectorManager.LoadAsync().ConfigureAwait(false);
+        await _driverConnectorManager.ConnectAsync().ConfigureAwait(false);
 
         // 每个工站启用
         // TODO: 下面都使用线程池线程运行，若有长时间运行的任务过多，会不会导致线程中线程被消耗殆尽？
@@ -103,7 +103,7 @@ public sealed class MonitorManager : IDisposable
 
     private async Task HeartbeatMonitorAsync(DriverConnector connector)
     {
-        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id).ConfigureAwait(false);
         var variable = deviceInfo!.Variables.FirstOrDefault(s => s.Flag == VariableFlag.Heartbeat);
         if (variable == null)
         {
@@ -115,7 +115,7 @@ public sealed class MonitorManager : IDisposable
             int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
             while (_cts != null && !_cts.Token.IsCancellationRequested)
             {
-                await Task.Delay(pollingInterval, _cts.Token);
+                await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                 if (_cts != null)
                 {
@@ -129,12 +129,13 @@ public sealed class MonitorManager : IDisposable
 
                 try
                 {
-                    var result = await connector.Driver.ReadInt16Async(variable.Address);
+                    var result = await connector.Driver.ReadInt16Async(variable.Address).ConfigureAwait(false);
                     if (!result.IsSuccess)
                     {
                         if (_monitorStartOptions!.IsLoggerHeartbeatError)
                         {
-                            _logger.LogError($"[Monitor] Heartbeat 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                            _logger.LogError("[Monitor] Heartbeat 数据读取异常，工站：{Station}，变量：{Tag}, 地址：{Address}，错误：{Message}",
+                                deviceInfo.Schema.Station, variable.Tag, variable.Address, result.Message);
                         }
 
                         continue;
@@ -147,13 +148,14 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.HeartbeatDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"[Monitor] Heartbeat 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
+                    _logger.LogError(ex, "[Monitor] Heartbeat 数据处理异常，工站：{Station}，变量：{Tag}, 地址：{Address}",
+                        deviceInfo.Schema.Station, variable.Tag, variable.Address);
                 }
             }
         });
@@ -161,7 +163,7 @@ public sealed class MonitorManager : IDisposable
 
     private async Task TriggerMonitorAsync(DriverConnector connector)
     {
-        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id).ConfigureAwait(false);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Trigger).ToList();
         foreach (var variable in variables)
         {
@@ -170,7 +172,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -185,12 +187,13 @@ public sealed class MonitorManager : IDisposable
                     try
                     {
                         // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                        var result = await connector.Driver.ReadInt16Async(variable.Address);
+                        var result = await connector.Driver.ReadInt16Async(variable.Address).ConfigureAwait(false);
                         if (!result.IsSuccess)
                         {
                             if (_monitorStartOptions!.IsLoggerTriggerError)
                             {
-                                _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{result.Message}");
+                                _logger.LogError("[Monitor] Trigger 数据读取异常，工站：{Station}，变量：{Tag}, 地址：{Address}，错误：{Message}",
+                                    deviceInfo.Schema.Station, variable.Tag, variable.Address, result.Message);
                             }
 
                             continue;
@@ -208,12 +211,13 @@ public sealed class MonitorManager : IDisposable
                             foreach (var normalVariable in normalVariables)
                             {
                                 // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                                var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                                var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable).ConfigureAwait(false);
                                 ok = ok1;
 
                                 if (!ok)
                                 {
-                                    _logger.LogError($"[Monitor] Trigger 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                    _logger.LogError("[Monitor] Trigger 数据读取异常，工站：{Station}，变量：{Tag} ，错误：{err}",
+                                        deviceInfo.Schema.Station, variable.Tag, err);
                                     break;
                                 }
 
@@ -233,13 +237,14 @@ public sealed class MonitorManager : IDisposable
                             _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
                             if (_cts != null)
                             {
-                                await _eventBus.TriggerAsync(eventData, _cts.Token);
+                                await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Monitor] Trigger 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
+                        _logger.LogError(ex, "[Monitor] Trigger 数据处理异常，工站：{Station}，变量：{Tag}, 地址：{Address}",
+                            deviceInfo.Schema.Station, variable.Tag, variable.Address);
                     }
                 }
             });
@@ -248,7 +253,7 @@ public sealed class MonitorManager : IDisposable
 
     private async Task NoticeMonitorAsync(DriverConnector connector)
     {
-        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id).ConfigureAwait(false);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Notice).ToList();
         foreach (var variable in variables)
         {
@@ -257,7 +262,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -272,12 +277,13 @@ public sealed class MonitorManager : IDisposable
                     try
                     {
                         // 若读取异常，等到下一次再访问即可。
-                        var (ok, data, err) = await ReadDataAsync(connector.Driver, variable);
+                        var (ok, data, err) = await ReadDataAsync(connector.Driver, variable).ConfigureAwait(false);
                         if (!ok)
                         {
                             if (_monitorStartOptions!.IsLoggerNoticeError)
                             {
-                                _logger.LogError($"[Monitor] Notice 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err}");
+                                _logger.LogError("[Monitor] Notice 数据读取异常，工站：{Station}，变量：{Tag}, 地址：{Address}，错误：{err}",
+                                    deviceInfo.Schema.Station, variable.Tag, variable.Address, err);
                             }
 
                             continue;
@@ -290,12 +296,13 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Monitor] Notice 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
+                        _logger.LogError(ex, "[Monitor] Notice 数据处理异常，工站：{Station}，变量：{Tag}, 地址：{Address}",
+                            deviceInfo.Schema.Station, variable.Tag, variable.Address);
                     }
                 }
             });
@@ -304,7 +311,7 @@ public sealed class MonitorManager : IDisposable
 
     private async Task SwitchMonitorAsync(DriverConnector connector)
     {
-        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id).ConfigureAwait(false);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Switch).ToList();
         foreach (var variable in variables)
         {
@@ -314,7 +321,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = _monitorStartOptions!.SwitchPollingInterval > 0 ? _monitorStartOptions!.SwitchPollingInterval : 10;
                 while (mre.WaitOne() && _cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -335,12 +342,13 @@ public sealed class MonitorManager : IDisposable
                         foreach (var normalVariable in normalVariables)
                         {
                             // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable).ConfigureAwait(false);
                             ok = ok1;
 
                             if (!ok)
                             {
-                                _logger.LogError($"[Monitor] Switch 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                _logger.LogError("[Monitor] Switch 数据读取异常，工站：{Station}，变量：{Tag} ，错误：{err}",
+                                    deviceInfo.Schema.Station, normalVariable.Tag, err);
                                 break;
                             }
 
@@ -360,12 +368,13 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Monitor] Switch 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}");
+                        _logger.LogError(ex, "[Monitor] Switch 数据处理异常，工站：{Station}，变量：{Tag}",
+                            deviceInfo.Schema.Station, variable.Tag);
                     }
                 }
             });
@@ -376,7 +385,7 @@ public sealed class MonitorManager : IDisposable
                 bool isOn = false; // 开关开启状态
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -389,7 +398,7 @@ public sealed class MonitorManager : IDisposable
                     }
 
                     // 若读取失败，该信号点不会复位，下次会继续读取执行。
-                    var result = await connector.Driver.ReadInt16Async(variable.Address);
+                    var result = await connector.Driver.ReadInt16Async(variable.Address).ConfigureAwait(false);
                     if (result.IsSuccess)
                     {
                         if (result.Content == ExStatusCode.SwitchOn)
@@ -404,7 +413,7 @@ public sealed class MonitorManager : IDisposable
 
                                 if (_cts != null)
                                 {
-                                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                                    await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                                 }
 
                                 // 开关开启时，发送信号，让子任务执行。
@@ -424,7 +433,7 @@ public sealed class MonitorManager : IDisposable
 
                                 if (_cts != null)
                                 {
-                                    await _eventBus.TriggerAsync(eventData, _cts.Token);
+                                    await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                                 }
 
                                 // 读取失败或开关关闭时，重置信号，让子任务阻塞。
@@ -447,7 +456,7 @@ public sealed class MonitorManager : IDisposable
 
     private async Task UnderlyMonitorAsync(DriverConnector connector)
     {
-        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id);
+        var deviceInfo = await _deviceInfoManager.GetAsync(connector.Id).ConfigureAwait(false);
         var variables = deviceInfo!.Variables.Where(s => s.Flag == VariableFlag.Underly).ToList();
         foreach (var variable in variables)
         {
@@ -456,7 +465,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token);
+                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -471,12 +480,13 @@ public sealed class MonitorManager : IDisposable
                     try
                     {
                         // 若读取异常，等到下一次再访问即可。
-                        var (ok0, data0, err0) = await ReadDataAsync(connector.Driver, variable);
+                        var (ok0, data0, err0) = await ReadDataAsync(connector.Driver, variable).ConfigureAwait(false);
                         if (!ok0)
                         {
                             if (_monitorStartOptions!.IsLoggerUnderlyError)
                             {
-                                _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}，错误：{err0}");
+                                _logger.LogError("[Monitor] Underly 数据读取异常，工站：{Station}，变量：{Tag}, 地址：{Address}，错误：{err0}", 
+                                    deviceInfo.Schema.Station, variable.Tag, variable.Address, err0);
                             }
 
                             continue;
@@ -490,12 +500,13 @@ public sealed class MonitorManager : IDisposable
                         foreach (var normalVariable in normalVariables)
                         {
                             // 若其中某一项异常，会终止此次后续流程，等下一次访问再执行。
-                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable);
+                            var (ok1, data, err) = await ReadDataAsync(connector.Driver, normalVariable).ConfigureAwait(false);
                             ok = ok1;
 
                             if (!ok)
                             {
-                                _logger.LogError($"[Monitor] Underly 数据读取异常，工站：{deviceInfo.Schema.Station}，变量：{normalVariable.Tag} ，错误：{err}");
+                                _logger.LogError("[Monitor] Underly 数据读取异常，工站：{Station}，变量：{Tag} ，错误：{err}", 
+                                    deviceInfo.Schema.Station, normalVariable.Tag, err);
                                 break;
                             }
 
@@ -515,12 +526,13 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.UnderlyDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token);
+                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[Monitor] Underly 数据处理异常，工站：{deviceInfo.Schema.Station}，变量：{variable.Tag}, 地址：{variable.Address}");
+                        _logger.LogError(ex, "[Monitor] Underly 数据处理异常，工站：{Station}，变量：{Tag}, 地址：{Address}",
+                            deviceInfo.Schema.Station, variable.Tag, variable.Address);
                     }
                 }
             });
@@ -533,7 +545,7 @@ public sealed class MonitorManager : IDisposable
         {
             while (_cts != null && !_cts.Token.IsCancellationRequested)
             {
-                var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync(_cts.Token);
+                var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync(_cts.Token).ConfigureAwait(false);
                 if (!ok)
                 {
                     break;
@@ -561,7 +573,7 @@ public sealed class MonitorManager : IDisposable
                                         break;
                                     }
 
-                                    await Task.Delay(1000); // 延迟1s
+                                    await Task.Delay(1000).ConfigureAwait(false); // 延迟1s
                                     connector = _driverConnectorManager[ctx.Request.DeviceInfo.Name];
                                 }
                             }
@@ -569,10 +581,10 @@ public sealed class MonitorManager : IDisposable
                             for (int i = 0; i < ctx.Response.Values.Count; i++)
                             {
                                 value = ctx.Response.Values[i];
-                                var (ok, err) = await WriteDataAsync(connector.Driver, value); // 考虑某个值回写失败该如何处理
+                                var (ok, err) = await WriteDataAsync(connector.Driver, value).ConfigureAwait(false); // 考虑某个值回写失败该如何处理
                                 if (!ok)
                                 {
-                                    _logger.LogError("[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}, 错误：{4}",
+                                    _logger.LogError("[Monitor] 数据写入 PLC 出错，RequestId：{RequestId}，工站：{Station}, 触发点：{Tag}，数据：{Value}, 错误：{err}",
                                         ctx.Request.RequestId,
                                         ctx.Request.DeviceInfo.Schema.Station,
                                         value?.Tag ?? "",
@@ -585,7 +597,7 @@ public sealed class MonitorManager : IDisposable
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "[Monitor] 数据写入 PLC 出错，RequestId：{0}，工站：{1}, 触发点：{2}，数据：{3}",
+                            _logger.LogError(ex, "[Monitor] 数据写入 PLC 出错，RequestId：{RequestId}，工站：{Station}, 触发点：{Tag}，数据：{Value}",
                                     ctx!.Request.RequestId,
                                     ctx.Request.DeviceInfo.Schema.Station,
                                     value?.Tag ?? "",
@@ -595,7 +607,7 @@ public sealed class MonitorManager : IDisposable
                 }
                 catch (Exception ex) when (ex is OperationCanceledException)
                 {
-                    _logger.LogError(ex, "[Monitor] 数据写入 PLC 超时取消，RequestId：{0}，工站：{1}",
+                    _logger.LogError(ex, "[Monitor] 数据写入 PLC 超时取消，RequestId：{RequestId}，工站：{Station}",
                                     ctx!.Request.RequestId,
                                     ctx!.Request.DeviceInfo.Schema.Station);
                 }
@@ -644,115 +656,115 @@ public sealed class MonitorManager : IDisposable
             case VariableType.Bit:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultBit2 = await driver.ReadBoolAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultBit2 = await driver.ReadBoolAsync(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultBit2, data);
                 }
                 else
                 {
-                    var resultBit1 = await driver.ReadBoolAsync(deviceVariable.Address);
+                    var resultBit1 = await driver.ReadBoolAsync(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultBit1, data);
                 }
                 break;
             case VariableType.Byte:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultBit2 = await driver.ReadAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultBit2 = await driver.ReadAsync(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultBit2, data);
                 }
                 else
                 {
-                    var resultBit1 = await driver.ReadAsync(deviceVariable.Address, 1);
+                    var resultBit1 = await driver.ReadAsync(deviceVariable.Address, 1).ConfigureAwait(false);
                     SetValue(resultBit1, data);
                 }
                 break;
             case VariableType.Word:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultWord2 = await driver.ReadUInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultWord2 = await driver.ReadUInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultWord2, data);
                 }
                 else
                 {
-                    var resultWord1 = await driver.ReadUInt16Async(deviceVariable.Address);
+                    var resultWord1 = await driver.ReadUInt16Async(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultWord1, data);
                 }
                 break;
             case VariableType.DWord:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultUInt2 = await driver.ReadUInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultUInt2 = await driver.ReadUInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultUInt2, data);
                 }
                 else
                 {
-                    var resultUInt1 = await driver.ReadUInt32Async(deviceVariable.Address);
+                    var resultUInt1 = await driver.ReadUInt32Async(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultUInt1, data);
                 }
                 break;
             case VariableType.Int:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultInt2 = await driver.ReadInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultInt2 = await driver.ReadInt16Async(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultInt2, data);
                 }
                 else
                 {
-                    var resultInt1 = await driver.ReadInt16Async(deviceVariable.Address);
+                    var resultInt1 = await driver.ReadInt16Async(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultInt1, data);
                 }
                 break;
             case VariableType.DInt:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultDInt2 = await driver.ReadInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultDInt2 = await driver.ReadInt32Async(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultDInt2, data);
                 }
                 else
                 {
-                    var resultDInt1 = await driver.ReadInt32Async(deviceVariable.Address);
+                    var resultDInt1 = await driver.ReadInt32Async(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultDInt1, data);
                 }
                 break;
             case VariableType.Real:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultReal2 = await driver.ReadFloatAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultReal2 = await driver.ReadFloatAsync(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultReal2, data);
                 }
                 else
                 {
-                    var resultReal1 = await driver.ReadFloatAsync(deviceVariable.Address);
+                    var resultReal1 = await driver.ReadFloatAsync(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultReal1, data);
                 }
                 break;
             case VariableType.LReal:
                 if (deviceVariable.Length > 0)
                 {
-                    var resultLReal2 = await driver.ReadDoubleAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultLReal2 = await driver.ReadDoubleAsync(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultLReal2, data);
                 }
                 else
                 {
-                    var resultLReal1 = await driver.ReadDoubleAsync(deviceVariable.Address);
+                    var resultLReal1 = await driver.ReadDoubleAsync(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultLReal1, data);
                 }
                 break;
             case VariableType.String or VariableType.S7String:
                 if (driver is SiemensS7Net driver1)
                 {
-                    var resultString1 = await driver1.ReadStringAsync(deviceVariable.Address); // S7 自动计算长度
+                    var resultString1 = await driver1.ReadStringAsync(deviceVariable.Address).ConfigureAwait(false); // S7 自动计算长度
                     SetValue(resultString1, data);
                 }
                 else
                 {
-                    var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length);
+                    var resultString2 = await driver.ReadStringAsync(deviceVariable.Address, (ushort)deviceVariable.Length).ConfigureAwait(false);
                     SetValue(resultString2, data);
                 }
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
                 {
-                    var resultWString2 = await driver2.ReadWStringAsync(deviceVariable.Address);
+                    var resultWString2 = await driver2.ReadWStringAsync(deviceVariable.Address).ConfigureAwait(false);
                     SetValue(resultWString2, data);
                 }
                 break;
@@ -785,94 +797,94 @@ public sealed class MonitorManager : IDisposable
             case VariableType.Bit:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<bool>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<bool>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<bool>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<bool>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.Byte:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<byte>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<byte>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<byte>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<byte>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.Word:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<ushort>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<ushort>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<ushort>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<ushort>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.DWord:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<uint>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<uint>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<uint>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<uint>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.Int:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<short>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<short>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<short>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<short>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.DInt:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<int>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<int>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<int>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<int>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.Real:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<float>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<float>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<float>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<float>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.LReal:
                 if (data.Length > 0)
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<double>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.ToArray<double>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<double>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<double>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             case VariableType.String or VariableType.S7String:
-                await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
+                await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value)).ConfigureAwait(false);
                 break;
             case VariableType.S7WString:
                 if (driver is SiemensS7Net driver2)
                 {
-                    await driver2.WriteWStringAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
+                    await driver2.WriteWStringAsync(data.Address, Object2ValueHelper.To<string>(data.Value)).ConfigureAwait(false);
                 }
                 else
                 {
-                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value));
+                    await driver.WriteAsync(data.Address, Object2ValueHelper.To<string>(data.Value)).ConfigureAwait(false);
                 }
                 break;
             default:

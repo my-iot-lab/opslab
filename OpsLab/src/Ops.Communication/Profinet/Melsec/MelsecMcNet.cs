@@ -13,23 +13,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// </summary>
 /// <remarks>
 /// 支持读写的数据类型详细参考API文档，支持高级的数据读取，例如读取智能模块，缓冲存储器等等。
-/// </remarks>
-/// <list type="number">
-/// 目前组件测试通过的PLC型号列表，有些来自于网友的测试
-/// <item>Q06UDV PLC  感谢hwdq0012</item>
-/// <item>fx5u PLC  感谢山楂</item>
-/// <item>Q02CPU PLC </item>
-/// <item>L02CPU PLC </item>
-/// </list>
-/// 地址的输入的格式支持多种复杂的地址表示方式：
-/// <list type="number">
-/// <item>[商业授权] 扩展的数据地址: 表示为 ext=1;W100  访问扩展区域为1的W100的地址信息</item>
-/// <item>[商业授权] 缓冲存储器地址: 表示为 mem=32  访问地址为32的本站缓冲存储器地址</item>
-/// <item>[商业授权] 智能模块地址：表示为 module=3;4106  访问模块号3，偏移地址是4106的数据，偏移地址需要根据模块的详细信息来确认。</item>
-/// <item>[商业授权] 基于标签的地址: 表示位 s=AAA  假如标签的名称为AAA，但是标签的读取是有条件的，详细参照<see cref="ReadTags(string,ushort)" /></item>
-/// <item>普通的数据地址，参照下面的信息</item>
-/// </list>
-/// <example><list type="table">
+///  <list type="table">
 ///   <listheader>
 ///     <term>地址名称</term>
 ///     <term>地址代号</term>
@@ -238,7 +222,7 @@ namespace Ops.Communication.Profinet.Melsec;
 ///     <term></term>
 ///   </item>
 /// </list>
-/// </example>
+/// </remarks>
 public class MelsecMcNet : NetworkDeviceBase
 {
 	/// <summary>
@@ -249,7 +233,6 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// </remarks>
 	public byte NetworkNumber { get; set; } = 0;
 
-
 	/// <summary>
 	/// 网络站号，通常为0。
 	/// </summary>
@@ -257,7 +240,6 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// 依据PLC的配置而配置，如果PLC配置了1，那么此处也填0，如果PLC配置了2，此处就填2，测试不通的话，继续测试0
 	/// </remarks>
 	public byte NetworkStationNumber { get; set; } = 0;
-
 
 	/// <summary>
 	/// 实例化三菱的Qna兼容3E帧协议的通讯对象。
@@ -413,7 +395,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (address.StartsWith("s="))
 		{
-			return await ReadTagsAsync(address[2..], length);
+			return await ReadTagsAsync(address[2..], length).ConfigureAwait(false);
 		}
 
 		if (Regex.IsMatch(address, "ext=[0-9]+;"))
@@ -425,7 +407,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 		if (Regex.IsMatch(address, "mem=", RegexOptions.IgnoreCase))
 		{
-			return await ReadMemoryAsync(address[4..], length);
+			return await ReadMemoryAsync(address[4..], length).ConfigureAwait(false);
 		}
 
 		OperateResult<McAddressData> addressResult = McAnalysisAddress(address, length);
@@ -440,7 +422,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		{
 			ushort readLength = (ushort)Math.Min(length - alreadyFinished, 900);
 			addressResult.Content.Length = readLength;
-			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content);
+			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -464,7 +446,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	private async Task<OperateResult<byte[]>> ReadAddressDataAsync(McAddressData addressData)
 	{
 		byte[] coreResult = MelsecHelper.BuildReadMcCoreCommand(addressData, isBit: false);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -485,13 +467,13 @@ public class MelsecMcNet : NetworkDeviceBase
 		{
 			return OperateResult.Error<byte[]>(addressResult);
 		}
-		return await WriteAddressDataAsync(addressResult.Content, value);
+		return await WriteAddressDataAsync(addressResult.Content, value).ConfigureAwait(false);
 	}
 
 	private async Task<OperateResult> WriteAddressDataAsync(McAddressData addressData, byte[] value)
 	{
 		byte[] coreResult = MelsecHelper.BuildWriteWordCoreCommand(addressData, value);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -517,7 +499,6 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <br />
 	/// 访问上述以外的 PLC CPU 其他站 时访问点数········1≦字访问点数≦10
 	/// </remarks>
-	/// <returns>结果</returns>
 	public OperateResult<byte[]> ReadRandom(string[] address)
 	{
 		McAddressData[] array = new McAddressData[address.Length];
@@ -629,7 +610,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildReadRandomWordCommand(mcAddressDatas);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -662,7 +643,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildReadRandomCommand(mcAddressDatas);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -678,7 +659,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult<short[]>> ReadRandomInt16Async(string[] address)
 	{
-		OperateResult<byte[]> read = await ReadRandomAsync(address);
+		OperateResult<byte[]> read = await ReadRandomAsync(address).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<short[]>(read);
@@ -747,7 +728,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildReadMcCoreCommand(addressResult.Content, isBit: true);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -776,7 +757,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildWriteBitCoreCommand(addressResult.Content, values);
-		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -832,13 +813,13 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult<byte[]>> ReadTagsAsync(string tag, ushort length)
 	{
-		return await ReadTagsAsync(new string[1] { tag }, new ushort[1] { length });
+		return await ReadTagsAsync(new string[1] { tag }, new ushort[1] { length }).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadTagsAsync(string[] tags, ushort[] length)
 	{
 		byte[] coreResult = MelsecHelper.BuildReadTag(tags, length);
-		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -859,7 +840,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	}
 
 	/// <summary>
-	/// <b>[商业授权]</b> 读取扩展的数据信息，需要在原有的地址，长度信息之外，输入扩展值信息。
+	/// 读取扩展的数据信息，需要在原有的地址，长度信息之外，输入扩展值信息。
 	/// </summary>
 	/// <param name="extend">扩展信息</param>
 	/// <param name="address">地址</param>
@@ -903,7 +884,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildReadMcCoreExtendCommand(addressResult.Content, extend, isBit: false);
-		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -924,7 +905,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	}
 
 	/// <summary>
-	/// <b>[商业授权]</b> 读取缓冲寄存器的数据信息，地址直接为偏移地址。
+	/// 读取缓冲寄存器的数据信息，地址直接为偏移地址。
 	/// </summary>
 	/// <remarks>
 	/// 本指令不可以访问下述缓冲存储器:<br />
@@ -964,7 +945,7 @@ public class MelsecMcNet : NetworkDeviceBase
 			return coreResult;
 		}
 
-		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -1015,7 +996,7 @@ public class MelsecMcNet : NetworkDeviceBase
 			return coreResult;
 		}
 
-		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -1132,7 +1113,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteRunAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1147,7 +1128,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteStopAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 2, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 2, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1163,7 +1144,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteResetAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 6, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 6, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1179,7 +1160,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult<string>> ReadPlcTypeAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 1, 1, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 1, 1, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -1195,7 +1176,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> ErrorStateResetAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 23, 22, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 23, 22, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;

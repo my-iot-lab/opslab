@@ -12,219 +12,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <remarks>
 /// 地址可以携带站号信息，例如：s=2;D100
 /// </remarks>
-/// <example>
-/// 地址的输入的格式说明如下：
-/// <list type="table">
-///   <listheader>
-///     <term>地址名称</term>
-///     <term>地址代号</term>
-///     <term>示例</term>
-///     <term>地址进制</term>
-///     <term>字操作</term>
-///     <term>位操作</term>
-///     <term>备注</term>
-///   </listheader>
-///   <item>
-///     <term>内部继电器</term>
-///     <term>M</term>
-///     <term>M100,M200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输入继电器</term>
-///     <term>X</term>
-///     <term>X100,X1A0</term>
-///     <term>16</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输出继电器</term>
-///     <term>Y</term>
-///     <term>Y100,Y1A0</term>
-///     <term>16</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///    <item>
-///     <term>锁存继电器</term>
-///     <term>L</term>
-///     <term>L100,L200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>报警器</term>
-///     <term>F</term>
-///     <term>F100,F200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>边沿继电器</term>
-///     <term>V</term>
-///     <term>V100,V200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>链接继电器</term>
-///     <term>B</term>
-///     <term>B100,B1A0</term>
-///     <term>16</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>步进继电器</term>
-///     <term>S</term>
-///     <term>S100,S200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>数据寄存器</term>
-///     <term>D</term>
-///     <term>D1000,D2000</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>链接寄存器</term>
-///     <term>W</term>
-///     <term>W100,W1A0</term>
-///     <term>16</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>文件寄存器</term>
-///     <term>R</term>
-///     <term>R100,R200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>ZR文件寄存器</term>
-///     <term>ZR</term>
-///     <term>ZR100,ZR2A0</term>
-///     <term>16</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>变址寄存器</term>
-///     <term>Z</term>
-///     <term>Z100,Z200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>定时器的触点</term>
-///     <term>TS</term>
-///     <term>TS100,TS200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>定时器的线圈</term>
-///     <term>TC</term>
-///     <term>TC100,TC200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>定时器的当前值</term>
-///     <term>TN</term>
-///     <term>TN100,TN200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>累计定时器的触点</term>
-///     <term>SS</term>
-///     <term>SS100,SS200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>累计定时器的线圈</term>
-///     <term>SC</term>
-///     <term>SC100,SC200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>累计定时器的当前值</term>
-///     <term>SN</term>
-///     <term>SN100,SN200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>计数器的触点</term>
-///     <term>CS</term>
-///     <term>CS100,CS200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>计数器的线圈</term>
-///     <term>CC</term>
-///     <term>CC100,CC200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>计数器的当前值</term>
-///     <term>CN</term>
-///     <term>CN100,CN200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-/// </list>
-/// </example>
-public class MelsecA3CNet1OverTcp : NetworkDeviceBase
+public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 {
     public byte Station { get; set; } = 0;
 
@@ -294,7 +82,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 		}
 
 		byte[] command = MelsecHelper.BuildAsciiReadMcCoreCommand(addressResult.Content, isBit: false);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -324,7 +112,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 		}
 
 		byte[] command = MelsecHelper.BuildAsciiWriteWordCoreCommand(addressResult.Content, value);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -371,7 +159,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 		}
 
 		byte[] command = MelsecHelper.BuildAsciiReadMcCoreCommand(addressResult.Content, isBit: true);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -397,7 +185,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 		}
 
 		byte[] command = MelsecHelper.BuildAsciiWriteBitCoreCommand(addressResult.Content, value);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command, stat)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -442,7 +230,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteStopAsync()
 	{
-		OperateResult<byte[]> read = await ReadWithPackCommandAsync(Encoding.ASCII.GetBytes("100200000001"));
+		OperateResult<byte[]> read = await ReadWithPackCommandAsync(Encoding.ASCII.GetBytes("100200000001")).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -457,7 +245,7 @@ public class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 	public async Task<OperateResult<string>> ReadPlcTypeAsync()
 	{
-		OperateResult<byte[]> read = await ReadWithPackCommandAsync(Encoding.ASCII.GetBytes("01010000"));
+		OperateResult<byte[]> read = await ReadWithPackCommandAsync(Encoding.ASCII.GetBytes("01010000")).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);

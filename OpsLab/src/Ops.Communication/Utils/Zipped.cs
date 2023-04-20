@@ -5,7 +5,7 @@ namespace Ops.Communication.Utils;
 /// <summary>
 /// 一个负责压缩解压数据字节的类
 /// </summary>
-public class Zipped
+public static class Zipped
 {
 	/// <summary>
 	/// 压缩字节数据

@@ -5,7 +5,7 @@ using Ops.Communication.Utils;
 
 namespace Ops.Communication.Profinet.Siemens;
 
-public class SiemensPPIOverTcp : NetworkDeviceBase
+public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 {
 	private byte station = 2;
 
@@ -199,7 +199,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -208,7 +208,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(read1.Content, ' '));
 		}
-		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat));
+		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat)).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return read2;
@@ -234,7 +234,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return OperateResult.Error<bool[]>(command);
 		}
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read1);
@@ -243,7 +243,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return new OperateResult<bool[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(read1.Content, ' '));
 		}
-		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat));
+		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat)).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read2);
@@ -269,7 +269,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return command;
 		}
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -278,7 +278,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + read1.Content[0]);
 		}
-		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat));
+		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat)).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return read2;
@@ -299,7 +299,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return command;
 		}
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -308,7 +308,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + read1.Content[0]);
 		}
-		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat));
+		OperateResult<byte[]> read2 = await ReadFromCoreServerAsync(GetExecuteConfirm(stat)).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return read2;
@@ -333,12 +333,12 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public async Task<OperateResult<byte>> ReadByteAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteAsync(address, new byte[1] { value });
+		return await WriteAsync(address, new byte[1] { value }).ConfigureAwait(false);
 	}
 
 	public OperateResult Start(string parameter = "")
@@ -417,7 +417,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		};
 		obj[4] = station;
 		byte[] cmd = obj;
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -446,7 +446,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		};
 		obj[4] = station;
 		byte[] cmd = obj;
-		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd);
+		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -478,7 +478,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 	/// Parse data address, parse out address type, start address, db block address</returns>
 	public static OperateResult<byte, int, ushort> AnalysisAddress(string address)
 	{
-		OperateResult<byte, int, ushort> operateResult = new OperateResult<byte, int, ushort>();
+		OperateResult<byte, int, ushort> operateResult = new();
 		try
 		{
 			operateResult.Content3 = 0;
@@ -681,8 +681,8 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			num2 += array[i];
 		}
-		array[array.Length - 2] = BitConverter.GetBytes(num2)[0];
-		array[array.Length - 1] = 22;
+		array[^2] = BitConverter.GetBytes(num2)[0];
+		array[^1] = 22;
 		return OperateResult.Ok(array);
 	}
 
@@ -764,6 +764,7 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			return OperateResult.Error<byte[]>(operateResult);
 		}
+
 		byte[] array = SoftBasic.BoolArrayToByte(values);
 		byte[] array2 = new byte[37 + array.Length];
 		array2[0] = 104;
@@ -807,8 +808,8 @@ public class SiemensPPIOverTcp : NetworkDeviceBase
 		{
 			num += array2[i];
 		}
-		array2[array2.Length - 2] = BitConverter.GetBytes(num)[0];
-		array2[array2.Length - 1] = 22;
+		array2[^2] = BitConverter.GetBytes(num)[0];
+		array2[^1] = 22;
 		return OperateResult.Ok(array2);
 	}
 

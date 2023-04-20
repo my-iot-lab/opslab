@@ -6,7 +6,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 基于Qna 兼容3C帧的格式一的通讯，具体的地址需要参照三菱的基本地址。
 /// </summary>
-public class MelsecA3CNet1 : SerialDeviceBase
+public sealed class MelsecA3CNet1 : SerialDeviceBase
 {
 	public byte Station { get; set; } = 0;
 

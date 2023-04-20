@@ -1,6 +1,6 @@
 ﻿namespace Ops.Exchange.Utils;
 
-internal struct ValueStopwatch
+internal readonly struct ValueStopwatch
 {
     private static readonly double _timestampToTicks = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
 

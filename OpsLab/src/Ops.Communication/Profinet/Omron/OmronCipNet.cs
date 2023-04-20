@@ -8,7 +8,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <summary>
 /// 欧姆龙PLC的CIP协议的类，支持NJ,NX,NY系列PLC，支持tag名的方式读写数据，假设你读取的是局部变量，那么使用 Program:MainProgram.变量名。
 /// </summary>
-public class OmronCipNet : AllenBradleyNet
+public sealed class OmronCipNet : AllenBradleyNet
 {
 	/// <summary>
 	/// Instantiate a communication object for a OmronCipNet PLC protocol
@@ -163,102 +163,102 @@ public class OmronCipNet : AllenBradleyNet
 	{
 		if (length > 1)
 		{
-			return await ReadAsync(new string[1] { address }, new int[1] { 1 });
+			return await ReadAsync(new string[1] { address }, new int[1] { 1 }).ConfigureAwait(false);
 		}
-		return await ReadAsync(new string[1] { address }, new int[1] { length });
+		return await ReadAsync(new string[1] { address }, new int[1] { length }).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt16(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt16(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
 	public override async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt16(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
 	public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt32(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt32(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
 	public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt32(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
 	public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransSingle(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransSingle(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransSingle(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransSingle(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
 	public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt64(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt64(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
 	public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt64(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransUInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
 	public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
 		if (length == 1)
 		{
-			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransDouble(m, 0, length));
+			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransDouble(m, 0, length));
 		}
 
 		int startIndex = OpsHelper.ExtractStartIndex(ref address);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1), m => ByteTransform.TransDouble(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransDouble(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
 	{
-		OperateResult<byte[]> read = await ReadAsync(address, length);
+		OperateResult<byte[]> read = await ReadAsync(address, length).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -269,25 +269,21 @@ public class OmronCipNet : AllenBradleyNet
 
 	public override async Task<OperateResult> WriteAsync(string address, string value)
 	{
-		if (string.IsNullOrEmpty(value))
-		{
-			value = string.Empty;
-		}
-
-		byte[] data = SoftBasic.SpliceArray(new byte[2], SoftBasic.ArrayExpandToLengthEven(Encoding.ASCII.GetBytes(value)));
+        value ??= string.Empty;
+        byte[] data = SoftBasic.SpliceArray(new byte[2], SoftBasic.ArrayExpandToLengthEven(Encoding.ASCII.GetBytes(value)));
 		data[0] = BitConverter.GetBytes(data.Length - 2)[0];
 		data[1] = BitConverter.GetBytes(data.Length - 2)[1];
-		return await WriteTagAsync(address, 208, data);
+		return await WriteTagAsync(address, 208, data).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 209, new byte[2] { value, 0 });
+		return await WriteTagAsync(address, 209, new byte[2] { value, 0 }).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
 	{
-		return await base.WriteTagAsync(address, typeCode, value);
+		return await base.WriteTagAsync(address, typeCode, value).ConfigureAwait(false);
 	}
 
 	public override string ToString()

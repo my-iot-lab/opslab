@@ -10,7 +10,7 @@ namespace Ops.Communication.Serial;
 /// <summary>
 /// 所有串行通信类的基类，提供了一些基础的服务，核心的通信实现
 /// </summary>
-public class SerialBase : IDisposable
+public abstract class SerialBase : IDisposable
 {
 	protected bool LogMsgFormatBinary = true;
 	private bool disposedValue = false;
@@ -215,7 +215,7 @@ public class SerialBase : IDisposable
 	public OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		byte[] array = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
-		Logger?.LogDebug($"{ToString()} Send: " + (LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array)));
+		Logger?.LogDebug("{str0} Send: {str1}", ToString(), LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array));
 
 		hybirdLock.Enter();
 		OperateResult operateResult = Open();
@@ -240,7 +240,7 @@ public class SerialBase : IDisposable
 		if (!hasResponseData)
 		{
 			hybirdLock.Leave();
-			return OperateResult.Ok(new byte[0]);
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 
 		OperateResult<byte[]> operateResult3 = SPReceived(m_ReadData, awaitData: true);
@@ -250,7 +250,7 @@ public class SerialBase : IDisposable
 			return operateResult3;
 		}
 
-		Logger?.LogDebug($"{ToString()} Receive: {(LogMsgFormatBinary ? operateResult3.Content.ToHexString(' ') : Encoding.ASCII.GetString(operateResult3.Content))}");
+		Logger?.LogDebug("{str0} Receive: {str1}", ToString(), LogMsgFormatBinary ? operateResult3.Content.ToHexString(' ') : Encoding.ASCII.GetString(operateResult3.Content));
 		return usePackAndUnpack ? UnpackResponseContent(array, operateResult3.Content) : operateResult3;
 	}
 

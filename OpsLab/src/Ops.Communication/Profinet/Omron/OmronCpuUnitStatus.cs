@@ -6,7 +6,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <summary>
 /// 欧姆龙Cpu的状态信息
 /// </summary>
-public class OmronCpuUnitStatus
+public sealed class OmronCpuUnitStatus
 {
 	/// <summary>
 	/// Run 或是 Stop

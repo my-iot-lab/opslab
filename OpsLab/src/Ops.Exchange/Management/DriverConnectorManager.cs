@@ -207,11 +207,11 @@ public sealed class DriverConnectorManager : IDisposable
                     };
 
                     // 先检查服务器能否访问
-                    var ipStatus = await networkDevice.PingIpAddressAsync(1_000);
+                    var ipStatus = await networkDevice.PingIpAddressAsync(1_000).ConfigureAwait(false);
                     if (ipStatus == IPStatus.Success)
                     {
                         connector.Available = true;
-                        _ = await networkDevice.ConnectServerAsync();
+                        _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
                     }
                     else
                     {

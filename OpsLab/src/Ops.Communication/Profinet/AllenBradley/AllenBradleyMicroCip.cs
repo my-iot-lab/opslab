@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// AB PLC的cip通信实现类，适用Micro800系列控制系统。
 /// </summary>
-public class AllenBradleyMicroCip : AllenBradleyNet
+public sealed class AllenBradleyMicroCip : AllenBradleyNet
 {
 	public AllenBradleyMicroCip()
 	{

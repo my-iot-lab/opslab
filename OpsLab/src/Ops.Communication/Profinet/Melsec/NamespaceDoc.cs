@@ -28,6 +28,6 @@ namespace Ops.Communication.Profinet.Melsec;
 /// 1. 生存确认选择确认模式；<br />
 /// 2. 初始设置中将"对象目标生存确认开始间隔定时器"从1200改为12<br />
 /// </summary>
-public class NamespaceDoc
+public sealed class NamespaceDoc
 {
 }

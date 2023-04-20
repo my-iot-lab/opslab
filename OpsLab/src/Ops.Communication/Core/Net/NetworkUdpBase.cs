@@ -78,7 +78,7 @@ public class NetworkUdpBase : NetworkBase
 	public virtual OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack)
 	{
 		byte[] array = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
-		Logger?.LogDebug($"{ToString()} Send: {SoftBasic.ByteToHexString(array)}");
+		Logger?.LogDebug("{str0} Send: {str1}", ToString(), SoftBasic.ByteToHexString(array));
 
 		hybirdLock.Enter();
 		try
@@ -93,12 +93,12 @@ public class NetworkUdpBase : NetworkBase
 			if (ReceiveTimeout < 0)
 			{
 				hybirdLock.Leave();
-				return OperateResult.Ok(new byte[0]);
+				return OperateResult.Ok(Array.Empty<byte>());
 			}
 			if (!hasResponseData)
 			{
 				hybirdLock.Leave();
-				return OperateResult.Ok(new byte[0]);
+				return OperateResult.Ok(Array.Empty<byte>());
 			}
 
 			socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, ReceiveTimeout);
@@ -109,7 +109,7 @@ public class NetworkUdpBase : NetworkBase
 			byte[] array3 = array2.SelectBegin(length);
 			hybirdLock.Leave();
 
-			Logger?.LogDebug($"{ToString()} Receive: {SoftBasic.ByteToHexString(array3)}");
+			Logger?.LogDebug("{str0} Receive: {str1}", ToString(), SoftBasic.ByteToHexString(array3));
 			connectErrorCount = 0;
 			return usePackAndUnpack ? UnpackResponseContent(array, array3) : OperateResult.Ok(array3);
 		}
@@ -126,7 +126,7 @@ public class NetworkUdpBase : NetworkBase
 
 	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] value)
 	{
-		return await Task.Run(() => ReadFromCoreServer(value));
+		return await Task.Run(() => ReadFromCoreServer(value)).ConfigureAwait(false);
 	}
 
 	public IPStatus IpAddressPing()

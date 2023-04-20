@@ -75,7 +75,7 @@ namespace Ops.Communication.Profinet.Omron;
 ///   </item>
 /// </list>
 /// </example>
-public class OmronHostLinkOverTcp : NetworkDeviceBase
+public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 {
 	/// <summary>
 	/// Specifies whether or not there are network relays. Set “80” (ASCII: 38,30) 
@@ -185,7 +185,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 		var contentArray = new List<byte>();
 		for (int i = 0; i < length; i++)
 		{
-			var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content[i]));
+			var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content[i])).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<byte[]>(read);
@@ -210,7 +210,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content));
+		var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -247,7 +247,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 			{
 				return OperateResult.Error<bool[]>(operateResult3);
 			}
-			list.AddRange(operateResult3.Content.Select((byte m) => (m != 0) ? true : false));
+			list.AddRange(operateResult3.Content.Select((byte m) => (m != 0)));
 		}
 		return OperateResult.Ok(list.ToArray());
 	}
@@ -287,7 +287,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 		var contentArray = new List<bool>();
 		for (int i = 0; i < command.Content.Count; i++)
 		{
-			var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content[i]));
+			var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content[i])).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<bool[]>(read);
@@ -298,7 +298,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 			{
 				return OperateResult.Error<bool[]>(valid);
 			}
-			contentArray.AddRange(valid.Content.Select((byte m) => (m != 0) ? true : false));
+			contentArray.AddRange(valid.Content.Select((byte m) => (m != 0)));
 		}
 		return OperateResult.Ok(contentArray.ToArray());
 	}
@@ -312,7 +312,7 @@ public class OmronHostLinkOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content));
+		var read = await ReadFromCoreServerAsync(PackCommand(station, command.Content)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;

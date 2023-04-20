@@ -1,7 +1,7 @@
 namespace Ops.Communication.Core;
 
 /// <summary>
-/// 一个简单的混合线程同步锁，采用了基元用户加基元内核同步构造实现
+/// 一个简单的混合线程同步锁，采用了基元用户加基元内核同步构造实现。
 /// </summary>
 /// <remarks>
 /// 当前的锁适用于，竞争频率比较低，锁部分的代码运行时间比较久的情况，当前的简单混合锁可以达到最大性能。
@@ -45,8 +45,9 @@ public sealed class SimpleHybirdLock : IDisposable
 		{
 			if (disposing)
 			{
-			}
-			m_waiterLock.Value.Close();
+                m_waiterLock.Value.Close();
+            }
+			
 			disposedValue = true;
 		}
 	}

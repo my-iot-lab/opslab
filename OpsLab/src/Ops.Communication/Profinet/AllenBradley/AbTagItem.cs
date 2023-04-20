@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// AB PLC的每个的数据标签情况
 /// </summary>
-public class AbTagItem
+public sealed class AbTagItem
 {
 	private ushort symbolType = 0;
 

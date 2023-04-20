@@ -5,7 +5,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱PLC的EIP协议的实现，当PLC使用了 QJ71EIP71 模块时就需要使用本类来访问
 /// </summary>
-public class MelsecCipNet : AllenBradleyNet
+public sealed class MelsecCipNet : AllenBradleyNet
 {
 	public MelsecCipNet()
 	{
@@ -29,6 +29,6 @@ public class MelsecCipNet : AllenBradleyNet
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		return await ReadAsync(new string[1] { address }, new int[1] { length });
+		return await ReadAsync(new string[1] { address }, new int[1] { length }).ConfigureAwait(false);
 	}
 }

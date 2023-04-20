@@ -1,5 +1,5 @@
-using Ops.Communication.Utils;
 using System.Net.Sockets;
+using Ops.Communication.Utils;
 
 namespace Ops.Communication.Extensions;
 
@@ -121,10 +121,7 @@ public static class OpsExtension
 
 	public static T[] SpliceArray<T>(this T[] value, params T[][] arrays)
 	{
-        List<T[]> list = new(arrays.Length + 1)
-        {
-            value
-        };
+        List<T[]> list = new(arrays.Length + 1) { value };
         list.AddRange(arrays);
 		return SoftBasic.SpliceArray(list.ToArray());
 	}
@@ -139,7 +136,7 @@ public static class OpsExtension
 	{
 		if (value == null)
 		{
-			return null;
+			return Array.Empty<T>();
 		}
 
 		T[] array = new T[value.Length];
@@ -177,9 +174,9 @@ public static class OpsExtension
 	public static int SetKeepAlive(this Socket socket, int keepAliveTime, int keepAliveInterval)
 	{
 		byte[] array = new byte[12];
-		BitConverter.GetBytes((keepAliveTime >= 0) ? 1 : 0).CopyTo(array, 0);
-		BitConverter.GetBytes(keepAliveTime).CopyTo(array, 4);
-		BitConverter.GetBytes(keepAliveInterval).CopyTo(array, 8);
+		BitConverter.GetBytes((keepAliveTime >= 0) ? 1 : 0).CopyTo(array, 0); // 启用 KeepAlive
+		BitConverter.GetBytes(keepAliveTime).CopyTo(array, 4); // 此时间段内若没有数据交互，则发送探测包
+		BitConverter.GetBytes(keepAliveInterval).CopyTo(array, 8); // 发送探测包的时间间隔
 		try
 		{
 			return socket.IOControl(IOControlCode.KeepAliveValues, array, null);

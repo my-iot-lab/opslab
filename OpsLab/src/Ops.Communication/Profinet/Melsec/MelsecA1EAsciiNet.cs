@@ -10,7 +10,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱PLC通讯协议，采用A兼容1E帧协议实现，使用ASCII码通讯，请根据实际型号来进行选取。
 /// </summary>
-public class MelsecA1EAsciiNet : NetworkDeviceBase
+public sealed class MelsecA1EAsciiNet : NetworkDeviceBase
 {
 	public byte PLCNumber { get; set; } = byte.MaxValue;
 
@@ -96,7 +96,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -118,7 +118,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -184,7 +184,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 			return OperateResult.Error<bool[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -212,7 +212,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -334,7 +334,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 		byte[] array = value.Select((bool m) => (byte)(m ? 49 : 48)).ToArray();
 		if (array.Length % 2 == 1)
 		{
-			array = SoftBasic.SpliceArray<byte>(array, new byte[1] { 48 });
+			array = SoftBasic.SpliceArray(array, new byte[1] { 48 });
 		}
 
 		byte[] array2 = new byte[24 + array.Length];
@@ -399,7 +399,7 @@ public class MelsecA1EAsciiNet : NetworkDeviceBase
 		if (isBit)
 		{
 			return OperateResult.Ok((from m in response.RemoveBegin(4)
-													  select (byte)((m != 48) ? 1 : 0)).ToArray());
+									 select (byte)((m != 48) ? 1 : 0)).ToArray());
 		}
 		return OperateResult.Ok(MelsecHelper.TransAsciiByteArrayToByteArray(response.RemoveBegin(4)));
 	}

@@ -6,7 +6,7 @@ namespace Ops.Communication.Core;
 /// <summary>
 /// 按照字节错位的数据转换类。
 /// </summary>
-public class ReverseWordTransform : ByteTransformBase
+public sealed class ReverseWordTransform : ByteTransformBase
 {
 	public ReverseWordTransform()
 	{

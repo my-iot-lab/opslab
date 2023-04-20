@@ -10,7 +10,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <remarks>
 /// 暂时只支持的字数据的读写操作，不支持位的读写操作。
 /// </remarks>
-public class OmronHostLinkCModeOverTcp : NetworkDeviceBase
+public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 {
 	public byte UnitNumber { get; set; }
 
@@ -87,7 +87,7 @@ public class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(OmronHostLinkCMode.PackCommand(command.Content, station));
+		var read = await ReadFromCoreServerAsync(OmronHostLinkCMode.PackCommand(command.Content, station)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -110,7 +110,7 @@ public class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(OmronHostLinkCMode.PackCommand(command.Content, station));
+		var read = await ReadFromCoreServerAsync(OmronHostLinkCMode.PackCommand(command.Content, station)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;

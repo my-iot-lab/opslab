@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱R系列的PLC的数据类型
 /// </summary>
-public class MelsecMcRDataType
+public sealed class MelsecMcRDataType
 {
 	/// <summary>
 	/// X输入继电器

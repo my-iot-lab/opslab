@@ -11,7 +11,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <remarks>
 /// 关于在PLC侧的配置信息，协议：专用协议  传送控制步骤：格式一  站号设置：0
 /// </remarks>
-public class MelsecFxLinks : SerialDeviceBase
+public sealed class MelsecFxLinks : SerialDeviceBase
 {
 	private byte watiingTime = 0;
 
@@ -114,6 +114,7 @@ public class MelsecFxLinks : SerialDeviceBase
 		{
 			return new OperateResult<bool[]>(operateResult2.Content[0], "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
+
 		byte[] array = new byte[length];
 		Array.Copy(operateResult2.Content, 5, array, 0, length);
 		return OperateResult.Ok(array.Select((byte m) => m == 49).ToArray());

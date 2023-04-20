@@ -8,7 +8,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <summary>
 /// Omron PLC的FINS协议相关的辅助类，主要是一些地址解析，读写的指令生成。
 /// </summary>
-public class OmronFinsNetHelper
+public static class OmronFinsNetHelper
 {
 	/// <summary>
 	/// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文。
@@ -252,7 +252,7 @@ public class OmronFinsNetHelper
 			return OperateResult.Error<byte[]>(command);
 		}
 
-		List<byte> contentArray = new List<byte>();
+		List<byte> contentArray = new();
 		for (int i = 0; i < command.Content.Count; i++)
 		{
 			OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content[i]);
@@ -273,7 +273,7 @@ public class OmronFinsNetHelper
 			return command;
 		}
 
-		OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -344,7 +344,7 @@ public class OmronFinsNetHelper
 		var contentArray = new List<bool>();
 		for (int i = 0; i < command.Content.Count; i++)
 		{
-			OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content[i]);
+			OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<bool[]>(read);
@@ -362,7 +362,7 @@ public class OmronFinsNetHelper
 			return command;
 		}
 
-		OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await omron.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -385,7 +385,7 @@ public class OmronFinsNetHelper
 
 	public static async Task<OperateResult> RunAsync(IReadWriteDevice omron)
 	{
-		return await omron.ReadFromCoreServerAsync(new byte[5] { 4, 1, 255, 255, 4 });
+		return await omron.ReadFromCoreServerAsync(new byte[5] { 4, 1, 255, 255, 4 }).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -403,7 +403,7 @@ public class OmronFinsNetHelper
 
 	public static async Task<OperateResult> StopAsync(IReadWriteDevice omron)
 	{
-		return await omron.ReadFromCoreServerAsync(new byte[4] { 4, 2, 255, 255 });
+		return await omron.ReadFromCoreServerAsync(new byte[4] { 4, 2, 255, 255 }).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -418,7 +418,7 @@ public class OmronFinsNetHelper
 
 	public static async Task<OperateResult<OmronCpuUnitData>> ReadCpuUnitDataAsync(IReadWriteDevice omron)
 	{
-		return (await omron.ReadFromCoreServerAsync(new byte[3] { 5, 1, 0 })).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
+		return (await omron.ReadFromCoreServerAsync(new byte[3] { 5, 1, 0 }).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
 	}
 
 	/// <summary>
@@ -433,6 +433,6 @@ public class OmronFinsNetHelper
 
 	public static async Task<OperateResult<OmronCpuUnitStatus>> ReadCpuUnitStatusAsync(IReadWriteDevice omron)
 	{
-		return (await omron.ReadFromCoreServerAsync(new byte[2] { 6, 1 })).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
+		return (await omron.ReadFromCoreServerAsync(new byte[2] { 6, 1 }).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
 	}
 }

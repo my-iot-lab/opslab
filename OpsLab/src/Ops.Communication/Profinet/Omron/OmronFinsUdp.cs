@@ -9,7 +9,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// </summary>
 /// <remarks>
 /// </remarks>
-public class OmronFinsUdp : NetworkUdpDeviceBase
+public sealed class OmronFinsUdp : NetworkUdpDeviceBase
 {
 	public override string IpAddress
 	{

@@ -7,7 +7,7 @@ namespace Ops.Communication.Modbus;
 /// 本客户端支持的标准的modbus协议，Modbus-Tcp及Modbus-Udp内置的消息号会进行自增，地址支持富文本格式，具体参考示例代码。<br />
 /// 读取线圈，输入线圈，寄存器，输入寄存器的方法中的读取长度对商业授权用户不限制，内部自动切割读取，结果合并。
 /// </remarks>
-public class ModbusAscii : ModbusRtu
+public sealed class ModbusAscii : ModbusRtu
 {
 	/// <summary>
 	/// 实例化一个Modbus-ascii协议的客户端对象。

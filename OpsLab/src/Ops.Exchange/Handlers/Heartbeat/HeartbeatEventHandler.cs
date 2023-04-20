@@ -22,6 +22,6 @@ internal sealed class HeartbeatEventHandler : IEventHandler<HeartbeatEventData>
     public async Task HandleAsync(HeartbeatEventData eventData, CancellationToken cancellationToken = default)
     {
         eventData.Context.SetResponseValue(eventData.Tag, ExStatusCode.Success);
-        await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken);
+        await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken).ConfigureAwait(false);
     }
 }

@@ -8,201 +8,8 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱计算机链接协议的网口版本，适用FX3U系列，FX3G，FX3S等等系列，通常在PLC侧连接的是485的接线口。
 /// </summary>
-/// <remarks>
-/// </remarks>
-/// <example>
-/// 支持的通讯的系列如下参考
-/// <list type="table">
-///     <listheader>
-///         <term>系列</term>
-///         <term>是否支持</term>
-///         <term>备注</term>
-///     </listheader>
-///     <item>
-///         <description>FX3UC系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX3U系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX3GC系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX3G系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX3S系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX2NC系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX2N系列</description>
-///         <description>部分支持(v1.06+)</description>
-///         <description>通过监控D8001来确认版本号</description>
-///     </item>
-///     <item>
-///         <description>FX1NC系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX1N系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX1S系列</description>
-///         <description>支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX0N系列</description>
-///         <description>部分支持(v1.20+)</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX0S系列</description>
-///         <description>不支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX0系列</description>
-///         <description>不支持</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX2C系列</description>
-///         <description>部分支持(v3.30+)</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX2(FX)系列</description>
-///         <description>部分支持(v3.30+)</description>
-///         <description></description>
-///     </item>
-///     <item>
-///         <description>FX1系列</description>
-///         <description>不支持</description>
-///         <description></description>
-///     </item>
-/// </list>
-/// 数据地址支持的格式如下：
-/// <list type="table">
-///   <listheader>
-///     <term>地址名称</term>
-///     <term>地址代号</term>
-///     <term>示例</term>
-///     <term>地址进制</term>
-///     <term>字操作</term>
-///     <term>位操作</term>
-///     <term>备注</term>
-///   </listheader>
-///   <item>
-///     <term>内部继电器</term>
-///     <term>M</term>
-///     <term>M100,M200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输入继电器</term>
-///     <term>X</term>
-///     <term>X10,X20</term>
-///     <term>8</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>输出继电器</term>
-///     <term>Y</term>
-///     <term>Y10,Y20</term>
-///     <term>8</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>步进继电器</term>
-///     <term>S</term>
-///     <term>S100,S200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>定时器的触点</term>
-///     <term>TS</term>
-///     <term>TS100,TS200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>定时器的当前值</term>
-///     <term>TN</term>
-///     <term>TN100,TN200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>计数器的触点</term>
-///     <term>CS</term>
-///     <term>CS100,CS200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>√</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>计数器的当前</term>
-///     <term>CN</term>
-///     <term>CN100,CN200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>数据寄存器</term>
-///     <term>D</term>
-///     <term>D1000,D2000</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-///   <item>
-///     <term>文件寄存器</term>
-///     <term>R</term>
-///     <term>R100,R200</term>
-///     <term>10</term>
-///     <term>√</term>
-///     <term>×</term>
-///     <term></term>
-///   </item>
-/// </list>
-/// </example>
-public class MelsecFxLinksOverTcp : NetworkDeviceBase
+/// <remarks></remarks>
+public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 {
 	private byte watiingTime = 0;
 
@@ -234,7 +41,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 	}
 
 	/// <summary>
-	/// 是否启动和校验。
+	/// 是否启动和校验, 默认为 true。
 	/// </summary>
 	public bool SumCheck { get; set; } = true;
 
@@ -333,7 +140,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -362,7 +169,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -442,7 +249,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return OperateResult.Error<bool[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -466,7 +273,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -569,7 +376,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -591,7 +398,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -613,7 +420,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return OperateResult.Error<string>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -772,7 +579,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(operateResult);
 		}
 
-		var stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
 		stringBuilder.Append(station.ToString("D2"));
 		stringBuilder.Append("FF");
 		stringBuilder.Append("BW");
@@ -806,7 +613,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(operateResult);
 		}
 
-		var stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
 		stringBuilder.Append(station.ToString("D2"));
 		stringBuilder.Append("FF");
 		stringBuilder.Append("WW");
@@ -834,7 +641,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>命令报文的结果内容对象</returns>
 	public static OperateResult<byte[]> BuildStart(byte station, bool sumCheck = true, byte waitTime = 0)
 	{
-		var stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
 		stringBuilder.Append(station.ToString("D2"));
 		stringBuilder.Append("FF");
 		stringBuilder.Append("RR");
@@ -853,7 +660,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>命令报文的结果内容对象</returns>
 	public static OperateResult<byte[]> BuildStop(byte station, bool sumCheck = true, byte waitTime = 0)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
+		StringBuilder stringBuilder = new();
 		stringBuilder.Append(station.ToString("D2"));
 		stringBuilder.Append("FF");
 		stringBuilder.Append("RS");
@@ -872,7 +679,7 @@ public class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>命令报文的结果内容对象</returns>
 	public static OperateResult<byte[]> BuildReadPlcType(byte station, bool sumCheck = true, byte waitTime = 0)
 	{
-		var stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
 		stringBuilder.Append(station.ToString("D2"));
 		stringBuilder.Append("FF");
 		stringBuilder.Append("PC");

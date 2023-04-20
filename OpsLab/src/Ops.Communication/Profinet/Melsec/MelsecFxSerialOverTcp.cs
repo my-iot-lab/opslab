@@ -120,7 +120,7 @@ namespace Ops.Communication.Profinet.Melsec;
 ///   </item>
 /// </list>
 /// </remarks>
-public class MelsecFxSerialOverTcp : NetworkDeviceBase
+public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 {
 	/// <summary>
 	/// 当前的编程口协议是否为新版，默认为新版，如果无法读取，切换旧版再次尝试。
@@ -170,7 +170,7 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -192,7 +192,7 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -230,7 +230,7 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 			return OperateResult.Error<bool[]>(command);
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content1);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content1).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -252,7 +252,7 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -279,7 +279,6 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 	/// <param name="readCore">指定的通道信息</param>
 	/// <param name="isNewVersion">是否是新版的串口访问类</param>
 	/// <returns>带成功标志的结果数据对象</returns>
-	/// <example>
 	public static OperateResult<byte[]> ReadHelper(string address, ushort length, Func<byte[], OperateResult<byte[]>> readCore, bool isNewVersion)
 	{
 		OperateResult<byte[]> operateResult = BuildReadWordCommand(address, length, isNewVersion);
@@ -688,7 +687,7 @@ public class MelsecFxSerialOverTcp : NetworkDeviceBase
 		}
 		catch (Exception ex)
 		{
-			OperateResult<byte[]> operateResult = new OperateResult<byte[]>();
+			OperateResult<byte[]> operateResult = new();
 			operateResult.Message = "Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response);
 			return operateResult;
 		}

@@ -5,7 +5,6 @@ namespace Ops.Communication;
 /// <summary>
 /// 用于网络传递的信息头，使用上等同于 int
 /// </summary>
-/// <remarks>
 [StructLayout(LayoutKind.Explicit)]
 public struct NetHandle
 {

@@ -41,18 +41,18 @@ public sealed class DeviceInfoManager
         return await _cache.GetOrCreateAsync(CacheKey, async cacheEntry =>
         {
             //cacheEntry.SetSlidingExpiration(TimeSpan.FromDays(1));
-            return await GetFromLocalAsync();
+            return await GetFromLocalAsync().ConfigureAwait(false);
         });
     }
 
     /// <summary>
     /// 获取指定的设备信息。
     /// </summary>
-    /// <param name="id">设备 Id</param>
+    /// <param name="code">设备 Id</param>
     /// <returns></returns>
     public async Task<DeviceInfo?> GetAsync(string code)
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = await GetAllAsync().ConfigureAwait(false);
         return deviceInfos.SingleOrDefault(s => s.Name == code);
     }
 
@@ -74,7 +74,7 @@ public sealed class DeviceInfoManager
     /// <param name="deviceInfo">要添加的设备信息</param>
     public async Task<(bool ok, string err)> AddAsync(DeviceInfo deviceInfo)
     {
-        var deviceInfos = await GetAllAsync();
+        var deviceInfos = await GetAllAsync().ConfigureAwait(false);
         if (deviceInfos.Exists(s => s.Schema == deviceInfo.Schema))
         {
             return (false, "已存在相同的设备信息");

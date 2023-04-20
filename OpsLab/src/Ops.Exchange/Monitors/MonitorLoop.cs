@@ -25,7 +25,7 @@ public sealed class MonitorLoop
         _logger.LogInformation($"[MonitorLoop] {nameof(MonitorAsync)} loop is starting.");
 
         // Run a console user input loop in a background thread
-        _ = Task.Run(async () => await MonitorAsync());
+        _ = Task.Run(async () => await MonitorAsync().ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     private async ValueTask MonitorAsync()
@@ -33,7 +33,7 @@ public sealed class MonitorLoop
         while (!_cancellationToken.IsCancellationRequested)
         {
             // Enqueue a background work item
-            await _taskQueue.QueueAsync(BuildWorkItemAsync);
+            await _taskQueue.QueueAsync(BuildWorkItemAsync).ConfigureAwait(false);
         }
     }
 
@@ -51,7 +51,7 @@ public sealed class MonitorLoop
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), token);
+                await Task.Delay(TimeSpan.FromSeconds(5), token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {

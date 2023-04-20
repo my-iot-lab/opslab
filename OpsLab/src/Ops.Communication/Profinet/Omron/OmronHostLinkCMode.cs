@@ -11,7 +11,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <remarks>
 /// 暂时只支持的字数据的读写操作，不支持位的读写操作。
 /// </remarks>
-public class OmronHostLinkCMode : SerialDeviceBase
+public sealed class OmronHostLinkCMode : SerialDeviceBase
 {
 	public byte UnitNumber { get; set; }
 
@@ -139,7 +139,7 @@ public class OmronHostLinkCMode : SerialDeviceBase
 			}
 			else if (!isBit)
 			{
-				operateResult.Content2 = ushort.Parse(address.Substring(1)).ToString("D4");
+				operateResult.Content2 = ushort.Parse(address[1..]).ToString("D4");
 			}
 		}
 		catch (Exception ex)

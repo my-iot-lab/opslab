@@ -58,7 +58,7 @@ public sealed class DeviceHealthManager
     {
         // 此计时器可异步执行，且在当前任务还没有结束之前下一次任务是不会开始的。
         _heartbeatTimer2 = new PeriodicTimer(TimeSpan.FromSeconds(5));
-        while (await _heartbeatTimer2.WaitForNextTickAsync(cancellationToken))
+        while (await _heartbeatTimer2.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
         {
             Heartbeat2();
         }
@@ -173,7 +173,7 @@ public sealed class DeviceHealthManager
                         _memoryCache.Set(cacheName, false, TimeSpan.FromSeconds(3));
                         if (_map.TryGetValue(deviceInfo.Name, out var item))
                         {
-                            _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 失败, 返回状态：{reply.Status}");
+                            _logger.LogWarning("Ping '{Host}' 失败, 返回状态：{Status}", deviceInfo.Schema.Host, reply.Status);
                         }
                     }
                 }
@@ -182,7 +182,7 @@ public sealed class DeviceHealthManager
                     _memoryCache.Set(cacheName, false, TimeSpan.FromSeconds(3));
                     if (_map.TryGetValue(deviceInfo.Name, out var item))
                     {
-                        _logger.LogWarning($"Ping '{deviceInfo.Schema.Host}' 异常, 消息：{ex.Message}");
+                        _logger.LogWarning("Ping '{Host}' 异常, 消息：{Message}", deviceInfo.Schema.Host, ex.Message);
                     }
                 }
             }

@@ -81,12 +81,12 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// </list>
 /// 感谢 seedee 的测试支持。
 /// </remarks>
-public class AllenBradleySLCNet : NetworkDeviceBase
+public sealed class AllenBradleySLCNet : NetworkDeviceBase
 {
 	/// <summary>
 	/// The current session handle, which is determined by the PLC when communicating with the PLC handshake
 	/// </summary>
-	public uint SessionHandle { get; protected set; }
+	public uint SessionHandle { get; private set; }
 
 	/// <summary>
 	/// Instantiate a communication object for a Allenbradley PLC protocol
@@ -129,7 +129,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		var read = await ReadFromCoreServerAsync(socket, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes());
+		var read = await ReadFromCoreServerAsync(socket, "01 01 00 00 00 00 00 00 00 00 00 00 00 04 00 05 00 00 00 00 00 00 00 00 00 00 00 00".ToHexBytes()).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -231,7 +231,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -254,7 +254,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -271,7 +271,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 	public override async Task<OperateResult<bool>> ReadBoolAsync(string address)
 	{
 		address = AnalysisBitIndex(address, out var bitIndex);
-		OperateResult<byte[]> read = await ReadAsync(address, 1);
+		OperateResult<byte[]> read = await ReadAsync(address, 1).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool>(read);
@@ -287,7 +287,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackCommand(command.Content)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -376,7 +376,7 @@ public class AllenBradleySLCNet : NetworkDeviceBase
 			}
 			else
 			{
-				operateResult.Content2 = byte.Parse(array[0].Substring(1));
+				operateResult.Content2 = byte.Parse(array[0][1..]);
 			}
 
 			operateResult.Content3 = ushort.Parse(array[1]);

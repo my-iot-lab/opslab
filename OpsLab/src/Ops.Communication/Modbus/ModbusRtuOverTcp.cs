@@ -120,57 +120,57 @@ public class ModbusRtuOverTcp : NetworkDeviceBase, IModbus, IReadWriteDevice, IR
 
 	public async Task<OperateResult<bool>> ReadCoilAsync(string address)
 	{
-		return await ReadBoolAsync(address);
+		return await ReadBoolAsync(address).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<bool[]>> ReadCoilAsync(string address, ushort length)
 	{
-		return await ReadBoolAsync(address, length);
+		return await ReadBoolAsync(address, length).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<bool>> ReadDiscreteAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadDiscreteAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadDiscreteAsync(address, 1).ConfigureAwait(false));
 	}
 
 	public async Task<OperateResult<bool[]>> ReadDiscreteAsync(string address, ushort length)
 	{
-		return await ReadBoolHelperAsync(address, length, 2);
+		return await ReadBoolHelperAsync(address, length, 2).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		return await ModbusHelper.ReadAsync(this, address, length);
+		return await ModbusHelper.ReadAsync(this, address, length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		return await ModbusHelper.WriteAsync(this, address, value);
+		return await ModbusHelper.WriteAsync(this, address, value).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, short value)
 	{
-		return await ModbusHelper.WriteAsync(this, address, value);
+		return await ModbusHelper.WriteAsync(this, address, value).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ushort value)
 	{
-		return await ModbusHelper.WriteAsync(this, address, value);
+		return await ModbusHelper.WriteAsync(this, address, value).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteOneRegisterAsync(string address, short value)
 	{
-		return await WriteAsync(address, value);
+		return await WriteAsync(address, value).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteOneRegisterAsync(string address, ushort value)
 	{
-		return await WriteAsync(address, value);
+		return await WriteAsync(address, value).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteMaskAsync(string address, ushort andMask, ushort orMask)
 	{
-		return await Task.Run(() => WriteMask(address, andMask, orMask));
+		return await Task.Run(() => WriteMask(address, andMask, orMask)).ConfigureAwait(false);
 	}
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
@@ -190,22 +190,22 @@ public class ModbusRtuOverTcp : NetworkDeviceBase, IModbus, IReadWriteDevice, IR
 
 	private async Task<OperateResult<bool[]>> ReadBoolHelperAsync(string address, ushort length, byte function)
 	{
-		return await ModbusHelper.ReadBoolHelperAsync(this, address, length, function);
+		return await ModbusHelper.ReadBoolHelperAsync(this, address, length, function).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		return await ReadBoolHelperAsync(address, length, 1);
+		return await ReadBoolHelperAsync(address, length, 1).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] values)
 	{
-		return await ModbusHelper.WriteAsync(this, address, values);
+		return await ModbusHelper.WriteAsync(this, address, values).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await ModbusHelper.WriteAsync(this, address, value);
+		return await ModbusHelper.WriteAsync(this, address, value).ConfigureAwait(false);
 	}
 
 	public override OperateResult<int[]> ReadInt32(string address, ushort length)
@@ -283,67 +283,67 @@ public class ModbusRtuOverTcp : NetworkDeviceBase, IModbus, IReadWriteDevice, IR
 	public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransUInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransUInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransSingle(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransSingle(m, 0, length));
 	}
 
 	public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransUInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransUInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
 		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransDouble(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransDouble(m, 0, length));
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, int[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, uint[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, float[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, long[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, double[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address);
+		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override string ToString()

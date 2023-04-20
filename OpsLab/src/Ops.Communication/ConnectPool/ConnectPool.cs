@@ -3,7 +3,7 @@
 /// <summary>
 /// 一个连接池管理器，负责维护多个可用的连接，并且自动清理，扩容，用于快速读写服务器或是PLC时使用。
 /// <para>
-/// 关于连接池管理，可参考 <see cref="SocketsHttpHandler"/> 中引用的 <see cref="System.Net.Http.HttpConnectionPoolManager"/> 对象。
+/// 关于连接池管理，可参考 <see cref="SocketsHttpHandler"/> 中引用的 System.Net.Http.HttpConnectionPoolManager 对象。
 /// </para>
 /// </summary>
 /// <typeparam name="TConnector">管理的连接类，需要支持IConnector接口</typeparam>

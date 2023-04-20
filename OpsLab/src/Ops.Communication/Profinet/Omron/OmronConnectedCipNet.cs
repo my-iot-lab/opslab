@@ -15,7 +15,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// </summary>
 /// <remarks>
 /// 支持普通标签的读写，类型要和标签对应上。如果标签是数组，例如 A 是 INT[0...9] 那么Read("A", 1)，返回的是10个short所有字节数组。
-/// 如果需要返回10个长度的short数组，请调用 ReadInt16("A[0], 10"); 地址必须写 "A[0]"，不能写 "A" , 如需要读取结构体，参考 <see cref="ReadStruct``1(System.String)" />
+/// 如果需要返回10个长度的short数组，请调用 ReadInt16("A[0], 10"); 地址必须写 "A[0]"，不能写 "A" , 如需要读取结构体，参考 <see cref="ReadStruct" />
 /// </remarks>
 /// <example>
 /// 首先说明支持的类型地址，在PLC里支持了大量的类型，有些甚至在C#里是不存在的。现在做个统一的声明
@@ -181,7 +181,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	/// </summary>
 	private uint OTConnectionId = 0u;
 
-	private IncrementCount incrementCount = new IncrementCount(65535L, 0L);
+	private readonly IncrementCount incrementCount = new(65535L, 0L);
 
 	public uint SessionHandle { get; protected set; }
 
@@ -279,7 +279,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		var read1 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.RegisterSessionHandle(), true, false);
+		var read1 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.RegisterSessionHandle(), true, false).ConfigureAwait(false);
 		if (!read1.IsSuccess)
 		{
 			return read1;
@@ -292,7 +292,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		}
 
 		SessionHandle = ByteTransform.TransUInt32(read1.Content, 4);
-		var read2 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetLargeForwardOpen()), true, false);
+		var read2 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetLargeForwardOpen()), true, false).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return read2;
@@ -309,7 +309,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 		OTConnectionId = ByteTransform.TransUInt32(read2.Content, 44);
 		incrementCount.ResetCurrentValue();
-		var read3 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), true, false);
+		var read3 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), true, false).ConfigureAwait(false);
 		if (!read3.IsSuccess)
 		{
 			return read3;
@@ -324,7 +324,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> ExtraOnDisconnectAsync(Socket socket)
 	{
-		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false);
+		var read = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.UnRegisterSessionHandle(SessionHandle), true, false).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -500,7 +500,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	public async Task<OperateResult<byte[]>> ReadCipFromServerAsync(params byte[][] cips)
 	{
 		byte[] command = PackCommandService(cips.ToArray());
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -584,7 +584,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	{
 		if (length == 1 && !Regex.IsMatch(address, "\\[[0-9]+\\]$"))
 		{
-			OperateResult<byte[]> read = await ReadAsync(address, length);
+			OperateResult<byte[]> read = await ReadAsync(address, length).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<bool[]>(read);
@@ -592,7 +592,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 			return OperateResult.Ok(SoftBasic.ByteToBoolArray(read.Content));
 		}
 
-		OperateResult<byte[]> read2 = await ReadAsync(address, length);
+		OperateResult<byte[]> read2 = await ReadAsync(address, length).ConfigureAwait(false);
 		if (!read2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read2);
@@ -602,7 +602,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync(new string[1] { address }, new ushort[1] { length });
+		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync(new string[1] { address }, new ushort[1] { length }).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -612,7 +612,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public async Task<OperateResult<byte[]>> ReadAsync(string[] address, ushort[] length)
 	{
-		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync(address, length);
+		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync(address, length).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -622,7 +622,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public async Task<OperateResult<byte>> ReadByteAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
 	}
 
 	/// <summary>
@@ -668,7 +668,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		return await Task.Run(() => Write(address, value));
+		return await Task.Run(() => Write(address, value)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)
@@ -679,7 +679,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 			return command;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -768,42 +768,42 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt16(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, 0, length));
 	}
 
 	public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransSingle(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransSingle(m, 0, length));
 	}
 
 	public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransUInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), m => ByteTransform.TransDouble(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), m => ByteTransform.TransDouble(m, 0, length));
 	}
 
 	public async Task<OperateResult<string>> ReadStringAsync(string address)
@@ -813,12 +813,12 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length)
 	{
-		return await ReadStringAsync(address, length, Encoding.UTF8);
+		return await ReadStringAsync(address, length, Encoding.UTF8).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
 	{
-		OperateResult<byte[]> read = await ReadAsync(address, length);
+		OperateResult<byte[]> read = await ReadAsync(address, length).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -888,66 +888,66 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, short[] values)
 	{
-		return await WriteTagAsync(address, 195, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 195, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ushort[] values)
 	{
-		return await WriteTagAsync(address, 199, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 199, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, int[] values)
 	{
-		return await WriteTagAsync(address, 196, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 196, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, uint[] values)
 	{
-		return await WriteTagAsync(address, 200, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 200, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, float[] values)
 	{
-		return await WriteTagAsync(address, 202, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 202, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, long[] values)
 	{
-		return await WriteTagAsync(address, 197, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 197, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
 	{
-		return await WriteTagAsync(address, 201, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 201, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, double[] values)
 	{
-		return await WriteTagAsync(address, 203, ByteTransform.TransByte(values), values.Length);
+		return await WriteTagAsync(address, 203, ByteTransform.TransByte(values), values.Length).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, string value)
 	{
 		byte[] buffer = string.IsNullOrEmpty(value) ? Array.Empty<byte>() : Encoding.UTF8.GetBytes(value);
-		return await WriteTagAsync(address, 208, SoftBasic.SpliceArray(BitConverter.GetBytes((ushort)buffer.Length), buffer));
+		return await WriteTagAsync(address, 208, SoftBasic.SpliceArray(BitConverter.GetBytes((ushort)buffer.Length), buffer)).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await WriteTagAsync(address, 193, !value ? new byte[2] : new byte[2] { 255, 255 });
+		return await WriteTagAsync(address, 193, !value ? new byte[2] : new byte[2] { 255, 255 }).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 194, new byte[1] { value });
+		return await WriteTagAsync(address, 194, new byte[1] { value }).ConfigureAwait(false);
 	}
 
-	private byte[] GetLargeForwardOpen()
+	private static byte[] GetLargeForwardOpen()
 	{
 		return "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 34 00\r\n5b 02 20 06 24 01 06 9c 02 00 00 80 01 00 fe 80\r\n02 00 1b 05 30 a7 2b 03 02 00 00 00 80 84 1e 00\r\ncc 07 00 42 80 84 1e 00 cc 07 00 42 a3 03 20 02\r\n24 01 2c 01".ToHexBytes();
 	}
 
-	private byte[] GetAttributeAll()
+	private static byte[] GetAttributeAll()
 	{
 		return "00 00 00 00 00 00 02 00 00 00 00 00 b2 00 06 00 01 02 20 01 24 01".ToHexBytes();
 	}

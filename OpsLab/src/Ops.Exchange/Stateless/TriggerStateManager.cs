@@ -64,10 +64,7 @@ public sealed class TriggerStateManager
         if (_states.TryGetValue(key, out var map))
         {
             var entry = map[key.Tag];
-            if (entry != null)
-            {
-                entry.Change(newState);
-            }
+            entry?.Change(newState);
         }
     }
 

@@ -140,7 +140,6 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 		return MelsecMcNet.ExtractActualData(SoftBasic.ArrayRemoveBegin(operateResult2.Content, 11), isBit: false);
 	}
 
-	/// <inheritdoc cref="M:HslCommunication.Profinet.Melsec.MelsecMcNet.ReadRandom(System.String[],System.UInt16[])" />
 	public OperateResult<byte[]> ReadRandom(string[] address, ushort[] length)
 	{
 		if (length.Length != address.Length)

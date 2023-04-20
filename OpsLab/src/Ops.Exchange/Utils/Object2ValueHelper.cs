@@ -114,7 +114,7 @@ public static class Object2ValueHelper
     /// <returns></returns>
     public static T ObjectTo<T>(object obj)
     {
-        object? obj2 = null;
+        object obj2;
 
         if (typeof(T) == typeof(byte))
         {
@@ -150,7 +150,11 @@ public static class Object2ValueHelper
         }
         else if (typeof(T) == typeof(string))
         {
-            obj2 = Convert.ToString(obj);
+            obj2 = Convert.ToString(obj)!;
+        }
+        else
+        {
+            throw new InvalidOperationException();
         }
 
         return (T)obj2;
@@ -238,6 +242,11 @@ public static class Object2ValueHelper
             {
                 obj = jsonElement.GetString();
             }
+        }
+
+        if (obj is null)
+        {
+            throw new InvalidOperationException();
         }
 
         return (T)obj;

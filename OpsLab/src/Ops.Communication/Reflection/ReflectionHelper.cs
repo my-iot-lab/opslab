@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using System.Reflection;
 using Ops.Communication.Attributes;
 using Ops.Communication.Core;
@@ -8,7 +7,7 @@ namespace Ops.Communication.Reflection;
 /// <summary>
 /// 反射的辅助类
 /// </summary>
-public class ReflectionHelper
+public static class ReflectionHelper
 {
 	/// <summary>
 	/// 从设备里读取支持Hsl特性的数据内容，该特性为<see cref="DeviceAddressAttribute" />，详细参考论坛的操作说明。
@@ -270,10 +269,7 @@ public class ReflectionHelper
 			}
 
 			var attr = customAttributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType());
-			if (attr == null)
-			{
-				attr = customAttributes.FirstOrDefault(s => s.DeviceType == null);
-			}
+			attr ??= customAttributes.FirstOrDefault(s => s.DeviceType == null);
 
 			if (attr == null)
 			{
@@ -466,22 +462,7 @@ public class ReflectionHelper
 	}
 
 	/// <summary>
-	/// 使用表达式树的方式来给一个属性赋值
-	/// </summary>
-	/// <param name="propertyInfo">属性信息</param>
-	/// <param name="obj">对象信息</param>
-	/// <param name="objValue">实际的值</param>
-	public static void SetPropertyExp<T, K>(PropertyInfo propertyInfo, T obj, K objValue)
-	{
-		ParameterExpression parameterExpression = Expression.Parameter(typeof(T), "obj");
-		ParameterExpression parameterExpression2 = Expression.Parameter(propertyInfo.PropertyType, "objValue");
-		MethodCallExpression body = Expression.Call(parameterExpression, propertyInfo.GetSetMethod(), parameterExpression2);
-		Expression<Action<T, K>> expression = Expression.Lambda<Action<T, K>>(body, new ParameterExpression[2] { parameterExpression, parameterExpression2 });
-		expression.Compile()(obj, objValue);
-	}
-
-	/// <summary>
-	/// 从设备里读取支持Hsl特性的数据内容，该特性为<see cref="T:HslCommunication.Reflection.HslDeviceAddressAttribute" />，详细参考论坛的操作说明。
+	/// 从设备里读取支持Hsl特性的数据内容，该特性为<see cref="DeviceAddressAttribute" />，详细参考论坛的操作说明。
 	/// </summary>
 	/// <typeparam name="T">自定义的数据类型对象</typeparam>
 	/// <param name="readWrite">读写接口的实现</param>
@@ -499,11 +480,8 @@ public class ReflectionHelper
 				continue;
 			}
 
-			var attr = attributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType()); ;
-			if (attr == null)
-			{
-				attr = attributes.FirstOrDefault(s => s.DeviceType == null);
-			}
+			var attr = attributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType());
+			attr ??= attributes.FirstOrDefault(s => s.DeviceType == null);
 
 			if (attr == null)
 			{
@@ -513,7 +491,7 @@ public class ReflectionHelper
 			Type propertyType = property.PropertyType;
 			if (propertyType == typeof(short))
 			{
-				OperateResult<short> valueResult8 = await readWrite.ReadInt16Async(attr.Address);
+				OperateResult<short> valueResult8 = await readWrite.ReadInt16Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult8.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult8);
@@ -522,7 +500,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(short[]))
 			{
-				OperateResult<short[]> valueResult9 = await readWrite.ReadInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<short[]> valueResult9 = await readWrite.ReadInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult9.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult9);
@@ -531,7 +509,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ushort))
 			{
-				OperateResult<ushort> valueResult12 = await readWrite.ReadUInt16Async(attr.Address);
+				OperateResult<ushort> valueResult12 = await readWrite.ReadUInt16Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult12.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult12);
@@ -540,7 +518,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ushort[]))
 			{
-				OperateResult<ushort[]> valueResult13 = await readWrite.ReadUInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<ushort[]> valueResult13 = await readWrite.ReadUInt16Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult13.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult13);
@@ -549,7 +527,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(int))
 			{
-				OperateResult<int> valueResult14 = await readWrite.ReadInt32Async(attr.Address);
+				OperateResult<int> valueResult14 = await readWrite.ReadInt32Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult14.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult14);
@@ -558,7 +536,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(int[]))
 			{
-				OperateResult<int[]> valueResult17 = await readWrite.ReadInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<int[]> valueResult17 = await readWrite.ReadInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult17.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult17);
@@ -567,7 +545,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(uint))
 			{
-				OperateResult<uint> valueResult18 = await readWrite.ReadUInt32Async(attr.Address);
+				OperateResult<uint> valueResult18 = await readWrite.ReadUInt32Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult18.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult18);
@@ -576,7 +554,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(uint[]))
 			{
-				OperateResult<uint[]> valueResult19 = await readWrite.ReadUInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<uint[]> valueResult19 = await readWrite.ReadUInt32Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult19.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult19);
@@ -585,7 +563,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(long))
 			{
-				OperateResult<long> valueResult20 = await readWrite.ReadInt64Async(attr.Address);
+				OperateResult<long> valueResult20 = await readWrite.ReadInt64Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult20.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult20);
@@ -594,7 +572,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(long[]))
 			{
-				OperateResult<long[]> valueResult16 = await readWrite.ReadInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<long[]> valueResult16 = await readWrite.ReadInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult16.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult16);
@@ -603,7 +581,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ulong))
 			{
-				OperateResult<ulong> valueResult15 = await readWrite.ReadUInt64Async(attr.Address);
+				OperateResult<ulong> valueResult15 = await readWrite.ReadUInt64Async(attr.Address).ConfigureAwait(false);
 				if (!valueResult15.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult15);
@@ -612,7 +590,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ulong[]))
 			{
-				OperateResult<ulong[]> valueResult11 = await readWrite.ReadUInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<ulong[]> valueResult11 = await readWrite.ReadUInt64Async(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult11.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult11);
@@ -621,7 +599,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(float))
 			{
-				OperateResult<float> valueResult10 = await readWrite.ReadFloatAsync(attr.Address);
+				OperateResult<float> valueResult10 = await readWrite.ReadFloatAsync(attr.Address).ConfigureAwait(false);
 				if (!valueResult10.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult10);
@@ -630,7 +608,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(float[]))
 			{
-				OperateResult<float[]> valueResult7 = await readWrite.ReadFloatAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<float[]> valueResult7 = await readWrite.ReadFloatAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult7.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult7);
@@ -639,7 +617,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(double))
 			{
-				OperateResult<double> valueResult6 = await readWrite.ReadDoubleAsync(attr.Address);
+				OperateResult<double> valueResult6 = await readWrite.ReadDoubleAsync(attr.Address).ConfigureAwait(false);
 				if (!valueResult6.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult6);
@@ -648,7 +626,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(double[]))
 			{
-				OperateResult<double[]> valueResult5 = await readWrite.ReadDoubleAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<double[]> valueResult5 = await readWrite.ReadDoubleAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult5.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult5);
@@ -657,7 +635,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(string))
 			{
-				OperateResult<string> valueResult4 = await readWrite.ReadStringAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<string> valueResult4 = await readWrite.ReadStringAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult4.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult4);
@@ -666,7 +644,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(byte[]))
 			{
-				OperateResult<byte[]> valueResult3 = await readWrite.ReadAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<byte[]> valueResult3 = await readWrite.ReadAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult3.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult3);
@@ -675,7 +653,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(bool))
 			{
-				OperateResult<bool> valueResult2 = await readWrite.ReadBoolAsync(attr.Address);
+				OperateResult<bool> valueResult2 = await readWrite.ReadBoolAsync(attr.Address).ConfigureAwait(false);
 				if (!valueResult2.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult2);
@@ -684,7 +662,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(bool[]))
 			{
-				OperateResult<bool[]> valueResult = await readWrite.ReadBoolAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length)));
+				OperateResult<bool[]> valueResult = await readWrite.ReadBoolAsync(attr.Address, (ushort)((attr.Length <= 0) ? 1u : ((uint)attr.Length))).ConfigureAwait(false);
 				if (!valueResult.IsSuccess)
 				{
 					return OperateResult.Error<T>(valueResult);
@@ -692,7 +670,7 @@ public class ReflectionHelper
 				property.SetValue(obj, valueResult.Content, null);
 			}
 		}
-		return OperateResult.Ok((T)obj);
+		return OperateResult.Ok(obj);
 	}
 
 	/// <summary>
@@ -721,10 +699,7 @@ public class ReflectionHelper
 			}
 
 			var attr = attributes.FirstOrDefault(s => s.DeviceType == readWrite.GetType());
-			if (attr == null)
-			{
-				attr = attributes.FirstOrDefault(s => s.DeviceType == null);
-			}
+			attr ??= attributes.FirstOrDefault(s => s.DeviceType == null);
 
 			if (attr == null)
 			{
@@ -734,7 +709,7 @@ public class ReflectionHelper
 			Type propertyType = property.PropertyType;
 			if (propertyType == typeof(short))
 			{
-				OperateResult writeResult20 = await readWrite.WriteAsync(value: (short)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult20 = await readWrite.WriteAsync(value: (short)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult20.IsSuccess)
 				{
 					return writeResult20;
@@ -742,7 +717,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(short[]))
 			{
-				OperateResult writeResult19 = await readWrite.WriteAsync(values: (short[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult19 = await readWrite.WriteAsync(values: (short[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult19.IsSuccess)
 				{
 					return writeResult19;
@@ -750,7 +725,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ushort))
 			{
-				OperateResult writeResult18 = await readWrite.WriteAsync(value: (ushort)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult18 = await readWrite.WriteAsync(value: (ushort)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult18.IsSuccess)
 				{
 					return writeResult18;
@@ -758,7 +733,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ushort[]))
 			{
-				OperateResult writeResult17 = await readWrite.WriteAsync(values: (ushort[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult17 = await readWrite.WriteAsync(values: (ushort[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult17.IsSuccess)
 				{
 					return writeResult17;
@@ -766,7 +741,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(int))
 			{
-				OperateResult writeResult16 = await readWrite.WriteAsync(value: (int)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult16 = await readWrite.WriteAsync(value: (int)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult16.IsSuccess)
 				{
 					return writeResult16;
@@ -774,7 +749,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(int[]))
 			{
-				OperateResult writeResult15 = await readWrite.WriteAsync(values: (int[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult15 = await readWrite.WriteAsync(values: (int[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult15.IsSuccess)
 				{
 					return writeResult15;
@@ -782,7 +757,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(uint))
 			{
-				OperateResult writeResult14 = await readWrite.WriteAsync(value: (uint)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult14 = await readWrite.WriteAsync(value: (uint)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult14.IsSuccess)
 				{
 					return writeResult14;
@@ -790,7 +765,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(uint[]))
 			{
-				OperateResult writeResult13 = await readWrite.WriteAsync(values: (uint[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult13 = await readWrite.WriteAsync(values: (uint[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult13.IsSuccess)
 				{
 					return writeResult13;
@@ -798,7 +773,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(long))
 			{
-				OperateResult writeResult12 = await readWrite.WriteAsync(value: (long)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult12 = await readWrite.WriteAsync(value: (long)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult12.IsSuccess)
 				{
 					return writeResult12;
@@ -806,7 +781,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(long[]))
 			{
-				OperateResult writeResult11 = await readWrite.WriteAsync(values: (long[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult11 = await readWrite.WriteAsync(values: (long[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult11.IsSuccess)
 				{
 					return writeResult11;
@@ -814,7 +789,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ulong))
 			{
-				OperateResult writeResult10 = await readWrite.WriteAsync(value: (ulong)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult10 = await readWrite.WriteAsync(value: (ulong)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult10.IsSuccess)
 				{
 					return writeResult10;
@@ -822,7 +797,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(ulong[]))
 			{
-				OperateResult writeResult9 = await readWrite.WriteAsync(values: (ulong[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult9 = await readWrite.WriteAsync(values: (ulong[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult9.IsSuccess)
 				{
 					return writeResult9;
@@ -830,7 +805,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(float))
 			{
-				OperateResult writeResult8 = await readWrite.WriteAsync(value: (float)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult8 = await readWrite.WriteAsync(value: (float)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult8.IsSuccess)
 				{
 					return writeResult8;
@@ -838,7 +813,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(float[]))
 			{
-				OperateResult writeResult7 = await readWrite.WriteAsync(values: (float[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult7 = await readWrite.WriteAsync(values: (float[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult7.IsSuccess)
 				{
 					return writeResult7;
@@ -846,7 +821,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(double))
 			{
-				OperateResult writeResult6 = await readWrite.WriteAsync(value: (double)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult6 = await readWrite.WriteAsync(value: (double)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult6.IsSuccess)
 				{
 					return writeResult6;
@@ -854,7 +829,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(double[]))
 			{
-				OperateResult writeResult5 = await readWrite.WriteAsync(values: (double[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult5 = await readWrite.WriteAsync(values: (double[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult5.IsSuccess)
 				{
 					return writeResult5;
@@ -862,7 +837,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(string))
 			{
-				OperateResult writeResult4 = await readWrite.WriteAsync(value: (string)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult4 = await readWrite.WriteAsync(value: (string)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult4.IsSuccess)
 				{
 					return writeResult4;
@@ -870,7 +845,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(byte[]))
 			{
-				OperateResult writeResult3 = await readWrite.WriteAsync(value: (byte[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult3 = await readWrite.WriteAsync(value: (byte[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult3.IsSuccess)
 				{
 					return writeResult3;
@@ -878,7 +853,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(bool))
 			{
-				OperateResult writeResult2 = await readWrite.WriteAsync(value: (bool)property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult2 = await readWrite.WriteAsync(value: (bool)property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult2.IsSuccess)
 				{
 					return writeResult2;
@@ -886,7 +861,7 @@ public class ReflectionHelper
 			}
 			else if (propertyType == typeof(bool[]))
 			{
-				OperateResult writeResult = await readWrite.WriteAsync(value: (bool[])property.GetValue(data, null), address: attr.Address);
+				OperateResult writeResult = await readWrite.WriteAsync(value: (bool[])property.GetValue(data, null), address: attr.Address).ConfigureAwait(false);
 				if (!writeResult.IsSuccess)
 				{
 					return writeResult;

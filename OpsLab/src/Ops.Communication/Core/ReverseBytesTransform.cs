@@ -3,7 +3,7 @@ namespace Ops.Communication.Core;
 /// <summary>
 /// 字节倒序的转换类
 /// </summary>
-public class ReverseBytesTransform : ByteTransformBase
+public sealed class ReverseBytesTransform : ByteTransformBase
 {
 	public ReverseBytesTransform()
 	{

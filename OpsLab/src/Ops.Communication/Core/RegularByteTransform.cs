@@ -3,7 +3,7 @@ namespace Ops.Communication.Core;
 /// <summary>
 /// 常规的字节转换类。
 /// </summary>
-public class RegularByteTransform : ByteTransformBase
+public sealed class RegularByteTransform : ByteTransformBase
 {
 	public RegularByteTransform()
 	{

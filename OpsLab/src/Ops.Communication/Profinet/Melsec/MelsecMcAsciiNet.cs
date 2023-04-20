@@ -132,7 +132,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		{
 			ushort readLength = (ushort)Math.Min(length - alreadyFinished, 450);
 			addressResult.Content.Length = readLength;
-			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content);
+			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -155,7 +155,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 	private async Task<OperateResult<byte[]>> ReadAddressDataAsync(McAddressData addressData)
 	{
 		byte[] coreResult = MelsecHelper.BuildAsciiReadMcCoreCommand(addressData, isBit: false);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -178,7 +178,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildAsciiWriteWordCoreCommand(addressResult.Content, value);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -277,7 +277,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildAsciiReadRandomWordCommand(mcAddressDatas);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -310,7 +310,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildAsciiReadRandomCommand(mcAddressDatas);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -326,7 +326,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult<short[]>> ReadRandomInt16Async(string[] address)
 	{
-		OperateResult<byte[]> read = await ReadRandomAsync(address);
+		OperateResult<byte[]> read = await ReadRandomAsync(address).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<short[]>(read);
@@ -395,7 +395,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildAsciiReadMcCoreCommand(addressResult.Content, isBit: true);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -424,7 +424,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = MelsecHelper.BuildAsciiWriteBitCoreCommand(addressResult.Content, values);
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -468,7 +468,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 			return coreResult;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -512,7 +512,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 			return coreResult;
 		}
 
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult.Content, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -608,7 +608,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteRunAsync()
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("1001000000010000"), NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("1001000000010000"), NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -624,7 +624,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteStopAsync()
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("100200000001"), NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("100200000001"), NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -640,7 +640,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteResetAsync()
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("100600000001"), NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("100600000001"), NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -656,7 +656,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult<string>> ReadPlcTypeAsync()
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("01010000"), NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("01010000"), NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -672,7 +672,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 
 	public async Task<OperateResult> ErrorStateResetAsync()
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("01010000"), NetworkNumber, NetworkStationNumber));
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(Encoding.ASCII.GetBytes("01010000"), NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -738,7 +738,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		if (isBit)
 		{
 			return OperateResult.Ok((from m in response.RemoveBegin(22)
-													  select (byte)((m != 48) ? 1 : 0)).ToArray());
+									 select (byte)((m != 48) ? 1 : 0)).ToArray());
 		}
 		return OperateResult.Ok(MelsecHelper.TransAsciiByteArrayToByteArray(response.RemoveBegin(22)));
 	}

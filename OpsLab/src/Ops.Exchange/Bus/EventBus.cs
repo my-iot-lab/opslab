@@ -72,7 +72,7 @@ public sealed class EventBus
                     var handler = _serviceProvider.GetService(handlerType);
                     if (handler is IEventHandler<TEventData> handler0)
                     {
-                        await handler0.HandleAsync(eventData, cancellationToken);
+                        await handler0.HandleAsync(eventData, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱PLC的数据类型，此处包含了几个常用的类型
 /// </summary>
-public class MelsecA1EDataType
+public sealed class MelsecA1EDataType
 {
 	/// <summary>
 	/// X输入寄存器

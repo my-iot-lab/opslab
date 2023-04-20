@@ -54,11 +54,11 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 
-                replyResult = await replyForwarder.ExecuteAsync(forwardData, cts0.Token);
+                replyResult = await replyForwarder.ExecuteAsync(forwardData, cts0.Token).ConfigureAwait(false);
             }
             else
             {
-                replyResult = await replyForwarder.ExecuteAsync(forwardData, cancellationToken);
+                replyResult = await replyForwarder.ExecuteAsync(forwardData, cancellationToken).ConfigureAwait(false);
             }
 
             foreach (var item in replyResult.Values)
@@ -72,7 +72,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         {
             newState = ExStatusCode.HandlerTimeout;
 
-            _logger.LogError("[ReplyEventHandler] 任务超时取消 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError("[ReplyEventHandler] 任务超时取消 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.Context.Request.RequestId,
                 schema.Station,
                 eventData.Tag);
@@ -81,7 +81,7 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
         {
             newState = ExStatusCode.HandlerException;
 
-            _logger.LogError(ex, "[ReplyEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError(ex, "[ReplyEventHandler] 任务异常 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.Context.Request.RequestId,
                 schema.Station,
                 eventData.Tag);
@@ -98,6 +98,6 @@ internal sealed class ReplyEventHandler : IEventHandler<ReplyEventData>
             eventData.Context.SetResponseValue(eventData.Tag, newState);
         }
 
-        await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken);
+        await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken).ConfigureAwait(false);
     }
 }

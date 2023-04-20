@@ -7,7 +7,7 @@ namespace Ops.Communication.Modbus;
 /// <summary>
 /// Modbus协议相关辅助类
 /// </summary>
-internal class ModbusHelper
+internal static class ModbusHelper
 {
 	public static OperateResult<byte[]> ExtraRtuResponseContent(byte[] send, byte[] response)
 	{
@@ -79,7 +79,7 @@ internal class ModbusHelper
 		var resultArray = new List<byte>();
 		for (int i = 0; i < command.Content.Length; i++)
 		{
-			var read = await modbus.ReadFromCoreServerAsync(command.Content[i]);
+			var read = await modbus.ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<byte[]>(read);
@@ -121,7 +121,7 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 
 	public static OperateResult Write(IModbus modbus, string address, short value)
@@ -154,7 +154,7 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 
 	public static OperateResult Write(IModbus modbus, string address, ushort value)
@@ -188,7 +188,7 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 
 	public static OperateResult WriteMask(IModbus modbus, string address, ushort andMask, ushort orMask)
@@ -222,7 +222,7 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 
 	internal static OperateResult<bool[]> ReadBoolHelper(IModbus modbus, string address, ushort length, byte function)
@@ -318,7 +318,7 @@ internal class ModbusHelper
 		var resultArray = new List<bool>();
 		for (int i = 0; i < command.Content.Length; i++)
 		{
-			var read = await modbus.ReadFromCoreServerAsync(command.Content[i]);
+			var read = await modbus.ReadFromCoreServerAsync(command.Content[i]).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return OperateResult.Error<bool[]>(read);
@@ -360,7 +360,7 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 
 	public static OperateResult Write(IModbus modbus, string address, bool value)
@@ -394,6 +394,6 @@ internal class ModbusHelper
 			return command;
 		}
 
-		return await modbus.ReadFromCoreServerAsync(command.Content);
+		return await modbus.ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 	}
 }

@@ -86,7 +86,7 @@ namespace Ops.Communication.Profinet.Omron;
 ///   </item>
 /// </list>
 /// </example>
-public class OmronFinsNet : NetworkDeviceBase
+public sealed class OmronFinsNet : NetworkDeviceBase
 {
 	private readonly byte[] handSingle = new byte[20]
 	{
@@ -103,7 +103,7 @@ public class OmronFinsNet : NetworkDeviceBase
 		set
 		{
 			base.IpAddress = value;
-			DA1 = Convert.ToByte(base.IpAddress.Substring(base.IpAddress.LastIndexOf(".") + 1));
+			DA1 = Convert.ToByte(base.IpAddress[(base.IpAddress.LastIndexOf(".") + 1)..]);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class OmronFinsNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(socket, handSingle, hasResponseData: true, usePackAndUnpack: false);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(socket, handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -316,32 +316,32 @@ public class OmronFinsNet : NetworkDeviceBase
 
 	public override OperateResult<string> ReadString(string address, ushort length)
 	{
-		return base.ReadString(address, length, Encoding.UTF8);
+		return ReadString(address, length, Encoding.UTF8);
 	}
 
 	public override OperateResult Write(string address, string value)
 	{
-		return base.Write(address, value, Encoding.UTF8);
+		return Write(address, value, Encoding.UTF8);
 	}
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		return await OmronFinsNetHelper.ReadAsync(this, address, length, ReadSplits);
+		return await OmronFinsNetHelper.ReadAsync(this, address, length, ReadSplits).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		return await OmronFinsNetHelper.WriteAsync(this, address, value);
+		return await OmronFinsNetHelper.WriteAsync(this, address, value).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length)
 	{
-		return await base.ReadStringAsync(address, length, Encoding.UTF8);
+		return await ReadStringAsync(address, length, Encoding.UTF8).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, string value)
 	{
-		return await base.WriteAsync(address, value, Encoding.UTF8);
+		return await WriteAsync(address, value, Encoding.UTF8).ConfigureAwait(false);
 	}
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
@@ -356,12 +356,12 @@ public class OmronFinsNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		return await OmronFinsNetHelper.ReadBoolAsync(this, address, length, ReadSplits);
+		return await OmronFinsNetHelper.ReadBoolAsync(this, address, length, ReadSplits).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] values)
 	{
-		return await OmronFinsNetHelper.WriteAsync(this, address, values);
+		return await OmronFinsNetHelper.WriteAsync(this, address, values).ConfigureAwait(false);
 	}
 
 	public OperateResult Run()
@@ -386,22 +386,22 @@ public class OmronFinsNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RunAsync()
 	{
-		return await OmronFinsNetHelper.RunAsync(this);
+		return await OmronFinsNetHelper.RunAsync(this).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> StopAsync()
 	{
-		return await OmronFinsNetHelper.StopAsync(this);
+		return await OmronFinsNetHelper.StopAsync(this).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<OmronCpuUnitData>> ReadCpuUnitDataAsync()
 	{
-		return await OmronFinsNetHelper.ReadCpuUnitDataAsync(this);
+		return await OmronFinsNetHelper.ReadCpuUnitDataAsync(this).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<OmronCpuUnitStatus>> ReadCpuUnitStatusAsync()
 	{
-		return await OmronFinsNetHelper.ReadCpuUnitStatusAsync(this);
+		return await OmronFinsNetHelper.ReadCpuUnitStatusAsync(this).ConfigureAwait(false);
 	}
 
 	public override string ToString()

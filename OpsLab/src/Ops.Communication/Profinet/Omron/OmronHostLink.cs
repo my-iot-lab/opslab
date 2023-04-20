@@ -15,7 +15,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// 串口线不是标准的串口线，电脑的串口线的235引脚分别接PLC的329引脚，45线短接，就可以通讯，感谢 深圳-小君(QQ932507362)提供的解决方案。
 /// </note>
 /// </remarks>
-public class OmronHostLink : SerialDeviceBase
+public sealed class OmronHostLink : SerialDeviceBase
 {
 	public byte ICF { get; set; } = 0;
 
@@ -115,7 +115,7 @@ public class OmronHostLink : SerialDeviceBase
 			{
 				return OperateResult.Error<bool[]>(operateResult3);
 			}
-			list.AddRange(operateResult3.Content.Select((byte m) => (m != 0) ? true : false));
+			list.AddRange(operateResult3.Content.Select((byte m) => m != 0));
 		}
 		return OperateResult.Ok(list.ToArray());
 	}

@@ -9,7 +9,7 @@ namespace Ops.Communication.Profinet.Siemens;
 /// 西门子的MPI协议信息，注意：未测试通过，无法使用<br />
 /// Siemens MPI protocol information, note: it has not passed the test and cannot be used
 /// </summary>
-public class SiemensMPI : SerialDeviceBase
+public sealed class SiemensMPI : SerialDeviceBase
 {
 	private byte station = 2;
 

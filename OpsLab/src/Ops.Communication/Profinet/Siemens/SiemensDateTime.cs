@@ -7,27 +7,28 @@ namespace Ops.Communication.Profinet.Siemens;
 /// 这部分的代码参考了另一个s7的库，感谢原作者，此处贴出出处，遵循 MIT 协议
 /// https://github.com/S7NetPlus/s7netplus
 /// </remarks>
-public class SiemensDateTime
+public static class SiemensDateTime
 {
-	/// <summary>
-	/// The minimum <see cref="T:System.DateTime" /> value supported by the specification.
-	/// </summary>
-	public static readonly DateTime SpecMinimumDateTime = new(1990, 1, 1);
+    /// <summary>
+    /// The minimum <see cref="DateTime" /> value supported by the specification.
+    /// </summary>
+    public static readonly DateTime SpecMinimumDateTime = new(1990, 1, 1);
 
-	/// <summary>
-	/// The maximum <see cref="T:System.DateTime" /> value supported by the specification.
-	/// </summary>
-	public static readonly DateTime SpecMaximumDateTime = new(2089, 12, 31, 23, 59, 59, 999);
+    /// <summary>
+    /// The maximum <see cref="DateTime" /> value supported by the specification.
+    /// </summary>
+    public static readonly DateTime SpecMaximumDateTime = new(2089, 12, 31, 23, 59, 59, 999);
 
-	/// <summary>
-	/// Parses a <see cref="T:System.DateTime" /> value from bytes.
-	/// </summary>
-	/// <param name="bytes">Input bytes read from PLC.</param>
-	/// <returns>A <see cref="T:System.DateTime" /> object representing the value read from PLC.</returns>
-	/// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the length of
-	///   <paramref name="bytes" /> is not 8 or any value in <paramref name="bytes" />
-	///   is outside the valid range of values.</exception>
-	public static DateTime FromByteArray(byte[] bytes)
+    /// <summary>
+    /// Parses a <see cref="DateTime" /> value from bytes.
+    /// </summary>
+    /// <param name="bytes">Input bytes read from PLC.</param>
+    /// <returns>A <see cref="DateTime" /> object representing the value read from PLC.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the length of
+    ///   <paramref name="bytes" /> is not 8 or any value in <paramref name="bytes" />
+    ///   is outside the valid range of values.
+	/// </exception>
+    public static DateTime FromByteArray(byte[] bytes)
 	{
 		return FromByteArrayImpl(bytes);
 	}
@@ -71,7 +72,7 @@ public class SiemensDateTime
 		int second = AssertRangeInclusive(DecodeBcd(bytes[5]), 0, 59, "second");
 		int num = AssertRangeInclusive(DecodeBcd(bytes[6]), 0, 99, "first two millisecond digits");
 		int num2 = AssertRangeInclusive(bytes[7] >> 4, 0, 9, "third millisecond digit");
-		int num3 = AssertRangeInclusive(bytes[7] & 0xF, 1, 7, "day of week");
+
 		return new DateTime(year, month, day, hour, minute, second, num * 10 + num2);
 
 		static int AssertRangeInclusive(int input, byte min, byte max, string field)
@@ -155,11 +156,11 @@ public class SiemensDateTime
 	}
 
 	/// <summary>
-	/// Converts an array of <see cref="T:System.DateTime" /> values to a byte array.
+	/// Converts an array of <see cref="DateTime" /> values to a byte array.
 	/// </summary>
 	/// <param name="dateTimes">The DateTime values to convert.</param>
 	/// <returns>A byte array containing the S7 date time representations of <paramref name="dateTimes" />.</returns>
-	/// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when any value of
+	/// <exception cref="ArgumentOutOfRangeException">Thrown when any value of
 	///   <paramref name="dateTimes" /> is before <see cref="P:SpecMinimumDateTime" />
 	///   or after <see cref="P:SpecMaximumDateTime" />.</exception>
 	public static byte[] ToByteArray(DateTime[] dateTimes)

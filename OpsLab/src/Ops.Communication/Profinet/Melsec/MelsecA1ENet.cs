@@ -160,16 +160,14 @@ namespace Ops.Communication.Profinet.Melsec;
 ///     <term></term>
 ///   </item>
 /// </list>
-/// <see cref="ReadBool(UInt16)" /> 方法一次读取的最多点数是256点。
-/// <note type="important">本通讯类由CKernal推送，感谢</note>
+/// <see cref="ReadBool" /> 方法一次读取的最多点数是256点。
 /// </remarks>
-public class MelsecA1ENet : NetworkDeviceBase
+public sealed class MelsecA1ENet : NetworkDeviceBase
 {
 	/// <summary>
 	/// PLC编号，默认为0xFF。
 	/// </summary>
 	public byte PLCNumber { get; set; } = byte.MaxValue;
-
 
 	/// <summary>
 	/// 实例化一个默认的对象。
@@ -225,11 +223,13 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return operateResult;
 		}
+
 		OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
 			return operateResult2;
 		}
+
 		OperateResult operateResult3 = CheckResponseLegal(operateResult2.Content);
 		if (!operateResult3.IsSuccess)
 		{
@@ -245,16 +245,19 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return OperateResult.Error<byte[]>(command);
 		}
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
 		}
+
 		OperateResult check = CheckResponseLegal(read.Content);
 		if (!check.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(check);
 		}
+
 		return ExtractActualData(read.Content, isBit: false);
 	}
 
@@ -265,11 +268,13 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return command;
 		}
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
 		}
+
 		OperateResult check = CheckResponseLegal(read.Content);
 		if (!check.IsSuccess)
 		{
@@ -294,16 +299,19 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return OperateResult.Error<bool[]>(operateResult);
 		}
+
 		OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult2);
 		}
+
 		OperateResult operateResult3 = CheckResponseLegal(operateResult2.Content);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult3);
 		}
+
 		OperateResult<byte[]> operateResult4 = ExtractActualData(operateResult2.Content, isBit: true);
 		if (!operateResult4.IsSuccess)
 		{
@@ -325,6 +333,7 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return operateResult;
 		}
+
 		OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
@@ -340,16 +349,19 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return OperateResult.Error<bool[]>(command);
 		}
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
 		}
+
 		OperateResult check = CheckResponseLegal(read.Content);
 		if (!check.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(check);
 		}
+
 		OperateResult<byte[]> extract = ExtractActualData(read.Content, isBit: true);
 		if (!extract.IsSuccess)
 		{
@@ -365,7 +377,8 @@ public class MelsecA1ENet : NetworkDeviceBase
 		{
 			return command;
 		}
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content);
+
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -407,7 +420,7 @@ public class MelsecA1ENet : NetworkDeviceBase
 			BitConverter.GetBytes(operateResult.Content2)[3],
 			operateResult.Content1.DataCode[1],
 			operateResult.Content1.DataCode[0],
-			(byte)((int)length % 256),
+			(byte)(length % 256),
 			0
 		});
 	}

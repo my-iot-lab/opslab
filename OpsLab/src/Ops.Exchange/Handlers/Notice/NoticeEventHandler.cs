@@ -33,23 +33,23 @@ internal sealed class NoticeEventHandler : IEventHandler<NoticeEventData>
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 
-                await noticeForwarder.ExecuteAsync(forwardData, cts0.Token);
+                await noticeForwarder.ExecuteAsync(forwardData, cts0.Token).ConfigureAwait(false);
             }
             else
             {
-                await noticeForwarder.ExecuteAsync(forwardData, cancellationToken);
+                await noticeForwarder.ExecuteAsync(forwardData, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.LogError("[NoticeEventHandler] 任务超时取消 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError("[NoticeEventHandler] 任务超时取消 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.RequestId,
                 eventData.Schema.Station,
                 eventData.Tag);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[NoticeEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError(ex, "[NoticeEventHandler] 任务异常 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.RequestId,
                 eventData.Schema.Station,
                 eventData.Tag);

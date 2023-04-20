@@ -8,7 +8,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// AB-PLC的DF1通信协议，基于串口实现，通信机制为半双工，目前适用于 Micro-Logix1000,SLC500,SLC 5/03,SLC 5/04，地址示例：N7:1
 /// </summary>
-public class AllenBradleyDF1Serial : SerialDeviceBase
+public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 {
 	private readonly IncrementCount incrementCount;
 
@@ -119,7 +119,7 @@ public class AllenBradleyDF1Serial : SerialDeviceBase
 	public byte[] PackCommand(byte station, byte[] command)
 	{
 		byte[] array = CalculateCheckResult(station, command);
-		MemoryStream memoryStream = new MemoryStream();
+		MemoryStream memoryStream = new();
 		memoryStream.WriteByte(16);
 		memoryStream.WriteByte(1);
 		memoryStream.WriteByte(station);

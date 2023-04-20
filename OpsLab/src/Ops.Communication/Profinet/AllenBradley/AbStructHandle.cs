@@ -3,7 +3,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// 结构体的句柄信息
 /// </summary>
-public class AbStructHandle
+public sealed class AbStructHandle
 {
 	/// <summary>
 	/// 返回项数

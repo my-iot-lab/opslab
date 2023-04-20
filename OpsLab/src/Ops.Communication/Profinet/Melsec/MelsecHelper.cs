@@ -7,7 +7,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 所有三菱通讯类的通用辅助工具类，包含了一些通用的静态方法，可以使用本类来获取一些原始的报文信息。详细的操作参见例子。
 /// </summary>
-public class MelsecHelper
+public static class MelsecHelper
 {
 	/// <summary>
 	/// 解析A1E协议数据地址。
@@ -192,10 +192,7 @@ public class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteWordCoreCommand(McAddressData addressData, byte[] value)
 	{
-		if (value == null)
-		{
-			value = new byte[0];
-		}
+		value ??= Array.Empty<byte>();
 		byte[] array = new byte[10 + value.Length];
 		array[0] = 1;
 		array[1] = 20;
@@ -253,10 +250,7 @@ public class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteBitCoreCommand(McAddressData addressData, bool[] value)
 	{
-		if (value == null)
-		{
-			value = new bool[0];
-		}
+		value ??= Array.Empty<bool>();
 		byte[] array = TransBoolArrayToByteData(value);
 		byte[] array2 = new byte[10 + array.Length];
 		array2[0] = 1;
@@ -281,10 +275,7 @@ public class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildAsciiWriteBitCoreCommand(McAddressData addressData, bool[] value)
 	{
-		if (value == null)
-		{
-			value = new bool[0];
-		}
+		value ??= Array.Empty<bool>();
 		byte[] array = value.Select((bool m) => (byte)(m ? 49 : 48)).ToArray();
 		byte[] array2 = new byte[20 + array.Length];
 		array2[0] = 49;

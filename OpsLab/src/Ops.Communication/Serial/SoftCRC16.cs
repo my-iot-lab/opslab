@@ -6,7 +6,7 @@ namespace Ops.Communication.Serial;
 /// <remarks>
 /// 本类提供了几个静态的方法，用来进行CRC16码的计算和验证的，多项式码可以自己指定配置，但是预置的寄存器为0xFF 0xFF
 /// </remarks>
-public class SoftCRC16
+public static class SoftCRC16
 {
 	/// <summary>
 	/// 来校验对应的接收数据的CRC校验码，默认多项式码为0xA001
@@ -36,11 +36,7 @@ public class SoftCRC16
 		byte[] array = new byte[num - 2];
 		Array.Copy(value, 0, array, 0, array.Length);
 		byte[] array2 = CRC16(array, CH, CL);
-		if (array2[num - 2] == value[num - 2] && array2[num - 1] == value[num - 1])
-		{
-			return true;
-		}
-		return false;
+		return array2[num - 2] == value[num - 2] && array2[num - 1] == value[num - 1];
 	}
 
 	/// <summary>
@@ -88,6 +84,7 @@ public class SoftCRC16
 				}
 			}
 		}
+
 		array[^2] = b;
 		array[^1] = b2;
 		return array;

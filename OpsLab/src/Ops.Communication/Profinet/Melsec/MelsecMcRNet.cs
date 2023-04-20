@@ -9,7 +9,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱的R系列的MC协议，支持的地址类型和 <see cref="MelsecMcNet" /> 有区别，详细请查看对应的API文档说明
 /// </summary>
-public class MelsecMcRNet : NetworkDeviceBase
+public sealed class MelsecMcRNet : NetworkDeviceBase
 {
 	public byte NetworkNumber { get; set; } = 0;
 
@@ -136,7 +136,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 		{
 			ushort readLength = (ushort)Math.Min(length - alreadyFinished, 900);
 			addressResult.Content.Length = readLength;
-			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content, isBit: false);
+			OperateResult<byte[]> read = await ReadAddressDataAsync(addressResult.Content, isBit: false).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -160,7 +160,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 	private async Task<OperateResult<byte[]>> ReadAddressDataAsync(McRAddressData address, bool isBit)
 	{
 		byte[] coreResult = BuildReadMcCoreCommand(address, isBit);
-		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -182,13 +182,13 @@ public class MelsecMcRNet : NetworkDeviceBase
 		{
 			return OperateResult.Error<byte[]>(addressResult);
 		}
-		return await WriteAddressDataAsync(addressResult.Content, value);
+		return await WriteAddressDataAsync(addressResult.Content, value).ConfigureAwait(false);
 	}
 
 	private async Task<OperateResult> WriteAddressDataAsync(McRAddressData addressData, byte[] value)
 	{
 		byte[] coreResult = BuildWriteWordCoreCommand(addressData, value);
-		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -263,7 +263,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = BuildReadMcCoreCommand(addressResult.Content, isBit: true);
-		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -292,7 +292,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 		}
 
 		byte[] coreResult = BuildWriteBitCoreCommand(addressResult.Content, values);
-		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber));
+		var read = await ReadFromCoreServerAsync(MelsecMcNet.PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -505,10 +505,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteWordCoreCommand(McRAddressData address, byte[] value)
 	{
-		if (value == null)
-		{
-			value = Array.Empty<byte>();
-		}
+		value ??= Array.Empty<byte>();
 
 		byte[] array = new byte[12 + value.Length];
 		array[0] = 1;
@@ -535,10 +532,7 @@ public class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteBitCoreCommand(McRAddressData address, bool[] value)
 	{
-		if (value == null)
-		{
-			value = Array.Empty<bool>();
-		}
+		value ??= Array.Empty<bool>();
 
 		byte[] array = MelsecHelper.TransBoolArrayToByteData(value);
 		byte[] array2 = new byte[12 + array.Length];

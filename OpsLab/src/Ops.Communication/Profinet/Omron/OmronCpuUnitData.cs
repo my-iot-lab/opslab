@@ -5,7 +5,7 @@ namespace Ops.Communication.Profinet.Omron;
 /// <summary>
 /// 欧姆的Cpu的单元信息数据类
 /// </summary>
-public class OmronCpuUnitData
+public sealed class OmronCpuUnitData
 {
 	/// <summary>
 	/// Cpu unit Model

@@ -6,7 +6,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// <summary>
 /// AB PLC的辅助类，用来辅助生成基本的指令信息
 /// </summary>
-public class AllenBradleyHelper
+public static class AllenBradleyHelper
 {
 	/// <summary>
 	/// CIP命令中的读取数据的服务
@@ -140,7 +140,7 @@ public class AllenBradleyHelper
 			if (num > 0 && num2 > 0 && num2 > num)
 			{
 				text = array[i].Substring(num + 1, num2 - num - 1);
-				array[i] = array[i].Substring(0, num);
+				array[i] = array[i][..num];
 			}
 
 			memoryStream.WriteByte(145);
@@ -662,10 +662,7 @@ public class AllenBradleyHelper
 	/// <returns>包含服务的信息</returns>
 	public static byte[] PackCommandSingleService(byte[] command)
 	{
-		if (command == null)
-		{
-			command = Array.Empty<byte>();
-		}
+		command ??= Array.Empty<byte>();
 
 		byte[] array = new byte[4 + command.Length];
 		array[0] = 178;
@@ -693,7 +690,7 @@ public class AllenBradleyHelper
 	/// <returns>字节报文信息</returns>
 	public static byte[] UnRegisterSessionHandle(uint sessionHandle)
 	{
-		return PackRequestHeader(102, sessionHandle, new byte[0]);
+		return PackRequestHeader(102, sessionHandle, Array.Empty<byte>());
 	}
 
 	/// <summary>

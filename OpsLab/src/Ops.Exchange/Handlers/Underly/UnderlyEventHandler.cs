@@ -41,11 +41,11 @@ internal sealed class UnderlyEventHandler : IEventHandler<UnderlyEventData>
                 CancellationTokenSource cts2 = new(eventData.HandleTimeout);
                 using var cts0 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts2.Token);
 
-                underlyResult = await replyForwarder.ExecuteAsync(forwardData, cts0.Token);
+                underlyResult = await replyForwarder.ExecuteAsync(forwardData, cts0.Token).ConfigureAwait(false);
             }
             else
             {
-                underlyResult = await replyForwarder.ExecuteAsync(forwardData, cancellationToken);
+                underlyResult = await replyForwarder.ExecuteAsync(forwardData, cancellationToken).ConfigureAwait(false);
             }
            
             if (underlyResult.Values.Any())
@@ -55,19 +55,19 @@ internal sealed class UnderlyEventHandler : IEventHandler<UnderlyEventData>
                     eventData.Context.SetResponseValue(item.Key, item.Value);
                 }
 
-                await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken);
+                await _callbackTaskQueueManager.QueueAsync(eventData.Context, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.LogError("[UnderlyEventHandler] 任务超时取消 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError("[UnderlyEventHandler] 任务超时取消 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.Context.Request.RequestId,
                 schema.Station,
                 eventData.Tag);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[UnderlyEventHandler] 任务异常 -- RequestId：{0}，工站：{1}，触发点：{2}",
+            _logger.LogError(ex, "[UnderlyEventHandler] 任务异常 -- RequestId：{RequestId}，工站：{Station}，触发点：{Tag}",
                 eventData.Context.Request.RequestId,
                 schema.Station,
                 eventData.Tag);

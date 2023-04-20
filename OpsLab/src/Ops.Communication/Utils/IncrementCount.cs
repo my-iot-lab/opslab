@@ -55,6 +55,7 @@ public sealed class IncrementCount : IDisposable
 		{
 			_current = _max;
 		}
+
 		_hybirdLock.Leave();
 		return num;
 	}

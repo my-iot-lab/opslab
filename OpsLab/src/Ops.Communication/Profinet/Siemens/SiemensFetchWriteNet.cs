@@ -82,7 +82,7 @@ namespace Ops.Communication.Profinet.Siemens;
 ///   </item>
 /// </list>
 /// </remarks>
-public class SiemensFetchWriteNet : NetworkDeviceBase
+public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 {
 	/// <summary>
 	/// 实例化一个西门子的Fetch/Write协议的通讯对象<br />
@@ -181,7 +181,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 			return command;
 		}
 
-		var read = await ReadFromCoreServerAsync(command.Content);
+		var read = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -203,7 +203,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 			return command;
 		}
 
-		var write = await ReadFromCoreServerAsync(command.Content);
+		var write = await ReadFromCoreServerAsync(command.Content).ConfigureAwait(false);
 		if (!write.IsSuccess)
 		{
 			return write;
@@ -247,12 +247,12 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 
 	public async Task<OperateResult<byte>> ReadByteAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadAsync(address, 1).ConfigureAwait(false));
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteAsync(address, new byte[1] { value });
+		return await WriteAsync(address, new byte[1] { value }).ConfigureAwait(false);
 	}
 
 	public override string ToString()
@@ -293,7 +293,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 	/// <returns>解析出地址类型，起始地址，DB块的地址 -&gt; Resolves address type, start address, db block address</returns>
 	private static OperateResult<byte, int, ushort> AnalysisAddress(string address)
 	{
-		OperateResult<byte, int, ushort> operateResult = new OperateResult<byte, int, ushort>();
+		OperateResult<byte, int, ushort> operateResult = new();
 		try
 		{
 			operateResult.Content3 = 0;
@@ -312,7 +312,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 				operateResult.Content1 = 2;
 				operateResult.Content2 = CalculateAddressStarted(address[1..]);
 			}
-			else if (address[0] == 'D' || address.Substring(0, 2) == "DB")
+			else if (address[0] == 'D' || address[..2] == "DB")
 			{
 				operateResult.Content1 = 1;
 				string[] array = address.Split(new char[1] { '.' });
@@ -334,7 +334,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 			else if (address[0] == 'T')
 			{
 				operateResult.Content1 = 7;
-				operateResult.Content2 = CalculateAddressStarted(address.Substring(1));
+				operateResult.Content2 = CalculateAddressStarted(address[1..]);
 			}
 			else
 			{
@@ -347,7 +347,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 					return operateResult;
 				}
 				operateResult.Content1 = 6;
-				operateResult.Content2 = CalculateAddressStarted(address.Substring(1));
+				operateResult.Content2 = CalculateAddressStarted(address[1..]);
 			}
 		}
 		catch (Exception ex)
@@ -421,10 +421,7 @@ public class SiemensFetchWriteNet : NetworkDeviceBase
 	/// <returns>带结果对象的报文数据 -&gt; Message data with a result object</returns>
 	public static OperateResult<byte[]> BuildWriteCommand(string address, byte[] data)
 	{
-		if (data == null)
-		{
-			data = new byte[0];
-		}
+		data ??= Array.Empty<byte>();
 		OperateResult<byte, int, ushort> operateResult = AnalysisAddress(address);
 		if (!operateResult.IsSuccess)
 		{

@@ -28,10 +28,12 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	protected SimpleHybirdLock InteractiveLock;
 
-	/// <summary>
-	/// 指示长连接的套接字是否处于错误的状态
-	/// </summary>
-	protected bool IsSocketError = false;
+    protected AsyncSimpleHybirdLock AsyncInteractiveLock;
+
+    /// <summary>
+    /// 指示长连接的套接字是否处于错误的状态
+    /// </summary>
+    protected bool IsSocketError = false;
 
 	/// <summary>
 	/// 设置日志记录报文是否二进制，如果为False，那就使用ASCII码
@@ -92,7 +94,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </remarks>
 	public int Port { get; set; } = 10000;
 
-
 	public string ConnectionId { get; set; } = string.Empty;
 
     /// <summary>
@@ -129,8 +130,9 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	public NetworkDoubleBase()
 	{
-		InteractiveLock = new SimpleHybirdLock();
-		ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
+		InteractiveLock = new();
+		AsyncInteractiveLock = new();
+        ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
 	}
 
 	/// <summary>
@@ -194,14 +196,14 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			CoreSocket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
 		}
 
-		Logger?.LogDebug(ToString() + " -- NetEngineStart");
+		Logger?.LogDebug("{str0} -- NetEngineStart", ToString());
 		return operateResult;
 	}
 
 	/// <summary>
 	/// 使用指定的套接字创建异形客户端，在异形客户端的模式下，网络通道需要被动创建。
 	/// </summary>
-	/// <param name="session">异形客户端对象，查看<seealso cref="NetworkAlienClient" />类型创建的客户端</param>
+	/// <param name="session">异形客户端对象</param>
 	/// <returns>通常都为成功</returns>
 	/// <remarks>
 	/// 不能和之前的长连接和短连接混用
@@ -262,7 +264,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			InteractiveLock.Leave();
 		}
 
-		Logger?.LogDebug(ToString() + " -- NetEngineClose");
+		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
 		return operateResult;
 	}
 
@@ -344,13 +346,13 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	protected async Task<OperateResult> AccountCertificateAsync(Socket socket)
 	{
-		OperateResult send = await SendAccountAndCheckReceiveAsync(socket, 1, _userName, _password);
+		OperateResult send = await SendAccountAndCheckReceiveAsync(socket, 1, _userName, _password).ConfigureAwait(false);
 		if (!send.IsSuccess)
 		{
 			return send;
 		}
 
-		var read = await ReceiveStringArrayContentFromSocketAsync(socket);
+		var read = await ReceiveStringArrayContentFromSocketAsync(socket).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -375,10 +377,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
 	{
-		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding);
+		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding).ConfigureAwait(false);
 		if (result.IsSuccess)
 		{
-			OperateResult initi = await InitializationOnConnectAsync(result.Content);
+			OperateResult initi = await InitializationOnConnectAsync(result.Content).ConfigureAwait(false);
 			if (!initi.IsSuccess)
 			{
 				result.Content?.Close();
@@ -408,7 +410,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 			if (IsSocketError || CoreSocket == null)
 			{
-				OperateResult connect = await ConnectServerAsync();
+				OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
 				if (!connect.IsSuccess)
 				{
 					IsSocketError = true;
@@ -422,14 +424,14 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 
 		// 非长连接，每个请求都会创建一个新的 Socket。
-		return await CreateSocketAndInitialicationAsync();
+		return await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> ConnectServerAsync()
 	{
 		IsPersistentConn = true;
 		CoreSocket?.Close();
-		OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync();
+		OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
 		ConnectServerPostDelegate?.Invoke(rSocket.IsSuccess);
 		if (!rSocket.IsSuccess)
 		{
@@ -439,18 +441,18 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 
 		CoreSocket = rSocket.Content;
-		Logger?.LogDebug(ToString() + "-- NetEngineStart");
+		Logger?.LogDebug("{str0}-- NetEngineStart", ToString());
 		return rSocket;
 	}
 
 	public async Task<OperateResult> ConnectCloseAsync()
 	{
 		IsPersistentConn = false;
-		InteractiveLock.Enter();
+        await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
 		OperateResult result;
 		try
 		{
-			result = await ExtraOnDisconnectAsync(CoreSocket);
+			result = await ExtraOnDisconnectAsync(CoreSocket).ConfigureAwait(false);
 			CoreSocket?.Close();
 			CoreSocket = null;
 		}
@@ -460,17 +462,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			InteractiveLock.Leave();
+            AsyncInteractiveLock.Leave();
 		}
 
-		Logger?.LogDebug(ToString() + "-- NetEngineClose");
+		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
 		return result;
 	}
 
 	public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(Socket socket, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
 	{
 		byte[] sendValue = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
-		Logger?.LogDebug($"{ToString()} Send : {(LogMsgFormatBinary ? sendValue.ToHexString(' ') : Encoding.ASCII.GetString(sendValue))}");
+		Logger?.LogDebug("{str0} Send : {str1}", ToString(), LogMsgFormatBinary ? sendValue.ToHexString(' ') : Encoding.ASCII.GetString(sendValue));
 
 		var netMessage = GetNewNetMessage();
 		if (netMessage != null)
@@ -478,7 +480,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			netMessage.SendBytes = sendValue;
 		}
 
-		OperateResult sendResult = await SendAsync(socket, sendValue);
+		OperateResult sendResult = await SendAsync(socket, sendValue).ConfigureAwait(false);
 		if (!sendResult.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(sendResult);
@@ -505,7 +507,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			return resultReceive;
 		}
 
-		Logger?.LogDebug($"{ToString()} Receive: {(LogMsgFormatBinary ? resultReceive.Content.ToHexString(' ') : Encoding.ASCII.GetString(resultReceive.Content))}");
+		Logger?.LogDebug("{str0} Receive: {str1}", ToString(), LogMsgFormatBinary ? resultReceive.Content.ToHexString(' ') : Encoding.ASCII.GetString(resultReceive.Content));
 		if (netMessage != null && !netMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
@@ -519,17 +521,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send)
 	{
-		return await ReadFromCoreServerAsync(send, hasResponseData: true);
+		return await ReadFromCoreServerAsync(send, hasResponseData: true).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var result = new OperateResult<byte[]>();
-		InteractiveLock.Enter();
+		await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
 		OperateResult<Socket> resultSocket;
 		try
 		{
-			resultSocket = await GetAvailableSocketAsync();
+			resultSocket = await GetAvailableSocketAsync().ConfigureAwait(false);
 			if (!resultSocket.IsSuccess)
 			{
 				IsSocketError = true;
@@ -537,7 +539,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 				result.CopyErrorFromOther(resultSocket);
 				return result;
 			}
-			OperateResult<byte[]> read = await ReadFromCoreServerAsync(resultSocket.Content, send, hasResponseData, usePackAndUnpack);
+			OperateResult<byte[]> read = await ReadFromCoreServerAsync(resultSocket.Content, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
 			if (read.IsSuccess)
 			{
 				IsSocketError = false;
@@ -559,7 +561,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			InteractiveLock.Leave();
+            AsyncInteractiveLock.Leave();
 		}
 
 		if (!IsPersistentConn)
@@ -659,7 +661,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	public virtual OperateResult<byte[]> ReadFromCoreServer(Socket socket, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
 	{
 		byte[] array = usePackAndUnpack ? PackCommandWithHeader(send) : send;
-		Logger?.LogDebug($"{ToString()} Send: {(LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array))}");
+		Logger?.LogDebug("{str0} Send: {str1}", ToString(), LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array));
 
 		INetMessage newNetMessage = GetNewNetMessage();
 		if (newNetMessage != null)
@@ -692,7 +694,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			return operateResult2;
 		}
 
-		Logger?.LogDebug($"{ToString()} Receive : {(LogMsgFormatBinary ? operateResult2.Content.ToHexString(' ') : Encoding.ASCII.GetString(operateResult2.Content))}");
+		Logger?.LogDebug("{str0} Receive: {str1}", ToString(), LogMsgFormatBinary ? operateResult2.Content.ToHexString(' ') : Encoding.ASCII.GetString(operateResult2.Content));
 		if (newNetMessage != null && !newNetMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();

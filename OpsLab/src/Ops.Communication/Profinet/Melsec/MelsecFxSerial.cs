@@ -6,7 +6,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <summary>
 /// 三菱的串口通信的对象，适用于读取FX系列的串口数据，支持的类型参考文档说明。
 /// </summary>
-public class MelsecFxSerial : SerialDeviceBase
+public sealed class MelsecFxSerial : SerialDeviceBase
 {
 	public bool IsNewVersion { get; set; }
 
@@ -43,7 +43,7 @@ public class MelsecFxSerial : SerialDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await Task.Run(() => Write(address, value));
+		return await Task.Run(() => Write(address, value)).ConfigureAwait(false);
 	}
 
 	public override string ToString()

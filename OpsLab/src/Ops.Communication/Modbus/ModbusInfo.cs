@@ -9,7 +9,7 @@ namespace Ops.Communication.Modbus;
 /// <summary>
 /// Modbus协议相关的一些信息，包括功能码定义，报文的生成的定义等等信息。
 /// </summary>
-public class ModbusInfo
+public sealed class ModbusInfo
 {
 	/// <summary>
 	/// 读取线圈
@@ -261,7 +261,7 @@ public class ModbusInfo
 			BitConverter.GetBytes(mAddress.Address)[1],
 			BitConverter.GetBytes(mAddress.Address)[0],
 			0,
-			0
+			0,
 		};
 
 		if (value)
@@ -274,6 +274,7 @@ public class ModbusInfo
 			array[4] = 0;
 			array[5] = 0;
 		}
+
 		return OperateResult.Ok(array);
 	}
 
@@ -295,6 +296,7 @@ public class ModbusInfo
 			{
 				modbusAddress.Function = defaultFunction;
 			}
+
 			CheckModbusAddressStart(modbusAddress, isStartWithZero);
 			return BuildWriteWordModbusCommand(modbusAddress, values);
 		}
@@ -322,6 +324,7 @@ public class ModbusInfo
 			{
 				modbusAddress.Function = defaultFunction;
 			}
+
 			CheckModbusAddressStart(modbusAddress, isStartWithZero);
 			return BuildWriteOneRegisterModbusCommand(modbusAddress, value);
 		}
@@ -349,6 +352,7 @@ public class ModbusInfo
 			{
 				modbusAddress.Function = defaultFunction;
 			}
+
 			CheckModbusAddressStart(modbusAddress, isStartWithZero);
 			return BuildWriteOneRegisterModbusCommand(modbusAddress, value);
 		}
@@ -377,6 +381,7 @@ public class ModbusInfo
 			{
 				modbusAddress.Function = defaultFunction;
 			}
+
 			CheckModbusAddressStart(modbusAddress, isStartWithZero);
 			return BuildWriteMaskModbusCommand(modbusAddress, andMask, orMask);
 		}
@@ -483,7 +488,8 @@ public class ModbusInfo
 			{
 				return OperateResult.Ok(SoftBasic.ArrayRemoveBegin(response, 3));
 			}
-			return OperateResult.Ok(new byte[0]);
+
+			return OperateResult.Ok(Array.Empty<byte>());
 		}
 		catch (Exception ex)
 		{
