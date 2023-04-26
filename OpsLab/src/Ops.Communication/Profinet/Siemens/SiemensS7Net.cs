@@ -42,8 +42,6 @@ public class SiemensS7Net : NetworkDeviceBase
 		17, 0, 0
 	};
 
-	private SiemensPLCS CurrentPlc = SiemensPLCS.S1200;
-
 	private readonly byte[] plcHead1_200smart = new byte[22]
 	{
 		3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
@@ -102,10 +100,15 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	private int pdu_length = 0;
 
-	/// <summary>
-	/// PLC的槽号，针对S7-400的PLC设置的。
-	/// </summary>
-	public byte Slot
+    /// <summary>
+    /// 当前适用的 PLC 型号。
+    /// </summary>
+    public SiemensPLCS CurrentPlc { get; private set; } = SiemensPLCS.S1200;
+
+    /// <summary>
+    /// PLC的槽号，针对S7-400的PLC设置的。
+    /// </summary>
+    public byte Slot
 	{
 		get
 		{
