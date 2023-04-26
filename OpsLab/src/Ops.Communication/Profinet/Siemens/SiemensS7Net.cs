@@ -637,7 +637,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		ushort alreadyFinished = 0;
 		while (alreadyFinished < length)
 		{
-			ushort readLength = (ushort)Math.Min(length - alreadyFinished, 200);
+			ushort readLength = (ushort)Math.Min(length - alreadyFinished, pdu_length);
 			addressResult.Content.Length = readLength;
 			var read = await ReadAsync(new S7AddressData[1] { addressResult.Content }).ConfigureAwait(false);
 			if (!read.IsSuccess)
@@ -695,7 +695,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		if (s7Addresses.Length > 19)
 		{
 			var bytes = new List<byte>();
-			var groups = SoftBasic.ArraySplitByLength(s7Addresses, 19);
+			var groups = SoftBasic.ArraySplitByLength(s7Addresses, pdu_length);
 			for (int i = 0; i < groups.Count; i++)
 			{
 				OperateResult<byte[]> read = await ReadAsync(groups[i]).ConfigureAwait(false);
@@ -1544,13 +1544,18 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	private static OperateResult AnalysisWrite(byte[] content)
 	{
-		byte b = content[^1];
-		if (b != byte.MaxValue)
+		if (content != null && content.Length >= 22)
 		{
-			return new OperateResult(b, $"SiemensWriteError {b} Msg: {SoftBasic.ByteToHexString(content, ' ')}");
-		}
-		return OperateResult.Ok();
-	}
+            byte b = content[21];
+            if (b != byte.MaxValue)
+            {
+                return new OperateResult(b, $"{ErrorCode.SiemensWriteError.Desc()} {b} Msg: {SoftBasic.ByteToHexString(content, ' ')}");
+            }
+            return OperateResult.Ok();
+        }
+
+        return new OperateResult($"{ErrorCode.UnknownError.Desc()} Msg: { SoftBasic.ByteToHexString(content, ' ')}");
+    }
 
 	#endregion
 }
