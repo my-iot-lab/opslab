@@ -199,20 +199,12 @@ public class ModbusTcpNet : NetworkDeviceBase, IModbus, IReadWriteDevice, IReadW
 
 	protected override OperateResult InitializationOnConnect(Socket socket)
 	{
-		if (IsUseAccountCertificate)
-		{
-			return AccountCertificate(socket);
-		}
 		return base.InitializationOnConnect(socket);
 	}
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		if (IsUseAccountCertificate)
-		{
-			return await AccountCertificateAsync(socket);
-		}
-		return await base.InitializationOnConnectAsync(socket);
+		return await base.InitializationOnConnectAsync(socket).ConfigureAwait(false);
 	}
 
 	public override OperateResult<int[]> ReadInt32(string address, ushort length)

@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 
 namespace Ops.Communication;
@@ -181,6 +182,16 @@ public sealed class OpsTimeOut
 					{
 						if (!opsTimeOut.IsSuccessful)
 						{
+							if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+							{
+                                try
+                                {
+                                    opsTimeOut.WorkSocket?.Disconnect(reuseSocket: false);
+                                }
+                                catch
+                                {
+                                }
+                            }
 							opsTimeOut.WorkSocket?.Close();
 							opsTimeOut.IsTimeout = true;
 						}

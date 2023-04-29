@@ -455,13 +455,14 @@ public static class MelsecHelper
 		return array;
 	}
 
-	/// <summary>
-	/// 创建批量读取标签的报文数据信息
-	/// </summary>
-	/// <param name="tags">标签名</param>
-	/// <param name="lengths">长度信息</param>
-	/// <returns>报文名称</returns>
-	public static byte[] BuildReadTag(string[] tags, ushort[] lengths)
+    /// <summary>
+    /// 创建批量读取标签的报文数据信息
+    /// </summary>
+    /// <param name="tags">标签名</param>
+    /// <param name="lengths">长度信息</param>
+    /// <returns>报文名称</returns>
+    /// <exception cref="Exception"></exception>
+    public static byte[] BuildReadTag(string[] tags, ushort[] lengths)
 	{
 		if (tags.Length != lengths.Length)
 		{

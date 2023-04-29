@@ -29,6 +29,11 @@ public enum ErrorCode : int
     [Description("不支持的数据类型错误")]
     NotSupportedDataType,
 
+    [Description("Token 检测失败")]
+    TokenCheckFailed,
+
+    CommandLengthCheckFailed,
+
     [Description("连接超时")]
     ConnectTimeout,
 
@@ -43,6 +48,9 @@ public enum ErrorCode : int
 
     [Description("接收的数据长度太短")]
     ReceiveDataLengthTooShort,
+
+    [Description("远程连接已关闭")]
+    RemoteClosedConnection,
 
     [Description("Ip地址格式不正确")]
     IpAddressError,
@@ -61,6 +69,9 @@ public enum ErrorCode : int
 
     [Description("套接字传送数据异常")]
     SocketIOException = 10201,
+
+    [Description("套接字异常")]
+    SocketException,
 
     [Description("同步数据发送异常")]
     SocketSendException,
@@ -103,6 +114,10 @@ public enum ErrorCode : int
 
     [Description("写入数据异常")]
     SiemensWriteError,
+
+    SiemensStartPLCError,
+
+    SiemensStopPLCError,
 
     [Description("读取的数组数量不允许大于19")]
     SiemensReadLengthCannotLargerThan19,
@@ -313,6 +328,12 @@ public enum ErrorCode : int
 
     [Description("不支持的封装协议修订")]
     AllenBradleySessionStatus69,
+
+    ModbusAsciiFormatCheckFailed = 20501,
+
+    ModbusLRCCheckFailed,
+
+    ModbusTransAsciiPackError,
 }
 
 public static class ErrorCodeExtensions

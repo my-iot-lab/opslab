@@ -318,7 +318,7 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>是否解析成功</returns>
 	public static OperateResult<MelsecMcRDataType, int> AnalysisAddress(string address)
 	{
-            try
+		try
 		{
 			if (address.StartsWith("LSTS"))
 			{

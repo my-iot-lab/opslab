@@ -567,29 +567,20 @@ public sealed class ModbusInfo
 		{
 			if (modbusAscii[0] != 58 || modbusAscii[^2] != 13 || modbusAscii[^1] != 10)
 			{
-				return new OperateResult<byte[]>
-				{
-					Message = "ModbusAsciiFormatCheckFailed:" + modbusAscii.ToHexString(' ')
-				};
+				return new OperateResult<byte[]>((int)ErrorCode.ModbusAsciiFormatCheckFailed, $"ModbusAsciiFormatCheckFailed: {modbusAscii.ToHexString(' ')}");
 			}
 
 			byte[] array = SoftBasic.AsciiBytesToBytes(modbusAscii.RemoveDouble(1, 2));
 			if (!SoftLRC.CheckLRC(array))
 			{
-				return new OperateResult<byte[]>
-				{
-					Message = "ModbusLRCCheckFailed" + array.ToHexString(' ')
-				};
+                return new OperateResult<byte[]>((int)ErrorCode.ModbusLRCCheckFailed, $"ModbusLRCCheckFailed: {modbusAscii.ToHexString(' ')}");
 			}
 
 			return OperateResult.Ok(array.RemoveLast(1));
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>
-			{
-				Message = ex.Message + modbusAscii.ToHexString(' ')
-			};
+            return new OperateResult<byte[]>((int)ErrorCode.ModbusTransAsciiPackError, $"{ex.Message}: {modbusAscii.ToHexString(' ')}");
 		}
 	}
 

@@ -12,46 +12,36 @@ namespace Ops.Communication.Core.Net;
 /// <summary>
 /// 支持长连接，短连接两个模式的通用客户端基类
 /// </summary>
-public class NetworkDoubleBase : NetworkBase, IDisposable
+public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 {
 	private string _ipAddress = "127.0.0.1";
-
-    private bool _isUseSpecifiedSocket = false;
-
-	/// <summary>
-	/// 是否是长连接的状态
-	/// </summary>
-	protected bool IsPersistentConn = false;
-
-	/// <summary>
-	/// 交互的混合锁，保证交互操作的安全性
-	/// </summary>
-	protected SimpleHybirdLock InteractiveLock;
-
-    protected AsyncSimpleHybirdLock AsyncInteractiveLock;
+    private bool _disposedValue = false;
+    private readonly Lazy<Ping> ping = new(() => new Ping());
 
     /// <summary>
-    /// 指示长连接的套接字是否处于错误的状态
+    /// 是否是长连接的状态。
     /// </summary>
-    protected bool IsSocketError = false;
+    public bool IsPersistentConn { get; private set; }
 
-	/// <summary>
-	/// 设置日志记录报文是否二进制，如果为False，那就使用ASCII码
-	/// </summary>
-	protected bool LogMsgFormatBinary = true;
+    /// <summary>
+    /// 交互的混合锁，保证交互操作的安全性。
+    /// </summary>
+    public SimpleHybirdLock InteractiveLock { get; private set; }
 
-	/// <summary>
-	/// 是否使用账号登录，这个账户登录的功能是<c>HSL</c>组件创建的服务器特有的功能。
-	/// </summary>
-	protected bool IsUseAccountCertificate = false;
+    /// <summary>
+    /// 异步交互的混合锁，保证交互操作的安全性。
+    /// </summary>
+    public AsyncSimpleHybirdLock AsyncInteractiveLock { get; private set; }
 
-	private string _userName = string.Empty;
+    /// <summary>
+    /// 指示长连接的套接字是否处于错误的状态。
+    /// </summary>
+    public bool IsSocketError { get; private set; }
 
-	private string _password = string.Empty;
-
-	private bool _disposedValue = false;
-
-	private readonly Lazy<Ping> ping = new(() => new Ping());
+    /// <summary>
+    /// 设置日志记录报文是否二进制，如果为False，那就使用ASCII码。
+    /// </summary>
+    public bool LogMsgFormatBinary { get; set; } = true;
 
 	/// <summary>
 	/// 当前的数据变换机制，当你需要从字节数据转换类型数据的时候需要。
@@ -59,20 +49,17 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	public IByteTransform ByteTransform { get; set; }
 
 	/// <summary>
-	/// 获取或设置连接的超时时间，单位是毫秒
+	/// 获取或设置连接的超时时间，单位是毫秒。
 	/// </summary>
-	/// <remarks>
-	/// 不适用于异形模式的连接。
-	/// </remarks>
 	public int ConnectTimeOut { get; set; } = 10_000;
 
-    /// <summary>
-    /// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈
-    /// </summary>
-    /// <remarks>
-    /// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
-    /// </remarks>
-    public int ReceiveTimeOut { get; protected set; } = 5000;
+	/// <summary>
+	/// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈
+	/// </summary>
+	/// <remarks>
+	/// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
+	/// </remarks>
+	public int ReceiveTimeOut { get; set; } = 5000;
 
 	/// <summary>
 	/// 获取或是设置远程服务器的IP地址，如果是本机测试，那么需要设置为127.0.0.1 
@@ -100,19 +87,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
     /// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
     /// </summary>
     public int SleepTime { get; set; }
-
-	/// <summary>
-	/// 获取或设置绑定的本地的IP地址和端口号信息，如果端口设置为0，代表任何可用的端口
-	/// </summary>
-	public IPEndPoint LocalBinding { get; set; }
-
-	/// <summary>
-	/// 当前的异形连接对象，如果设置了异形连接的话，仅用于异形模式的情况使用
-	/// </summary>
-	/// <remarks>
-	/// 具体的使用方法请参照Demo项目中的异形modbus实现。
-	/// </remarks>
-	public AlienSession AlienSession { get; set; }
 
 	/// <summary>
 	/// 获取或设置客户端的Socket的心跳时间信息
@@ -157,19 +131,21 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	/// <param name="timeout">Ping 超时时间</param>
 	/// <returns>返回PING的结果</returns>
+	/// <exception cref="PingException"></exception>
 	public IPStatus PingIpAddress(int timeout = 5000)
 	{
 		return ping.Value.Send(IpAddress, timeout).Status;
 	}
 
-	/// <summary>
-	/// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" />
-	/// </summary>
-	/// <param name="timeout">Ping 超时时间</param>
-	/// <returns>返回PING的结果</returns>
-	public async Task<IPStatus> PingIpAddressAsync(int timeout = 5000)
+    /// <summary>
+    /// 对当前设备的IP地址进行PING的操作，返回PING的结果，正常来说，返回<see cref="IPStatus.Success" />
+    /// </summary>
+    /// <param name="timeout">Ping 超时时间</param>
+    /// <returns>返回PING的结果</returns>
+    /// <exception cref="PingException"></exception>
+    public async Task<IPStatus> PingIpAddressAsync(int timeout = 5000)
 	{
-		var pingReply = await ping.Value.SendPingAsync(IpAddress, timeout);
+		var pingReply = await ping.Value.SendPingAsync(IpAddress, timeout).ConfigureAwait(false);
 		return pingReply.Status;
 	}
 
@@ -181,6 +157,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		IsPersistentConn = true;
 		CoreSocket?.Close();
+
 		OperateResult<Socket> operateResult = CreateSocketAndInitialication();
 		ConnectServerPostDelegate?.Invoke(operateResult.IsSuccess);
 		if (!operateResult.IsSuccess)
@@ -198,46 +175,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 		Logger?.LogDebug("{str0} -- NetEngineStart", ToString());
 		return operateResult;
-	}
-
-	/// <summary>
-	/// 使用指定的套接字创建异形客户端，在异形客户端的模式下，网络通道需要被动创建。
-	/// </summary>
-	/// <param name="session">异形客户端对象</param>
-	/// <returns>通常都为成功</returns>
-	/// <remarks>
-	/// 不能和之前的长连接和短连接混用
-	/// </remarks>
-	public OperateResult ConnectServer(AlienSession session)
-	{
-		IsPersistentConn = true;
-		_isUseSpecifiedSocket = true;
-		if (session != null)
-		{
-			AlienSession?.Socket?.Close();
-			if (string.IsNullOrEmpty(ConnectionId))
-			{
-				ConnectionId = session.DTU;
-			}
-
-			if (ConnectionId == session.DTU)
-			{
-				CoreSocket = session.Socket;
-				IsSocketError = !session.IsStatusOk;
-				AlienSession = session;
-				if (session.IsStatusOk)
-				{
-					return InitializationOnConnect(session.Socket);
-				}
-				return new OperateResult();
-			}
-
-			IsSocketError = true;
-			return new OperateResult();
-		}
-
-		IsSocketError = true;
-		return new OperateResult();
 	}
 
 	/// <summary>
@@ -300,84 +237,32 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	}
 
 	/// <summary>
-	/// 设置当前的登录的账户名和密码信息，并启用账户验证的功能，账户名为空时设置不生效
+	/// 连接成功后进行一些数据的初始化操作。
 	/// </summary>
-	/// <param name="userName">账户名</param>
-	/// <param name="password">密码</param>
-	public void SetLoginAccount(string userName, string password)
-	{
-		if (!string.IsNullOrEmpty(userName.Trim()))
-		{
-			IsUseAccountCertificate = true;
-			_userName = userName;
-			_password = password;
-		}
-		else
-		{
-			IsUseAccountCertificate = false;
-		}
-	}
-
-	/// <summary>
-	/// 认证账号，根据已经设置的用户名和密码，进行发送服务器进行账号认证。
-	/// </summary>
-	/// <param name="socket">套接字</param>
-	/// <returns>认证结果</returns>
-	protected OperateResult AccountCertificate(Socket socket)
-	{
-		OperateResult operateResult = SendAccountAndCheckReceive(socket, 1, _userName, _password);
-		if (!operateResult.IsSuccess)
-		{
-			return operateResult;
-		}
-
-		var operateResult2 = ReceiveStringArrayContentFromSocket(socket);
-		if (!operateResult2.IsSuccess)
-		{
-			return operateResult2;
-		}
-
-		if (operateResult2.Content1 == 0)
-		{
-			return new OperateResult(operateResult2.Content2[0]);
-		}
-		return OperateResult.Ok();
-	}
-
-	protected async Task<OperateResult> AccountCertificateAsync(Socket socket)
-	{
-		OperateResult send = await SendAccountAndCheckReceiveAsync(socket, 1, _userName, _password).ConfigureAwait(false);
-		if (!send.IsSuccess)
-		{
-			return send;
-		}
-
-		var read = await ReceiveStringArrayContentFromSocketAsync(socket).ConfigureAwait(false);
-		if (!read.IsSuccess)
-		{
-			return read;
-		}
-
-		if (read.Content1 == 0)
-		{
-			return new OperateResult(read.Content2[0]);
-		}
-		return OperateResult.Ok();
-	}
-
+	/// <param name="socket"></param>
+	/// <returns></returns>
 	protected virtual Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
 		return Task.FromResult(OperateResult.Ok());
 	}
 
+	/// <summary>
+	/// 当断开连接前可做的额外事情。
+	/// </summary>
+	/// <param name="socket"></param>
+	/// <returns></returns>
 	protected virtual Task<OperateResult> ExtraOnDisconnectAsync(Socket socket)
 	{
 		return Task.FromResult(OperateResult.Ok());
 	}
 
-	private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
+    /// <summary>
+    /// 创建一个新的Socket对象并尝试连接远程主机。再连接成功后会进行一些数据的初始化操作。
+    /// </summary>
+    /// <returns></returns>
+    private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
 	{
-		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding).ConfigureAwait(false);
+		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut).ConfigureAwait(false);
 		if (result.IsSuccess)
 		{
 			OperateResult initi = await InitializationOnConnectAsync(result.Content).ConfigureAwait(false);
@@ -392,46 +277,50 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	}
 
 	/// <summary>
-	/// Core 获取可用的 Socket 对象。
+	/// 获取可用的 Socket 对象。
 	/// </summary>
 	/// <returns></returns>
-	protected async Task<OperateResult<Socket>> GetAvailableSocketAsync()
+	/// <remarks>
+	/// 对于长连接，若是有Socket异常或是没有进行连接服务器，会调用连接服务接口进行长连接，否则会使用已连接的Socket；
+	/// 非长连接，会创建一个新的Socket并进行数据的初始化操作。
+	/// </remarks>
+	private async Task<OperateResult<Socket>> GetAvailableSocketAsync()
 	{
-		if (IsPersistentConn)
+        // 非长连接，每个请求都会创建一个新的 Socket。
+        if (!IsPersistentConn)
 		{
-			if (_isUseSpecifiedSocket)
+            return await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
+        }
+		
+		// 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
+		if (IsSocketError || CoreSocket == null)
+		{
+			OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
+			if (!connect.IsSuccess)
 			{
-				if (IsSocketError)
-				{
-					return new OperateResult<Socket>(ErrorCode.ConnectionIsNotAvailable.Desc());
-				}
-				return OperateResult.Ok(CoreSocket);
+				IsSocketError = true;
+				return OperateResult.Error<Socket>(connect);
 			}
 
-			if (IsSocketError || CoreSocket == null)
-			{
-				OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
-				if (!connect.IsSuccess)
-				{
-					IsSocketError = true;
-					return OperateResult.Error<Socket>(connect);
-				}
-
-				IsSocketError = false;
-				return OperateResult.Ok(CoreSocket);
-			}
+			IsSocketError = false;
 			return OperateResult.Ok(CoreSocket);
 		}
 
-		// 非长连接，每个请求都会创建一个新的 Socket。
-		return await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
+		// 使用已创建的Socket。
+		return OperateResult.Ok(CoreSocket);
 	}
 
+	/// <summary>
+	/// 连接服务器，并设置状态为长连接状态。
+	/// </summary>
+	/// <returns></returns>
 	public async Task<OperateResult> ConnectServerAsync()
 	{
 		IsPersistentConn = true;
 		CoreSocket?.Close();
-		OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
+        CoreSocket = null;
+
+        OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
 		ConnectServerPostDelegate?.Invoke(rSocket.IsSuccess);
 		if (!rSocket.IsSuccess)
 		{
@@ -445,9 +334,14 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		return rSocket;
 	}
 
+	/// <summary>
+	/// 关闭连接。
+	/// </summary>
+	/// <returns></returns>
 	public async Task<OperateResult> ConnectCloseAsync()
 	{
 		IsPersistentConn = false;
+
         await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
 		OperateResult result;
 		try
@@ -469,9 +363,18 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		return result;
 	}
 
-	public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(Socket socket, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    /// <summary>
+    /// 发送数据并接收响应数据（若有设置响应）。
+    /// </summary>
+    /// <param name="socket">Socket对象</param>
+    /// <param name="send">要发生的数据</param>
+    /// <param name="hasResponseData">是否有响应数据。注：若有响应数据，会在发送后并接收响应数据，否则不会进行数据接收操作。</param>
+    /// <param name="usePackAndUnpack">是否对命令进行打包处理。</param>
+    /// <returns></returns>
+	/// <remarks>若有设置接收响应数据，<see cref="ReceiveTimeOut"/> 必须大于 0，允许在一定时间内等待接收数据。</remarks>
+    public virtual async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(Socket socket, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
 	{
-		byte[] sendValue = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
+		byte[] sendValue = usePackAndUnpack ? PackCommandWithHeader(send) : send;
 		Logger?.LogDebug("{str0} Send : {str1}", ToString(), LogMsgFormatBinary ? sendValue.ToHexString(' ') : Encoding.ASCII.GetString(sendValue));
 
 		var netMessage = GetNewNetMessage();
@@ -498,10 +401,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 
 		if (SleepTime > 0)
 		{
-			await Task.Delay(SleepTime);
+			await Task.Delay(SleepTime).ConfigureAwait(false);
 		}
 
-		var resultReceive = await ReceiveByMessageAsync(socket, ReceiveTimeOut, netMessage);
+		var resultReceive = await ReceiveByMessageAsync(socket, ReceiveTimeOut, netMessage).ConfigureAwait(false);
 		if (!resultReceive.IsSuccess)
 		{
 			return resultReceive;
@@ -511,7 +414,7 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		if (netMessage != null && !netMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>($"CommandHeadCodeCheckFailed{Environment.NewLine}" +
+			return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(sendValue, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(resultReceive.Content, ' ')}");
 		}
@@ -519,12 +422,18 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		return usePackAndUnpack ? UnpackResponseContent(sendValue, resultReceive.Content) : resultReceive;
 	}
 
-	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send)
+    /// <summary>
+    /// 发送数据并接收响应数据。
+    /// </summary>
+    /// <param name="send">要发送的数据。</param>
+    /// <returns></returns>
+	/// <remarks></remarks>
+    public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send)
 	{
 		return await ReadFromCoreServerAsync(send, hasResponseData: true).ConfigureAwait(false);
 	}
 
-	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
+    private async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var result = new OperateResult<byte[]>();
 		await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
@@ -535,10 +444,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			if (!resultSocket.IsSuccess)
 			{
 				IsSocketError = true;
-				AlienSession?.Offline();
 				result.CopyErrorFromOther(resultSocket);
 				return result;
 			}
+
 			OperateResult<byte[]> read = await ReadFromCoreServerAsync(resultSocket.Content, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
 			if (read.IsSuccess)
 			{
@@ -550,7 +459,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			else
 			{
 				IsSocketError = true;
-				AlienSession?.Offline();
 				result.CopyErrorFromOther(read);
 			}
 			ExtraAfterReadFromCoreServer(read);
@@ -596,44 +504,39 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// 获取本次操作的可用的网络通道，如果是短连接，就重新生成一个新的网络通道，如果是长连接，就复用当前的网络通道。
 	/// </summary>
 	/// <returns>是否成功，如果成功，使用这个套接字</returns>
-	protected OperateResult<Socket> GetAvailableSocket()
+	private OperateResult<Socket> GetAvailableSocket()
 	{
-		if (IsPersistentConn)
+        // 非长连接，每个请求都会创建一个新的 Socket。
+        if (!IsPersistentConn)
 		{
-			if (_isUseSpecifiedSocket)
+			return CreateSocketAndInitialication();
+		}
+
+        // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
+        if (IsSocketError || CoreSocket == null)
+		{
+			OperateResult operateResult = ConnectServer();
+			if (!operateResult.IsSuccess)
 			{
-				if (IsSocketError)
-				{
-					return new OperateResult<Socket>("ConnectionIsNotAvailable");
-				}
-				return OperateResult.Ok(CoreSocket);
+				IsSocketError = true;
+				return OperateResult.Error<Socket>(operateResult);
 			}
 
-			if (IsSocketError || CoreSocket == null)
-			{
-				OperateResult operateResult = ConnectServer();
-				if (!operateResult.IsSuccess)
-				{
-					IsSocketError = true;
-					return OperateResult.Error<Socket>(operateResult);
-				}
-				IsSocketError = false;
-				return OperateResult.Ok(CoreSocket);
-			}
-
+			IsSocketError = false;
 			return OperateResult.Ok(CoreSocket);
 		}
 
-		return CreateSocketAndInitialication();
+        // 使用已创建的Socket。
+        return OperateResult.Ok(CoreSocket);
 	}
 
 	/// <summary>
-	/// 尝试连接服务器，如果成功，并执行<see cref="InitializationOnConnect(Socket)" />的初始化方法，并返回最终的结果。
+	/// 尝试连接服务器，如果成功，并执行<see cref="InitializationOnConnect(Socket)" />的方法进行数据初始化操作，并返回最终的结果。
 	/// </summary>
 	/// <returns>带有socket的结果对象</returns>
 	private OperateResult<Socket> CreateSocketAndInitialication()
 	{
-		OperateResult<Socket> operateResult = CreateSocketAndConnect(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut, LocalBinding);
+		OperateResult<Socket> operateResult = CreateSocketAndConnect(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut);
 		if (operateResult.IsSuccess)
 		{
 			OperateResult operateResult2 = InitializationOnConnect(operateResult.Content);
@@ -648,12 +551,12 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	}
 
 	/// <summary>
-	/// 将数据报文发送指定的网络通道上，根据当前指定的<see cref="INetMessage" />类型，返回一条完整的数据指令<br />
+	/// 将数据报文发送指定的网络通道上，根据当前指定的<see cref="INetMessage" />类型，返回一条完整的数据指令。
 	/// </summary>
 	/// <param name="socket">指定的套接字</param>
 	/// <param name="send">发送的完整的报文信息</param>
 	/// <param name="hasResponseData">是否有等待的数据返回，默认为 true</param>
-	/// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(Byte[])" />方法后才会有影响</param>
+	/// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(byte[])" />方法后才会有影响</param>
 	/// <remarks>
 	/// 无锁的基于套接字直接进行叠加协议的操作。
 	/// </remarks>
@@ -698,14 +601,20 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 		if (newNetMessage != null && !newNetMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>($"CommandHeadCodeCheckFailed {Environment.NewLine}" +
+			return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed {Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(array, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(operateResult2.Content, ' ')}");
 		}
+
 		return usePackAndUnpack ? UnpackResponseContent(array, operateResult2.Content) : OperateResult.Ok(operateResult2.Content);
 	}
 
-	public OperateResult<byte[]> ReadFromCoreServer(byte[] send)
+    /// <summary>
+    /// 将数据发送到当前的网络通道中，并从网络通道中接收一个<see cref="INetMessage" />指定的完整的报文，网络通道将根据<see cref="GetAvailableSocket" />方法自动获取，本方法是线程安全的。
+    /// </summary>
+    /// <param name="send">发送的完整的报文信息</param>
+    /// <returns></returns>
+    public OperateResult<byte[]> ReadFromCoreServer(byte[] send)
 	{
 		return ReadFromCoreServer(send, hasResponseData: true);
 	}
@@ -715,12 +624,12 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	/// <param name="send">发送的完整的报文信息</param>
 	/// <param name="hasResponseData">是否有等待的数据返回，默认为 true</param>
-	/// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(Byte[])" />方法后才会有影响</param>
+	/// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(byte[])" />方法后才会有影响</param>
 	/// <returns>接收的完整的报文信息</returns>
 	/// <remarks>
 	/// 本方法用于实现本组件还未实现的一些报文功能，例如有些modbus服务器会有一些特殊的功能码支持，需要收发特殊的报文，详细请看示例
 	/// </remarks>
-	public OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
+	private OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var operateResult = new OperateResult<byte[]>();
 		OperateResult<Socket> operateResult2;
@@ -731,7 +640,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			if (!operateResult2.IsSuccess)
 			{
 				IsSocketError = true;
-				AlienSession?.Offline();
 				operateResult.CopyErrorFromOther(operateResult2);
 				return operateResult;
 			}
@@ -747,7 +655,6 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			else
 			{
 				IsSocketError = true;
-				AlienSession?.Offline();
 				operateResult.CopyErrorFromOther(operateResult3);
 			}
 			ExtraAfterReadFromCoreServer(operateResult3);
@@ -779,8 +686,10 @@ public class NetworkDoubleBase : NetworkBase, IDisposable
 			if (disposing)
 			{
 				ConnectClose();
+			
 				InteractiveLock?.Dispose();
-			}
+                AsyncInteractiveLock?.Dispose();
+            }
 			_disposedValue = true;
 		}
 	}

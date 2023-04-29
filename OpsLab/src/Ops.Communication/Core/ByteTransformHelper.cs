@@ -26,9 +26,11 @@ public static class ByteTransformHelper
 		}
 		catch (Exception ex)
 		{
-			OperateResult<TResult> operateResult = new();
-			operateResult.Message = $"DataTransformError {SoftBasic.ByteToHexString(result.Content)} : Length({result.Content.Length}) {ex.Message}";
-			return operateResult;
+            OperateResult<TResult> operateResult = new()
+            {
+                Message = $"DataTransformError {SoftBasic.ByteToHexString(result.Content)} : Length({result.Content.Length}) {ex.Message}",
+            };
+            return operateResult;
 		}
 	}
 
