@@ -37,6 +37,7 @@ internal static class NetSupport
     /// <param name="socket">网络套接字</param>
     /// <param name="receive">接收的长度</param>
     /// <returns>最终接收的指定长度的byte[]数据</returns>
+    /// <exception cref="RemoteCloseException"></exception>
     internal static byte[] ReadBytesFromSocket(Socket socket, int receive)
 	{
 		byte[] array = new byte[receive];

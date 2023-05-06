@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -188,6 +190,12 @@ public abstract class NetworkBase
 		return connect;
     }
 	
+	/// <summary>
+	/// 发送数据，出现异常后会主动关闭 Socket。
+	/// </summary>
+	/// <param name="socket"></param>
+	/// <param name="data">要发送的数据。</param>
+	/// <returns></returns>
 	protected async Task<OperateResult> SendAsync(Socket socket, byte[] data)
 	{
 		if (data == null)
@@ -207,6 +215,14 @@ public abstract class NetworkBase
 		}
 	}
 
+	/// <summary>
+	/// 接收数据并按指定格式解析。
+	/// </summary>
+	/// <remarks>出现异常会主动关闭 Socket。</remarks>
+	/// <param name="socket">套接字</param>
+	/// <param name="timeOut">接收超时时长</param>
+	/// <param name="netMessage">消息解析格式。</param>
+	/// <returns></returns>
 	protected async Task<OperateResult<byte[]>> ReceiveByMessageAsync(Socket socket, int timeOut, INetMessage netMessage)
 	{
 		if (netMessage == null)
@@ -241,28 +257,19 @@ public abstract class NetworkBase
 
         try
         {
-            if (length > 0)
-            {
-                // 设置超时
-                using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(timeOut));
+            // 设置超时
+            using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(timeOut));
 
-                byte[] buffer = new byte[length];
-                int count2 = await socket.ReceiveAsync(buffer, SocketFlags.None, cts.Token).ConfigureAwait(false); // 读取数据，直至填满缓冲区。
-                if (count2 == 0)
-                {
-                    throw new RemoteCloseException();
-                }
-                return OperateResult.Ok(buffer);
-            }
+			byte[] buffer = new byte[length > 0 ? length : 2048];
+            int count = await socket.ReceiveAsync(buffer, SocketFlags.None, cts.Token).ConfigureAwait(false); // 读取数据，直至填满缓冲区。
 
-            byte[] buffer2 = new byte[2048];
-            int count = await socket.ReceiveAsync(buffer2, SocketFlags.None).ConfigureAwait(false);
+            // 0 => Socket 被动关闭; -1 => Socket 主动关闭
             if (count == 0)
             {
                 throw new RemoteCloseException();
             }
 
-            return OperateResult.Ok(SoftBasic.ArraySelectBegin(buffer2, count));
+            return OperateResult.Ok(length > 0 ? buffer : SoftBasic.ArraySelectBegin(buffer, count));
         }
         catch (RemoteCloseException)
         {
@@ -273,6 +280,17 @@ public abstract class NetworkBase
         {
             socket.Close();
             return new OperateResult<byte[]>((int)ErrorCode.ReceiveDataTimeout, $"ReceiveDataTimeout: {timeOut}ms");
+        }
+		catch (SocketException ex)
+		{
+            // 已断开连接 ex.NativeErrorCode.Equals(10035), 10035 == WSAEWOULDBLOCK
+            // 详细参考：https://learn.microsoft.com/zh-cn/dotnet/api/system.net.sockets.socket.connected?view=net-7.0#system-net-sockets-socket-connected
+			//if (ex.SocketErrorCode != SocketError.WouldBlock)
+			//{
+			//}
+			
+            socket.Close();
+            return new OperateResult<byte[]>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
         }
         catch (Exception ex)
         {

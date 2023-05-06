@@ -36,6 +36,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// <summary>
     /// 指示长连接的套接字是否处于错误的状态。
     /// </summary>
+	/// <remarks>当读取/写入数据时有接收数据超时、远端Socket关闭、Socket异常都会影响该值。</remarks>
     public bool IsSocketError { get; private set; }
 
     /// <summary>
@@ -98,11 +99,16 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// </summary>
 	public Action<bool> ConnectServerPostDelegate { get; set; }
 
-	/// <summary>
-	/// 默认的无参构造函数 <br />
-	/// Default no-parameter constructor
-	/// </summary>
-	public NetworkDoubleBase()
+    /// <summary>
+    /// 表示长连接 Socket 读写异常主动关闭后处理方法。
+    /// </summary>
+    public Action<int> SocketReadErrorClosedDelegate { get; set; }
+
+    /// <summary>
+    /// 默认的无参构造函数 <br />
+    /// Default no-parameter constructor
+    /// </summary>
+    public NetworkDoubleBase()
 	{
 		InteractiveLock = new();
 		AsyncInteractiveLock = new();
@@ -386,7 +392,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		OperateResult sendResult = await SendAsync(socket, sendValue).ConfigureAwait(false);
 		if (!sendResult.IsSuccess)
 		{
-			return OperateResult.Error<byte[]>(sendResult);
+            return OperateResult.Error<byte[]>(sendResult);
 		}
 
 		if (ReceiveTimeOut < 0)
@@ -407,14 +413,14 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		var resultReceive = await ReceiveByMessageAsync(socket, ReceiveTimeOut, netMessage).ConfigureAwait(false);
 		if (!resultReceive.IsSuccess)
 		{
-			return resultReceive;
+            return resultReceive;
 		}
 
 		Logger?.LogDebug("{str0} Receive: {str1}", ToString(), LogMsgFormatBinary ? resultReceive.Content.ToHexString(' ') : Encoding.ASCII.GetString(resultReceive.Content));
 		if (netMessage != null && !netMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
+            return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(sendValue, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(resultReceive.Content, ' ')}");
 		}
@@ -443,7 +449,9 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			resultSocket = await GetAvailableSocketAsync().ConfigureAwait(false);
 			if (!resultSocket.IsSuccess)
 			{
-				IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(resultSocket.ErrorCode);
+
+                IsSocketError = true;
 				result.CopyErrorFromOther(resultSocket);
 				return result;
 			}
@@ -458,7 +466,9 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			}
 			else
 			{
-				IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(read.ErrorCode);
+
+                IsSocketError = true;
 				result.CopyErrorFromOther(read);
 			}
 			ExtraAfterReadFromCoreServer(read);
@@ -639,7 +649,9 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			operateResult2 = GetAvailableSocket();
 			if (!operateResult2.IsSuccess)
 			{
-				IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(operateResult2.ErrorCode);
+
+                IsSocketError = true;
 				operateResult.CopyErrorFromOther(operateResult2);
 				return operateResult;
 			}
@@ -654,7 +666,9 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			}
 			else
 			{
-				IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(operateResult3.ErrorCode);
+
+                IsSocketError = true;
 				operateResult.CopyErrorFromOther(operateResult3);
 			}
 			ExtraAfterReadFromCoreServer(operateResult3);
