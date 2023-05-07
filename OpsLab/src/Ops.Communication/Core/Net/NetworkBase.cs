@@ -1,5 +1,3 @@
-using System;
-using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;

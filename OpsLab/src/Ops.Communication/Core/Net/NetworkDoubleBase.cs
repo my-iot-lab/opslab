@@ -50,7 +50,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	public IByteTransform ByteTransform { get; set; }
 
 	/// <summary>
-	/// 获取或设置连接的超时时间，单位是毫秒。
+	/// 获取或设置连接的超时时间，单位毫秒，默认10s。
 	/// </summary>
 	public int ConnectTimeOut { get; set; } = 10_000;
 
@@ -60,7 +60,17 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
 	/// </remarks>
-	public int ReceiveTimeOut { get; set; } = 5000;
+	public int ReceiveTimeOut { get; set; } = 5_000;
+
+	/// <summary>
+	/// 在读取/写入数据期间还未创建Socket或是Socket有异常时，是否自动取连接服务创建Socket，默认为true。
+	/// </summary>
+	/// <remarks>
+	/// 在有大量请求时，若服务器突然断开，因为锁的缘故会导致后续的请求还会去读取数据，
+	/// 在读取数据期间因异常会主动创建Socket并尝试进行连接，又因有超时缘故导致这些请求会在后续依次排队处理。设置不自动连接能请求快速返回响应。
+	/// 若设置为false，必须先手动调用 ConnectServer[Async] 方法。
+	/// </remarks>
+	public bool AutoConnectServerWhenSocketIsErrorOrNull { get; set; } = true;
 
 	/// <summary>
 	/// 获取或是设置远程服务器的IP地址，如果是本机测试，那么需要设置为127.0.0.1 
@@ -297,20 +307,27 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		{
             return await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
         }
-		
-		// 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
-		if (IsSocketError || CoreSocket == null)
-		{
-			OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
-			if (!connect.IsSuccess)
-			{
-				IsSocketError = true;
-				return OperateResult.Error<Socket>(connect);
-			}
 
-			IsSocketError = false;
-			return OperateResult.Ok(CoreSocket);
-		}
+		if (IsSocketError || CoreSocket is null)
+		{
+            // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
+            if (AutoConnectServerWhenSocketIsErrorOrNull)
+			{
+                OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
+                if (!connect.IsSuccess)
+                {
+                    IsSocketError = true;
+                    return OperateResult.Error<Socket>(connect);
+                }
+
+                IsSocketError = false;
+                return OperateResult.Ok(CoreSocket);
+            }
+
+			// 不自动连接服务，抛出异常。
+			string err = IsSocketError ? "Socket error" : "Must connect server firstly";
+            return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
+        }
 
 		// 使用已创建的Socket。
 		return OperateResult.Ok(CoreSocket);
@@ -442,7 +459,9 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     private async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var result = new OperateResult<byte[]>();
-		await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
+
+        // 锁，只允许单线程执行
+        await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false); 
 		OperateResult<Socket> resultSocket;
 		try
 		{

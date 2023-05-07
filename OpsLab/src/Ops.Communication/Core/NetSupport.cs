@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 
 namespace Ops.Communication.Core;
 
@@ -129,42 +128,14 @@ internal static class NetSupport
         }
         catch (OperationCanceledException)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                try
-                {
-                    socket.Disconnect(reuseSocket: false);
-                }
-                catch
-                {
-                }
-            }
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, endPoint:{endPoint}, timeOut: {timeOut}ms");
+            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
         catch (Exception ex)
         {
             socket.Close();
             return new OperateResult<Socket>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
         }
-    }
-
-    public static OperateResult<byte[]> ReadFromCoreServer(IEnumerable<byte[]> send, Func<byte[], OperateResult<byte[]>> funcRead)
-    {
-        List<byte> list = new();
-        foreach (byte[] item in send)
-        {
-            OperateResult<byte[]> operateResult = funcRead(item);
-            if (!operateResult.IsSuccess)
-            {
-                return operateResult;
-            }
-            if (operateResult.Content != null)
-            {
-                list.AddRange(operateResult.Content);
-            }
-        }
-        return OperateResult.Ok(list.ToArray());
     }
 
     /// <summary>
@@ -189,41 +160,13 @@ internal static class NetSupport
         }
         catch (OperationCanceledException)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                try
-                {
-                    socket.Disconnect(reuseSocket: false);
-                }
-                catch
-                {
-                }
-            }
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, endPoint:{endPoint}, timeOut: {timeOut}ms");
+            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
         catch (Exception ex)
         {
             socket.Close();
             return new OperateResult<Socket>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
         }
-    }
-
-    public static async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send, Func<byte[], Task<OperateResult<byte[]>>> funcRead)
-    {
-        List<byte> array = new();
-        foreach (byte[] data in send)
-        {
-            OperateResult<byte[]> read = await funcRead(data).ConfigureAwait(false);
-            if (!read.IsSuccess)
-            {
-                return read;
-            }
-            if (read.Content != null)
-            {
-                array.AddRange(read.Content);
-            }
-        }
-        return OperateResult.Ok(array.ToArray());
     }
 }
