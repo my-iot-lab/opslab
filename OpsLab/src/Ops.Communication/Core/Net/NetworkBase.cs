@@ -14,10 +14,10 @@ namespace Ops.Communication.Core.Net;
 /// </remarks>
 public abstract class NetworkBase
 {
-    /// <summary>
-    /// 连接服务器成功后的套接字。
-    /// </summary>
-    public Socket CoreSocket { get; protected set; }
+	/// <summary>
+	/// 连接服务器成功后的套接字。
+	/// </summary>
+	protected Socket CoreSocket;
 
 	/// <summary>
 	/// 组件的日志工具，支持日志记录，只要实例化后，当前网络的基本信息，就以DEBUG等级进行输出。

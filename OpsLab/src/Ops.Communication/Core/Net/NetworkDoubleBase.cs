@@ -18,20 +18,13 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     private bool _disposedValue = false;
     private readonly Lazy<Ping> ping = new(() => new Ping());
 
+    private readonly SimpleHybirdLock _interactiveLock; // 交互的混合锁，保证交互操作的安全性。
+    private readonly AsyncSimpleHybirdLock _asyncInteractiveLock; // 异步交互的混合锁，保证交互操作的安全性。
+
     /// <summary>
     /// 是否是长连接的状态。
     /// </summary>
     public bool IsPersistentConn { get; private set; }
-
-    /// <summary>
-    /// 交互的混合锁，保证交互操作的安全性。
-    /// </summary>
-    public SimpleHybirdLock InteractiveLock { get; private set; }
-
-    /// <summary>
-    /// 异步交互的混合锁，保证交互操作的安全性。
-    /// </summary>
-    public AsyncSimpleHybirdLock AsyncInteractiveLock { get; private set; }
 
     /// <summary>
     /// 指示长连接的套接字是否处于错误的状态。
@@ -120,8 +113,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// </summary>
     public NetworkDoubleBase()
 	{
-		InteractiveLock = new();
-		AsyncInteractiveLock = new();
+		_interactiveLock = new();
+		_asyncInteractiveLock = new();
         ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
 	}
 
@@ -183,7 +176,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			return operateResult;
 		}
 
-		CoreSocket = operateResult.Content;
+        IsSocketError = false;
+        CoreSocket = operateResult.Content;
 		if (SocketKeepAliveTime > 0)
 		{
 			CoreSocket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
@@ -201,7 +195,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		var operateResult = new OperateResult();
 		IsPersistentConn = false;
-		InteractiveLock.Enter();
+		_interactiveLock.Enter();
 		try
 		{
 			operateResult = ExtraOnDisconnect(CoreSocket);
@@ -214,7 +208,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			InteractiveLock.Leave();
+			_interactiveLock.Leave();
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
@@ -352,7 +346,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			return rSocket;
 		}
 
-		CoreSocket = rSocket.Content;
+        IsSocketError = false;
+        CoreSocket = rSocket.Content;
 		Logger?.LogDebug("{str0}-- NetEngineStart", ToString());
 		return rSocket;
 	}
@@ -365,7 +360,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		IsPersistentConn = false;
 
-        await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false);
+        await _asyncInteractiveLock.EnterAsync().ConfigureAwait(false);
 		OperateResult result;
 		try
 		{
@@ -379,7 +374,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-            AsyncInteractiveLock.Leave();
+            _asyncInteractiveLock.Leave();
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
@@ -461,7 +456,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		var result = new OperateResult<byte[]>();
 
         // 锁，只允许单线程执行
-        await AsyncInteractiveLock.EnterAsync().ConfigureAwait(false); 
+        await _asyncInteractiveLock.EnterAsync().ConfigureAwait(false); 
 		OperateResult<Socket> resultSocket;
 		try
 		{
@@ -498,7 +493,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-            AsyncInteractiveLock.Leave();
+            _asyncInteractiveLock.Leave();
 		}
 
 		if (!IsPersistentConn)
@@ -540,20 +535,27 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		{
 			return CreateSocketAndInitialication();
 		}
-
-        // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
-        if (IsSocketError || CoreSocket == null)
+       
+        if (IsSocketError || CoreSocket is null)
 		{
-			OperateResult operateResult = ConnectServer();
-			if (!operateResult.IsSuccess)
+            // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
+            if (AutoConnectServerWhenSocketIsErrorOrNull)
 			{
-				IsSocketError = true;
-				return OperateResult.Error<Socket>(operateResult);
-			}
+                OperateResult operateResult = ConnectServer();
+                if (!operateResult.IsSuccess)
+                {
+                    IsSocketError = true;
+                    return OperateResult.Error<Socket>(operateResult);
+                }
 
-			IsSocketError = false;
-			return OperateResult.Ok(CoreSocket);
-		}
+                IsSocketError = false;
+                return OperateResult.Ok(CoreSocket);
+            }
+
+            // 不自动连接服务，抛出异常。
+            string err = IsSocketError ? "Socket error" : "Must connect server firstly";
+            return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
+        }
 
         // 使用已创建的Socket。
         return OperateResult.Ok(CoreSocket);
@@ -662,7 +664,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		var operateResult = new OperateResult<byte[]>();
 		OperateResult<Socket> operateResult2;
-		InteractiveLock.Enter();
+		_interactiveLock.Enter();
 		try
 		{
 			operateResult2 = GetAvailableSocket();
@@ -698,7 +700,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			InteractiveLock.Leave();
+			_interactiveLock.Leave();
 		}
 
 		if (!IsPersistentConn)
@@ -720,8 +722,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			{
 				ConnectClose();
 			
-				InteractiveLock?.Dispose();
-                AsyncInteractiveLock?.Dispose();
+				_interactiveLock?.Dispose();
+                _asyncInteractiveLock?.Dispose();
             }
 			_disposedValue = true;
 		}
