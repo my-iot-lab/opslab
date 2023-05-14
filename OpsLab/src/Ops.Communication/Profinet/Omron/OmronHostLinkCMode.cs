@@ -82,7 +82,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		int num = Convert.ToInt32(Encoding.ASCII.GetString(operateResult.Content, 5, 2), 16);
 		if (num > 0)
 		{
-			return new OperateResult<string>(num, "Unknown Error");
+			return new OperateResult<string>((int)ErrorCode.UnknownError, "Unknown Error");
 		}
 
 		string @string = Encoding.ASCII.GetString(operateResult.Content, 7, 2);
@@ -144,7 +144,8 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		}
 		catch (Exception ex)
 		{
-			operateResult.Message = ex.Message;
+			operateResult.ErrorCode = (int)ErrorCode.NotSupportedDataType;
+            operateResult.Message = ex.Message;
 			return operateResult;
 		}
 
@@ -224,14 +225,15 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 			{
 				return new OperateResult<byte[]>
 				{
-					ErrorCode = num,
+					ErrorCode = (int)ErrorCode.OmronReceiveDataError,
 					Content = array
 				};
 			}
+
 			return OperateResult.Ok(array);
 		}
 
-		return new OperateResult<byte[]>(ErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>

@@ -224,7 +224,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>(ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, ErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] array = new McAddressData[address.Length];
@@ -295,7 +295,7 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>(ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, ErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] mcAddressDatas = new McAddressData[address.Length];
@@ -753,7 +753,8 @@ public class MelsecMcAsciiNet : NetworkDeviceBase
 		ushort num = Convert.ToUInt16(Encoding.ASCII.GetString(content, 18, 4), 16);
 		if (num != 0)
 		{
-			return new OperateResult(num, MelsecHelper.GetErrorDescription(num));
+            var errCode = MelsecHelper.GetErrorDescription(num);
+            return new OperateResult((int)errCode, errCode.Desc());
 		}
 		return OperateResult.Ok();
 	}

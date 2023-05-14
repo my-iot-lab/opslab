@@ -14,11 +14,12 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// 基元用户模式构造同步锁
 	/// </summary>
 	private int m_waiters = 0;
+    private int m_lock_tick = 0;
 
-	/// <summary>
-	/// 基元内核模式构造同步锁
-	/// </summary>
-	private readonly Lazy<AutoResetEvent> m_waiterLock = new(() => new AutoResetEvent(false));
+    /// <summary>
+    /// 基元内核模式构造同步锁
+    /// </summary>
+    private readonly Lazy<AutoResetEvent> m_waiterLock = new(() => new AutoResetEvent(false));
 
 	private static long simpleHybirdLockCount;
 
@@ -29,10 +30,12 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// </summary>
 	public bool IsWaitting => m_waiters != 0;
 
-	/// <summary>
-	/// 获取当前总的所有进入锁的信息
-	/// </summary>
-	public static long SimpleHybirdLockCount => simpleHybirdLockCount;
+    public int LockingTick => m_lock_tick;
+
+    /// <summary>
+    /// 获取当前总的所有进入锁的信息
+    /// </summary>
+    public static long SimpleHybirdLockCount => simpleHybirdLockCount;
 
 	/// <summary>
 	/// 当前正在等待的锁的统计信息，此时已经发生了竞争了
@@ -60,26 +63,33 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// <summary>
 	/// 获取锁
 	/// </summary>
-	public void Enter()
+	public bool Enter()
 	{
 		Interlocked.Increment(ref simpleHybirdLockCount);
-		if (Interlocked.Increment(ref m_waiters) != 1)
+		if (Interlocked.Increment(ref m_waiters) == 1)
 		{
-			Interlocked.Increment(ref simpleHybirdLockWaitCount);
-			m_waiterLock.Value.WaitOne();
+			return true;
 		}
-	}
+
+        Interlocked.Increment(ref simpleHybirdLockWaitCount);
+        Interlocked.Increment(ref m_lock_tick);
+        return m_waiterLock.Value.WaitOne();
+    }
 
 	/// <summary>
 	/// 离开锁
 	/// </summary>
-	public void Leave()
+	public bool Leave()
 	{
 		Interlocked.Decrement(ref simpleHybirdLockCount);
-		if (Interlocked.Decrement(ref m_waiters) != 0)
+		if (Interlocked.Decrement(ref m_waiters) == 0)
 		{
-			Interlocked.Decrement(ref simpleHybirdLockWaitCount);
-			m_waiterLock.Value.Set();  // 设置事件信号，一次只允许执行一个线程, 其它线程继续 WaitOne 。
+			return true;
 		}
-	}
+
+        var flag = m_waiterLock.Value.Set(); // 设置事件信号，一次只允许执行一个线程, 其它线程继续 WaitOne 。
+        Interlocked.Decrement(ref simpleHybirdLockWaitCount);
+        Interlocked.Decrement(ref m_lock_tick);
+        return flag;
+    }
 }

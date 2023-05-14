@@ -13,6 +13,7 @@ public sealed class AsyncSimpleHybirdLock : IDisposable
     /// 基元用户模式构造同步锁
     /// </summary>
     private int m_waiters = 0;
+    private int m_lock_tick = 0;
 
     /// <summary>
     /// 基元内核模式构造同步锁
@@ -27,6 +28,8 @@ public sealed class AsyncSimpleHybirdLock : IDisposable
     /// 获取当前锁是否在等待当中
     /// </summary>
     public bool IsWaitting => m_waiters != 0;
+
+    public int LockingTick => m_lock_tick;
 
     /// <summary>
     /// 获取当前总的所有进入锁的信息
@@ -59,26 +62,34 @@ public sealed class AsyncSimpleHybirdLock : IDisposable
     /// <summary>
     /// 获取锁
     /// </summary>
-    public async Task EnterAsync(CancellationToken cancellationToken = default)
+    public async Task<bool> EnterAsync(CancellationToken cancellationToken = default)
     {
         Interlocked.Increment(ref simpleHybirdLockCount);
-        if (Interlocked.Increment(ref m_waiters) != 1)
+        if (Interlocked.Increment(ref m_waiters) == 1)
         {
-            Interlocked.Increment(ref simpleHybirdLockWaitCount);
-            await m_waiterLock.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return true;
         }
+
+        Interlocked.Increment(ref simpleHybirdLockWaitCount);
+        Interlocked.Increment(ref m_lock_tick);
+        await m_waiterLock.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+        return true;
     }
 
     /// <summary>
     /// 离开锁
     /// </summary>
-    public void Leave()
+    public bool Leave()
     {
         Interlocked.Decrement(ref simpleHybirdLockCount);
-        if (Interlocked.Decrement(ref m_waiters) != 0)
+        if (Interlocked.Decrement(ref m_waiters) == 0)
         {
-            Interlocked.Decrement(ref simpleHybirdLockWaitCount);
-            m_waiterLock.Value.Set();  // 设置事件信号，一次只允许执行一个线程, 其它线程继续 Wait。
+            return true;
         }
+
+        m_waiterLock.Value.Set();  // 设置事件信号，一次只允许执行一个线程, 其它线程继续 Wait。
+        Interlocked.Decrement(ref simpleHybirdLockWaitCount);
+        Interlocked.Decrement(ref m_lock_tick);
+        return true;
     }
 }

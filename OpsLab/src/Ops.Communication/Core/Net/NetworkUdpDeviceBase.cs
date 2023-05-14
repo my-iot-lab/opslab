@@ -292,17 +292,17 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 
 	public virtual async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		return await Task.Run(() => Read(address, length));
+		return await Task.Run(() => Read(address, length)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		return await Task.Run(() => Write(address, value));
+		return await Task.Run(() => Write(address, value)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		return await Task.Run(() => ReadBool(address, length));
+		return await Task.Run(() => ReadBool(address, length)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult<bool>> ReadBoolAsync(string address)
@@ -312,19 +312,19 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 
 	public virtual async Task<OperateResult> WriteAsync(string address, bool[] value)
 	{
-		return await Task.Run(() => Write(address, value));
+		return await Task.Run(() => Write(address, value)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await WriteAsync(address, new bool[1] { value });
+		return await WriteAsync(address, new bool[1] { value }).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new()
 	{
 		OperateResult<T> result = new OperateResult<T>();
 		T Content = new();
-		OperateResult<byte[]> read = await ReadAsync(address, Content.ReadCount);
+		OperateResult<byte[]> read = await ReadAsync(address, Content.ReadCount).ConfigureAwait(false);
 		if (read.IsSuccess)
 		{
 			Content.ParseSource(read.Content);
@@ -341,57 +341,57 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 
 	public async Task<OperateResult> WriteCustomerAsync<T>(string address, T data) where T : IDataTransfer, new()
 	{
-		return await WriteAsync(address, data.ToSource());
+		return await WriteAsync(address, data.ToSource()).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult<T>> ReadAsync<T>() where T : class, new()
 	{
-		return await ReflectionHelper.ReadAsync<T>(this);
+		return await ReflectionHelper.ReadAsync<T>(this).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync<T>(T data) where T : class, new()
 	{
-		return await ReflectionHelper.WriteAsync(data, this);
+		return await ReflectionHelper.WriteAsync(data, this).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<short>> ReadInt16Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadInt16Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadInt16Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength)), (byte[] m) => ByteTransform.TransInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransInt16(m, 0, length));
 	}
 
 	public async Task<OperateResult<ushort>> ReadUInt16Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadUInt16Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadUInt16Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<ushort[]>> ReadUInt16Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength)), (byte[] m) => ByteTransform.TransUInt16(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransUInt16(m, 0, length));
 	}
 
 	public async Task<OperateResult<int>> ReadInt32Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadInt32Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadInt32Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)), (byte[] m) => ByteTransform.TransInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransInt32(m, 0, length));
 	}
 
 	public async Task<OperateResult<uint>> ReadUInt32Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadUInt32Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadUInt32Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)), (byte[] m) => ByteTransform.TransUInt32(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransUInt32(m, 0, length));
 	}
 
 	public async Task<OperateResult<float>> ReadFloatAsync(string address)
@@ -401,132 +401,132 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 
 	public virtual async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)), (byte[] m) => ByteTransform.TransSingle(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 2)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransSingle(m, 0, length));
 	}
 
 	public async Task<OperateResult<long>> ReadInt64Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadInt64Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadInt64Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)), (byte[] m) => ByteTransform.TransInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransInt64(m, 0, length));
 	}
 
 	public async Task<OperateResult<ulong>> ReadUInt64Async(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadUInt64Async(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadUInt64Async(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)), (byte[] m) => ByteTransform.TransUInt64(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransUInt64(m, 0, length));
 	}
 
 	public async Task<OperateResult<double>> ReadDoubleAsync(string address)
 	{
-		return ByteTransformHelper.GetResultFromArray(await ReadDoubleAsync(address, 1));
+		return ByteTransformHelper.GetResultFromArray(await ReadDoubleAsync(address, 1).ConfigureAwait(false));
 	}
 
 	public virtual async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)), (byte[] m) => ByteTransform.TransDouble(m, 0, length));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * WordLength * 4)).ConfigureAwait(false), (byte[] m) => ByteTransform.TransDouble(m, 0, length));
 	}
 
 	public async Task<OperateResult<string>> ReadStringAsync(string address, ushort length)
 	{
-		return await ReadStringAsync(address, length, Encoding.ASCII);
+		return await ReadStringAsync(address, length, Encoding.ASCII).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
 	{
-		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length), (byte[] m) => ByteTransform.TransString(m, 0, m.Length, encoding));
+		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, length).ConfigureAwait(false), (byte[] m) => ByteTransform.TransString(m, 0, m.Length, encoding));
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, short[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, short value)
 	{
-		return await WriteAsync(address, new short[1] { value });
+		return await WriteAsync(address, new short[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, ushort[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, ushort value)
 	{
-		return await WriteAsync(address, new ushort[1] { value });
+		return await WriteAsync(address, new ushort[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, int[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, int value)
 	{
-		return await WriteAsync(address, new int[1] { value });
+		return await WriteAsync(address, new int[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, uint[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, uint value)
 	{
-		return await WriteAsync(address, new uint[1] { value });
+		return await WriteAsync(address, new uint[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, float[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, float value)
 	{
-		return await WriteAsync(address, new float[1] { value });
+		return await WriteAsync(address, new float[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, long[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, long value)
 	{
-		return await WriteAsync(address, new long[1] { value });
+		return await WriteAsync(address, new long[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, ulong[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, ulong value)
 	{
-		return await WriteAsync(address, new ulong[1] { value });
+		return await WriteAsync(address, new ulong[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, double[] values)
 	{
-		return await WriteAsync(address, ByteTransform.TransByte(values));
+		return await WriteAsync(address, ByteTransform.TransByte(values)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, double value)
 	{
-		return await WriteAsync(address, new double[1] { value });
+		return await WriteAsync(address, new double[1] { value }).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, string value)
 	{
-		return await WriteAsync(address, value, Encoding.ASCII);
+		return await WriteAsync(address, value, Encoding.ASCII).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, string value, Encoding encoding)
@@ -541,7 +541,7 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 
 	public virtual async Task<OperateResult> WriteAsync(string address, string value, int length)
 	{
-		return await WriteAsync(address, value, length, Encoding.ASCII);
+		return await WriteAsync(address, value, length, Encoding.ASCII).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, string value, int length, Encoding encoding)
@@ -552,6 +552,6 @@ public class NetworkUdpDeviceBase : NetworkUdpBase, IReadWriteDevice, IReadWrite
 			temp2 = SoftBasic.ArrayExpandToLengthEven(temp2);
 		}
 		temp2 = SoftBasic.ArrayExpandToLength(temp2, length);
-		return await WriteAsync(address, temp2);
+		return await WriteAsync(address, temp2).ConfigureAwait(false);
 	}
 }

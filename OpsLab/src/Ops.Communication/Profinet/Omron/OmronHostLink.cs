@@ -92,7 +92,36 @@ public sealed class OmronHostLink : SerialDeviceBase
 		return OperateResult.Ok();
 	}
 
-	public override OperateResult<bool[]> ReadBool(string address, ushort length)
+    public OperateResult<byte[]> Read(string[] address)
+    {
+        byte station = UnitNumber;
+        if (address != null && address.Length != 0)
+        {
+            station = (byte)OpsHelper.ExtractParameter(ref address[0], "s", UnitNumber);
+        }
+
+        OperateResult<List<byte[]>> operateResult = OmronFinsNetHelper.BuildReadCommand(address);
+        if (!operateResult.IsSuccess)
+        {
+            return OperateResult.Error<byte[]>(operateResult);
+        }
+
+        List<byte> list = new();
+        for (int i = 0; i < operateResult.Content.Count; i++)
+        {
+            OperateResult<byte[]> operateResult2 = ReadFromCoreServer(PackCommand(station, operateResult.Content[i]));
+            if (!operateResult2.IsSuccess)
+            {
+                return OperateResult.Error<byte[]>(operateResult2);
+            }
+
+            list.AddRange(operateResult2.Content);
+        }
+
+        return OperateResult.Ok(list.ToArray());
+    }
+
+    public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
 		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<List<byte[]>> operateResult = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: true);

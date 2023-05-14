@@ -391,13 +391,31 @@ public class OperateResult
         return IsSuccess ? func() : Error<T1, T2, T3, T4, T5, T6, T7>(this);
     }
 
-    /// <summary>
-    /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
-    /// </summary>
-    /// <typeparam name="T">目标数据类型</typeparam>
-    /// <param name="result">之前的结果对象</param>
-    /// <returns>带默认泛型对象的失败结果类</returns>
-    public static OperateResult<T> Error<T>(OperateResult result)
+    public static OperateResult Error(int errorCode, string message)
+    {
+        return new OperateResult
+        {
+            ErrorCode = errorCode,
+            Message = message
+        };
+    }
+
+	public static OperateResult<T> Error<T>(int errorCode, string message)
+	{
+		return new OperateResult<T>
+		{
+			ErrorCode = errorCode,
+			Message = message
+		};
+	}
+
+	/// <summary>
+	/// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+	/// </summary>
+	/// <typeparam name="T">目标数据类型</typeparam>
+	/// <param name="result">之前的结果对象</param>
+	/// <returns>带默认泛型对象的失败结果类</returns>
+	public static OperateResult<T> Error<T>(OperateResult result)
 	{
 		return new OperateResult<T>
 		{

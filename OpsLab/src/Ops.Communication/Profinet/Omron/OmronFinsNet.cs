@@ -94,19 +94,6 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
 
-	public override string IpAddress
-	{
-		get
-		{
-			return base.IpAddress;
-		}
-		set
-		{
-			base.IpAddress = value;
-			DA1 = Convert.ToByte(base.IpAddress[(base.IpAddress.LastIndexOf(".") + 1)..]);
-		}
-	}
-
 	/// <summary>
 	/// 信息控制字段，默认0x80。
 	/// </summary>
@@ -247,7 +234,8 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 
 		if (num != 0)
 		{
-			return new OperateResult(num, OmronFinsNetHelper.GetStatusDescription(num));
+			var errCode = OmronFinsNetHelper.GetErrorCode(num);
+            return new OperateResult((int)errCode, errCode.Desc());
 		}
 
 		if (operateResult.Content.Length >= 20)
@@ -280,7 +268,8 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 
 		if (status != 0)
 		{
-			return new OperateResult(status, OmronFinsNetHelper.GetStatusDescription(status));
+			var errCode = OmronFinsNetHelper.GetErrorCode(status);
+            return new OperateResult((int)errCode, errCode.Desc());
 		}
 
 		if (read.Content.Length >= 20)
@@ -309,7 +298,12 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 		return OmronFinsNetHelper.Read(this, address, length, ReadSplits);
 	}
 
-	public override OperateResult Write(string address, byte[] value)
+    public OperateResult<byte[]> Read(string[] address)
+    {
+        return OmronFinsNetHelper.Read(this, address);
+    }
+
+    public override OperateResult Write(string address, byte[] value)
 	{
 		return OmronFinsNetHelper.Write(this, address, value);
 	}

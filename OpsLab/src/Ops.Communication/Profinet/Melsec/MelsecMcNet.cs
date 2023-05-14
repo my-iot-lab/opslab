@@ -332,6 +332,7 @@ public class MelsecMcNet : NetworkDeviceBase
 			{
 				return operateResult2;
 			}
+
 			list.AddRange(operateResult2.Content);
 			num = (ushort)(num + num2);
 			if (operateResult.Content.McDataType.DataType == 0)
@@ -628,7 +629,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>(ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, ErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] mcAddressDatas = new McAddressData[address.Length];
@@ -1013,9 +1014,8 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <summary>
 	/// 远程Run操作。
 	/// </summary>
-	/// <param name="force">是否强制执行</param>
 	/// <returns>是否成功</returns>
-	public OperateResult RemoteRun(bool force = false)
+	public OperateResult RemoteRun()
 	{
 		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
@@ -1118,6 +1118,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		{
 			return read;
 		}
+
 		OperateResult check = CheckResponseContent(read.Content);
 		if (!check.IsSuccess)
 		{
@@ -1244,6 +1245,7 @@ public class MelsecMcNet : NetworkDeviceBase
 			}
 			return OperateResult.Ok(array);
 		}
+
 		return OperateResult.Ok(response);
 	}
 
@@ -1257,7 +1259,8 @@ public class MelsecMcNet : NetworkDeviceBase
 		ushort num = BitConverter.ToUInt16(content, 9);
 		if (num != 0)
 		{
-			return new OperateResult<byte[]>(num, MelsecHelper.GetErrorDescription(num));
+			var errCode = MelsecHelper.GetErrorDescription(num);
+            return new OperateResult<byte[]>((int)errCode, errCode.Desc());
 		}
 		return OperateResult.Ok();
 	}

@@ -464,11 +464,11 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 			{
 				return OperateResult.Ok(MelsecMcRDataType.Z, Convert.ToInt32(address[1..], MelsecMcRDataType.Z.FromBase));
 			}
-			return new OperateResult<MelsecMcRDataType, int>(ErrorCode.NotSupportedDataType.Desc());
+			return new OperateResult<MelsecMcRDataType, int>((int)ErrorCode.NotSupportedDataType, ErrorCode.NotSupportedDataType.Desc());
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<MelsecMcRDataType, int>(ex.Message);
+			return new OperateResult<MelsecMcRDataType, int>((int)ErrorCode.NotSupportedDataType, ex.Message);
 		}
 	}
 

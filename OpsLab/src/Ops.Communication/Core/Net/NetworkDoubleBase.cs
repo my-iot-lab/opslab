@@ -1,9 +1,9 @@
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Ops.Communication.Core.Message;
+using Ops.Communication.Core.Pipe;
 using Ops.Communication.Extensions;
 using Ops.Communication.Utils;
 
@@ -14,12 +14,10 @@ namespace Ops.Communication.Core.Net;
 /// </summary>
 public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 {
-	private string _ipAddress = "127.0.0.1";
+	private PipeSocket _pipeSocket;
+
     private bool _disposedValue = false;
     private readonly Lazy<Ping> ping = new(() => new Ping());
-
-    private readonly SimpleHybirdLock _interactiveLock; // 交互的混合锁，保证交互操作的安全性。
-    private readonly AsyncSimpleHybirdLock _asyncInteractiveLock; // 异步交互的混合锁，保证交互操作的安全性。
 
     /// <summary>
     /// 是否是长连接的状态。
@@ -30,7 +28,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// 指示长连接的套接字是否处于错误的状态。
     /// </summary>
 	/// <remarks>当读取/写入数据时有接收数据超时、远端Socket关闭、Socket异常都会影响该值。</remarks>
-    public bool IsSocketError { get; private set; }
+    public bool IsSocketError => _pipeSocket?.IsSocketError == true;
 
     /// <summary>
     /// 设置日志记录报文是否二进制，如果为False，那就使用ASCII码。
@@ -45,7 +43,17 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <summary>
 	/// 获取或设置连接的超时时间，单位毫秒，默认10s。
 	/// </summary>
-	public int ConnectTimeOut { get; set; } = 10_000;
+	public int ConnectTimeOut 
+	{
+        get => _pipeSocket.ConnectTimeOut;
+        set
+        {
+            if (value >= 0)
+            {
+                _pipeSocket.ConnectTimeOut = value;
+            }
+        }
+    }
 
 	/// <summary>
 	/// 获取或设置接收服务器反馈的时间，如果为负数，则不接收反馈
@@ -53,7 +61,14 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 超时的通常原因是服务器端没有配置好，导致访问失败，为了不卡死软件，所以有了这个超时的属性。
 	/// </remarks>
-	public int ReceiveTimeOut { get; set; } = 5_000;
+	public int ReceiveTimeOut 
+	{
+        get => _pipeSocket.ReceiveTimeOut;
+        set
+        {
+            _pipeSocket.ReceiveTimeOut = value;
+        }
+    }
 
 	/// <summary>
 	/// 在读取/写入数据期间还未创建Socket或是Socket有异常时，是否自动取连接服务创建Socket，默认为true。
@@ -71,10 +86,13 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 最好实在初始化的时候进行指定，当使用短连接的时候，支持动态更改，切换；当使用长连接后，无法动态更改
 	/// </remarks>
-	public virtual string IpAddress
+	public string IpAddress
     {
-        get => _ipAddress;
-        set => _ipAddress = OpsHelper.GetIpAddressFromInput(value);
+        get => _pipeSocket.IpAddress;
+        set
+        {
+            _pipeSocket.IpAddress = value;
+        }
     }
 
 	/// <summary>
@@ -83,14 +101,28 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <remarks>
 	/// 最好实在初始化的时候进行指定，当使用短连接的时候，支持动态更改，切换；当使用长连接后，无法动态更改
 	/// </remarks>
-	public int Port { get; set; } = 10000;
+	public int Port
+	{
+		get => _pipeSocket.Port;
+		set
+		{
+            _pipeSocket.Port = value;
+		}
+	}
 
-	public string ConnectionId { get; set; } = string.Empty;
+    public string ConnectionId { get; set; } = string.Empty;
 
     /// <summary>
     /// 获取或设置在正式接收对方返回数据前的时候，需要休息的时间，当设置为0的时候，不需要休息。
     /// </summary>
-    public int SleepTime { get; set; }
+    public int SleepTime
+	{
+		get => _pipeSocket.SleepTime;
+        set
+		{
+			_pipeSocket.SleepTime = value;
+		}
+	}
 
 	/// <summary>
 	/// 获取或设置客户端的Socket的心跳时间信息
@@ -113,8 +145,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// </summary>
     public NetworkDoubleBase()
 	{
-		_interactiveLock = new();
-		_asyncInteractiveLock = new();
+        _pipeSocket = new();
         ConnectionId = SoftBasic.GetUniqueStringByGuidAndRandom();
 	}
 
@@ -127,10 +158,18 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		return null;
 	}
 
-	/// <summary>
-	/// 在读取数据之前可以调用本方法将客户端设置为长连接模式，相当于跳过了ConnectServer的结果验证，对异形客户端无效，当第一次进行通信时再进行创建连接请求。
-	/// </summary>
-	public void SetPersistentConnection()
+    public void SetPipeSocket(PipeSocket pipeSocket)
+    {
+        _pipeSocket ??= pipeSocket;
+        SetPersistentConnection();
+    }
+
+	public PipeSocket GetPipeSocket() => _pipeSocket;
+
+    /// <summary>
+    /// 在读取数据之前可以调用本方法将客户端设置为长连接模式，相当于跳过了ConnectServer的结果验证，对异形客户端无效，当第一次进行通信时再进行创建连接请求。
+    /// </summary>
+    public void SetPersistentConnection()
 	{
 		IsPersistentConn = true;
 	}
@@ -165,22 +204,22 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	public OperateResult ConnectServer()
 	{
 		IsPersistentConn = true;
-		CoreSocket?.Close();
+		_pipeSocket.Socket?.Close();
 
 		OperateResult<Socket> operateResult = CreateSocketAndInitialication();
 		ConnectServerPostDelegate?.Invoke(operateResult.IsSuccess);
 		if (!operateResult.IsSuccess)
 		{
-			IsSocketError = true;
+            _pipeSocket.IsSocketError = true;
 			operateResult.Content = null;
 			return operateResult;
 		}
 
-        IsSocketError = false;
-        CoreSocket = operateResult.Content;
+        _pipeSocket.IsSocketError = false;
+        _pipeSocket.Socket = operateResult.Content;
 		if (SocketKeepAliveTime > 0)
 		{
-			CoreSocket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
+            _pipeSocket.Socket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineStart", ToString());
@@ -195,12 +234,12 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		var operateResult = new OperateResult();
 		IsPersistentConn = false;
-		_interactiveLock.Enter();
+        _pipeSocket.PipeLockEnter();
 		try
 		{
-			operateResult = ExtraOnDisconnect(CoreSocket);
-			CoreSocket?.Close();
-			CoreSocket = null;
+			operateResult = ExtraOnDisconnect(_pipeSocket.Socket);
+            _pipeSocket.Socket?.Close();
+            _pipeSocket.Socket = null;
 		}
 		catch
 		{
@@ -208,7 +247,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			_interactiveLock.Leave();
+            _pipeSocket.PipeLockLeave();
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
@@ -272,7 +311,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// <returns></returns>
     private async Task<OperateResult<Socket>> CreateSocketAndInitialicationAsync()
 	{
-		var result = await CreateSocketAndConnectAsync(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut).ConfigureAwait(false);
+        var result = await CreateSocketAndConnectAsync(_pipeSocket.GetConnectIPEndPoint(), ConnectTimeOut).ConfigureAwait(false);
 		if (result.IsSuccess)
 		{
 			OperateResult initi = await InitializationOnConnectAsync(result.Content).ConfigureAwait(false);
@@ -302,7 +341,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
             return await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
         }
 
-		if (IsSocketError || CoreSocket is null)
+		if (_pipeSocket.IsConnectitonError())
 		{
             // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
             if (AutoConnectServerWhenSocketIsErrorOrNull)
@@ -310,21 +349,21 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
                 OperateResult connect = await ConnectServerAsync().ConfigureAwait(false);
                 if (!connect.IsSuccess)
                 {
-                    IsSocketError = true;
+                    _pipeSocket.IsSocketError = true;
                     return OperateResult.Error<Socket>(connect);
                 }
 
-                IsSocketError = false;
-                return OperateResult.Ok(CoreSocket);
+                _pipeSocket.IsSocketError = false;
+                return OperateResult.Ok(_pipeSocket.Socket);
             }
 
 			// 不自动连接服务，抛出异常。
-			string err = IsSocketError ? "Socket error" : "Must connect server firstly";
+			string err = _pipeSocket.IsSocketError ? "Socket error" : "Must connect server firstly";
             return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
         }
 
 		// 使用已创建的Socket。
-		return OperateResult.Ok(CoreSocket);
+		return OperateResult.Ok(_pipeSocket.Socket);
 	}
 
 	/// <summary>
@@ -334,20 +373,20 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	public async Task<OperateResult> ConnectServerAsync()
 	{
 		IsPersistentConn = true;
-		CoreSocket?.Close();
-        CoreSocket = null;
+        _pipeSocket.Socket?.Close();
+        _pipeSocket.Socket = null;
 
         OperateResult<Socket> rSocket = await CreateSocketAndInitialicationAsync().ConfigureAwait(false);
 		ConnectServerPostDelegate?.Invoke(rSocket.IsSuccess);
 		if (!rSocket.IsSuccess)
 		{
-			IsSocketError = true;
+            _pipeSocket.IsSocketError = true;
 			rSocket.Content = null;
 			return rSocket;
 		}
 
-        IsSocketError = false;
-        CoreSocket = rSocket.Content;
+		_pipeSocket.IsSocketError = false;
+        _pipeSocket.Socket = rSocket.Content;
 		Logger?.LogDebug("{str0}-- NetEngineStart", ToString());
 		return rSocket;
 	}
@@ -360,13 +399,13 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		IsPersistentConn = false;
 
-        await _asyncInteractiveLock.EnterAsync().ConfigureAwait(false);
+        await _pipeSocket.AsyncPipeLockEnter().ConfigureAwait(false);
 		OperateResult result;
 		try
 		{
-			result = await ExtraOnDisconnectAsync(CoreSocket).ConfigureAwait(false);
-			CoreSocket?.Close();
-			CoreSocket = null;
+			result = await ExtraOnDisconnectAsync(_pipeSocket.Socket).ConfigureAwait(false);
+            _pipeSocket.Socket?.Close();
+            _pipeSocket.Socket = null;
 		}
 		catch
 		{
@@ -374,7 +413,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-            _asyncInteractiveLock.Leave();
+            _pipeSocket.AsyncPipeLockLeave();
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineClose", ToString());
@@ -451,12 +490,17 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		return await ReadFromCoreServerAsync(send, hasResponseData: true).ConfigureAwait(false);
 	}
 
+    public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send)
+    {
+        return await NetSupport.ReadFromCoreServerAsync(send, ReadFromCoreServerAsync).ConfigureAwait(false);
+    }
+
     private async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var result = new OperateResult<byte[]>();
 
         // 锁，只允许单线程执行
-        await _asyncInteractiveLock.EnterAsync().ConfigureAwait(false); 
+        await _pipeSocket.AsyncPipeLockEnter().ConfigureAwait(false); 
 		OperateResult<Socket> resultSocket;
 		try
 		{
@@ -465,7 +509,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			{
                 SocketReadErrorClosedDelegate?.Invoke(resultSocket.ErrorCode);
 
-                IsSocketError = true;
+                _pipeSocket.IsSocketError = true;
 				result.CopyErrorFromOther(resultSocket);
 				return result;
 			}
@@ -473,7 +517,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			OperateResult<byte[]> read = await ReadFromCoreServerAsync(resultSocket.Content, send, hasResponseData, usePackAndUnpack).ConfigureAwait(false);
 			if (read.IsSuccess)
 			{
-				IsSocketError = false;
+				_pipeSocket.IsSocketError = false;
 				result.IsSuccess = read.IsSuccess;
 				result.Content = read.Content;
 				result.Message = "Success";
@@ -482,7 +526,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			{
                 SocketReadErrorClosedDelegate?.Invoke(read.ErrorCode);
 
-                IsSocketError = true;
+                _pipeSocket.IsSocketError = true;
 				result.CopyErrorFromOther(read);
 			}
 			ExtraAfterReadFromCoreServer(read);
@@ -493,7 +537,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-            _asyncInteractiveLock.Leave();
+            _pipeSocket.AsyncPipeLockLeave();
 		}
 
 		if (!IsPersistentConn)
@@ -536,7 +580,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			return CreateSocketAndInitialication();
 		}
        
-        if (IsSocketError || CoreSocket is null)
+        if (_pipeSocket.IsConnectitonError())
 		{
             // 有Socket异常或是还没有进行连接服务器，会重新连接服务器。
             if (AutoConnectServerWhenSocketIsErrorOrNull)
@@ -544,21 +588,21 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
                 OperateResult operateResult = ConnectServer();
                 if (!operateResult.IsSuccess)
                 {
-                    IsSocketError = true;
+                    _pipeSocket.IsSocketError = true;
                     return OperateResult.Error<Socket>(operateResult);
                 }
 
-                IsSocketError = false;
-                return OperateResult.Ok(CoreSocket);
+                _pipeSocket.IsSocketError = false;
+                return OperateResult.Ok(_pipeSocket.Socket);
             }
 
             // 不自动连接服务，抛出异常。
-            string err = IsSocketError ? "Socket error" : "Must connect server firstly";
+            string err = _pipeSocket.IsSocketError ? "Socket error" : "Must connect server firstly";
             return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
         }
 
         // 使用已创建的Socket。
-        return OperateResult.Ok(CoreSocket);
+        return OperateResult.Ok(_pipeSocket.Socket);
 	}
 
 	/// <summary>
@@ -567,7 +611,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <returns>带有socket的结果对象</returns>
 	private OperateResult<Socket> CreateSocketAndInitialication()
 	{
-		OperateResult<Socket> operateResult = CreateSocketAndConnect(new IPEndPoint(IPAddress.Parse(_ipAddress), Port), ConnectTimeOut);
+		OperateResult<Socket> operateResult = CreateSocketAndConnect(_pipeSocket.GetConnectIPEndPoint(), ConnectTimeOut);
 		if (operateResult.IsSuccess)
 		{
 			OperateResult operateResult2 = InitializationOnConnect(operateResult.Content);
@@ -650,21 +694,26 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		return ReadFromCoreServer(send, hasResponseData: true);
 	}
 
-	/// <summary>
-	/// 将数据发送到当前的网络通道中，并从网络通道中接收一个<see cref="INetMessage" />指定的完整的报文，网络通道将根据<see cref="GetAvailableSocket" />方法自动获取，本方法是线程安全的。
-	/// </summary>
-	/// <param name="send">发送的完整的报文信息</param>
-	/// <param name="hasResponseData">是否有等待的数据返回，默认为 true</param>
-	/// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(byte[])" />方法后才会有影响</param>
-	/// <returns>接收的完整的报文信息</returns>
-	/// <remarks>
-	/// 本方法用于实现本组件还未实现的一些报文功能，例如有些modbus服务器会有一些特殊的功能码支持，需要收发特殊的报文，详细请看示例
-	/// </remarks>
-	private OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
+    public OperateResult<byte[]> ReadFromCoreServer(IEnumerable<byte[]> send)
+    {
+        return NetSupport.ReadFromCoreServer(send, ReadFromCoreServer);
+    }
+
+    /// <summary>
+    /// 将数据发送到当前的网络通道中，并从网络通道中接收一个<see cref="INetMessage" />指定的完整的报文，网络通道将根据<see cref="GetAvailableSocket" />方法自动获取，本方法是线程安全的。
+    /// </summary>
+    /// <param name="send">发送的完整的报文信息</param>
+    /// <param name="hasResponseData">是否有等待的数据返回，默认为 true</param>
+    /// <param name="usePackAndUnpack">是否需要对命令重新打包，在重写<see cref="PackCommandWithHeader(byte[])" />方法后才会有影响</param>
+    /// <returns>接收的完整的报文信息</returns>
+    /// <remarks>
+    /// 本方法用于实现本组件还未实现的一些报文功能，例如有些modbus服务器会有一些特殊的功能码支持，需要收发特殊的报文，详细请看示例
+    /// </remarks>
+    private OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
 		var operateResult = new OperateResult<byte[]>();
 		OperateResult<Socket> operateResult2;
-		_interactiveLock.Enter();
+        _pipeSocket.PipeLockEnter();
 		try
 		{
 			operateResult2 = GetAvailableSocket();
@@ -672,7 +721,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			{
                 SocketReadErrorClosedDelegate?.Invoke(operateResult2.ErrorCode);
 
-                IsSocketError = true;
+                _pipeSocket.IsSocketError = true;
 				operateResult.CopyErrorFromOther(operateResult2);
 				return operateResult;
 			}
@@ -680,7 +729,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			var operateResult3 = ReadFromCoreServer(operateResult2.Content, send, hasResponseData, usePackAndUnpack);
 			if (operateResult3.IsSuccess)
 			{
-				IsSocketError = false;
+				_pipeSocket.IsSocketError = false;
 				operateResult.IsSuccess = operateResult3.IsSuccess;
 				operateResult.Content = operateResult3.Content;
 				operateResult.Message = "Success";
@@ -689,7 +738,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			{
                 SocketReadErrorClosedDelegate?.Invoke(operateResult3.ErrorCode);
 
-                IsSocketError = true;
+                _pipeSocket.IsSocketError = true;
 				operateResult.CopyErrorFromOther(operateResult3);
 			}
 			ExtraAfterReadFromCoreServer(operateResult3);
@@ -700,7 +749,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		}
 		finally
 		{
-			_interactiveLock.Leave();
+            _pipeSocket.PipeLockLeave();
 		}
 
 		if (!IsPersistentConn)
@@ -721,9 +770,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			if (disposing)
 			{
 				ConnectClose();
-			
-				_interactiveLock?.Dispose();
-                _asyncInteractiveLock?.Dispose();
+
+                _pipeSocket?.Dispose();
             }
 			_disposedValue = true;
 		}

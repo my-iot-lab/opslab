@@ -1,8 +1,6 @@
-using System.ComponentModel;
 using System.IO.Ports;
-using System.Text;
-using Microsoft.Extensions.Logging;
 using Ops.Communication.Core;
+using Ops.Communication.Core.Pipe;
 using Ops.Communication.Extensions;
 
 namespace Ops.Communication.Serial;
@@ -12,19 +10,16 @@ namespace Ops.Communication.Serial;
 /// </summary>
 public abstract class SerialBase : IDisposable
 {
-	protected bool LogMsgFormatBinary = true;
 	private bool disposedValue = false;
-	private readonly SimpleHybirdLock hybirdLock;
-	private int sleepTime = 20;
-	private bool isClearCacheBeforeRead = false;
-	private int connectErrorCount = 0;
+    private int sleepTime = 20;
 
-	/// <summary>
-	/// 串口交互的核心
-	/// </summary>
-	protected SerialPort m_ReadData = null;
+    protected PipeSerial _pipeSerial;
+    protected int AtLeastReceiveLength = 1;
 
-	public ILogger Logger { get; set; }
+    /// <summary>
+    /// 串口交互的核心
+    /// </summary>
+    protected SerialPort m_ReadData = null;
 
 	/// <summary>
 	/// 获取或设置一个值，该值指示在串行通信中是否启用请求发送 (RTS) 信号。
@@ -44,7 +39,7 @@ public abstract class SerialBase : IDisposable
 	/// <summary>
 	/// 接收数据的超时时间，默认5000ms
 	/// </summary>
-	public int ReceiveTimeout { get; set; } = 5000;
+	public int ReceiveTimeout { get; set; } = 5_000;
 
 	/// <summary>
 	/// 连续串口缓冲数据检测的间隔时间，默认20ms，该值越小，通信速度越快，但是越不稳定。
@@ -64,48 +59,56 @@ public abstract class SerialBase : IDisposable
 		}
 	}
 
-	/// <summary>
-	/// 是否在发送数据前清空缓冲数据，默认是false
-	/// </summary>
-	public bool IsClearCacheBeforeRead
-	{
-		get
-		{
-			return isClearCacheBeforeRead;
-		}
-		set
-		{
-			isClearCacheBeforeRead = value;
-		}
-	}
+    /// <summary>
+    /// 是否在发送数据前清空缓冲数据，默认是false
+    /// </summary>
+    public bool IsClearCacheBeforeRead { get; set; }
 
-	/// <summary>
-	/// 当前连接串口信息的端口号名称
-	/// </summary>
-	public string PortName { get; private set; }
+    /// <summary>
+    /// 当前连接串口信息的端口号名称
+    /// </summary>
+    public string PortName { get; private set; }
 
 	/// <summary>
 	/// 当前连接串口信息的波特率
 	/// </summary>
 	public int BaudRate { get; private set; }
 
-	/// <summary>
-	/// 实例化一个无参的构造方法
-	/// </summary>
-	public SerialBase()
-	{
-		m_ReadData = new SerialPort();
-		hybirdLock = new SimpleHybirdLock();
-	}
+    public int ReceiveEmptyDataCount { get; set; } = 1;
 
-	/// <summary>
-	/// 初始化串口信息，9600波特率，8位数据位，1位停止位，无奇偶校验
-	/// </summary>
-	/// <param name="portName">端口号信息，例如"COM3"</param>
-	public virtual void SerialPortInit(string portName)
+    /// <summary>
+    /// 实例化一个无参的构造方法
+    /// </summary>
+    public SerialBase()
 	{
-		SerialPortInit(portName, 9600);
-	}
+        _pipeSerial = new PipeSerial();
+    }
+
+    public void SetPipeSerial(PipeSerial pipeSerial)
+    {
+        _pipeSerial ??= pipeSerial;
+    }
+
+    public PipeSerial GetPipeSerial() => _pipeSerial;
+
+    /// <summary>
+    /// 初始化串口信息，9600波特率，8位数据位，1位停止位，无奇偶校验
+    /// </summary>
+    /// <param name="portName">端口号信息，例如"COM3"</param>
+    public virtual void SerialPortInit(string portName)
+	{
+        if (portName.Contains('-') || portName.Contains(';'))
+        {
+            SerialPortInit(delegate (SerialPort sp)
+            {
+                sp.InitSerialByFormatString(portName);
+            });
+        }
+        else
+        {
+            SerialPortInit(portName, 9600);
+        }
+    }
 
 	/// <summary>
 	/// 初始化串口信息，波特率，8位数据位，1位停止位，无奇偶校验
@@ -127,75 +130,76 @@ public abstract class SerialBase : IDisposable
 	/// <param name="parity">奇偶校验</param>
 	public virtual void SerialPortInit(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
 	{
-		if (!m_ReadData.IsOpen)
-		{
-			m_ReadData.PortName = portName;
-			m_ReadData.BaudRate = baudRate;
-			m_ReadData.DataBits = dataBits;
-			m_ReadData.StopBits = stopBits;
-			m_ReadData.Parity = parity;
-			PortName = m_ReadData.PortName;
-			BaudRate = m_ReadData.BaudRate;
-		}
+        _pipeSerial.SerialPortInni(portName, baudRate, dataBits, stopBits, parity);
+        PortName = portName;
+        BaudRate = baudRate;
 	}
 
-	/// <summary>
-	/// 打开一个新的串行端口连接<br />
-	/// Open a new serial port connection
-	/// </summary>
-	public OperateResult Open()
-	{
-		try
-		{
-			if (!m_ReadData.IsOpen)
-			{
-				m_ReadData.Open();
-				return InitializationOnOpen();
-			}
-			return OperateResult.Ok();
-		}
-		catch (Exception ex)
-		{
-			if (connectErrorCount < 100000000)
-			{
-				connectErrorCount++;
-			}
-			return new OperateResult(-connectErrorCount, ex.Message);
-		}
-	}
+    public void SerialPortInit(Action<SerialPort> initi)
+    {
+        _pipeSerial.SerialPortInni(initi);
+        PortName = _pipeSerial.GetPipe().PortName;
+        BaudRate = _pipeSerial.GetPipe().BaudRate;
+    }
 
-	/// <summary>
-	/// 获取一个值，指示串口是否处于打开状态
-	/// </summary>
-	/// <returns>是或否</returns>
-	public bool IsOpen()
+    /// <summary>
+    /// 打开一个新的串行端口连接<br />
+    /// Open a new serial port connection
+    /// </summary>
+    public OperateResult Open()
 	{
-		return m_ReadData.IsOpen;
-	}
+        OperateResult operateResult = _pipeSerial.Open();
+        if (!operateResult.IsSuccess)
+        {
+            return new OperateResult((int)ErrorCode.OpenSerialPortException, operateResult.Message);
+        }
+
+        return InitializationOnOpen(_pipeSerial.GetPipe());
+    }
+
+    protected virtual OperateResult InitializationOnOpen(SerialPort sp)
+    {
+        return OperateResult.Ok();
+    }
+
+    /// <summary>
+    /// 获取一个值，指示串口是否处于打开状态
+    /// </summary>
+    /// <returns>是或否</returns>
+    public bool IsOpen()
+	{
+        return _pipeSerial.GetPipe().IsOpen;
+    }
 
 	/// <summary>
 	/// 关闭当前的串口连接
 	/// </summary>
 	public void Close()
 	{
-		if (m_ReadData.IsOpen)
-		{
-			ExtraOnClose();
-			m_ReadData.Close();
-		}
-	}
+        _pipeSerial.Close(ExtraOnClose);
+    }
 
-	/// <summary>
-	/// 将原始的字节数据发送到串口，然后从串口接收一条数据。
-	/// </summary>
-	/// <param name="send">发送的原始字节数据</param>
-	/// <returns>带接收字节的结果对象</returns>
-	public OperateResult<byte[]> ReadFromCoreServer(byte[] send)
+    protected virtual OperateResult ExtraOnClose(SerialPort sp)
+    {
+        return OperateResult.Ok();
+    }
+
+    /// <summary>
+    /// 将原始的字节数据发送到串口，然后从串口接收一条数据。
+    /// </summary>
+    /// <param name="send">发送的原始字节数据</param>
+    /// <returns>带接收字节的结果对象</returns>
+    public OperateResult<byte[]> ReadFromCoreServer(byte[] send)
 	{
 		return ReadFromCoreServer(send, hasResponseData: true);
 	}
 
-	protected virtual byte[] PackCommandWithHeader(byte[] command)
+    public OperateResult<byte[]> ReadFromCoreServer(IEnumerable<byte[]> send)
+    {
+        return NetSupport.ReadFromCoreServer(send, ReadFromCoreServer);
+    }
+
+    protected virtual byte[] PackCommandWithHeader(byte[] command)
 	{
 		return command;
 	}
@@ -214,61 +218,77 @@ public abstract class SerialBase : IDisposable
 	/// <returns>带接收字节的结果对象</returns>
 	public OperateResult<byte[]> ReadFromCoreServer(byte[] send, bool hasResponseData, bool usePackAndUnpack = true)
 	{
-		byte[] array = (usePackAndUnpack ? PackCommandWithHeader(send) : send);
-		Logger?.LogDebug("{str0} Send: {str1}", ToString(), LogMsgFormatBinary ? array.ToHexString(' ') : Encoding.ASCII.GetString(array));
+        _pipeSerial.PipeLockEnter();
+        try
+        {
+            OperateResult operateResult = Open();
+            if (!operateResult.IsSuccess)
+            {
+                return OperateResult.Error<byte[]>(operateResult);
+            }
 
-		hybirdLock.Enter();
-		OperateResult operateResult = Open();
-		if (!operateResult.IsSuccess)
-		{
-			hybirdLock.Leave();
-			return OperateResult.Error<byte[]>(operateResult);
-		}
-
-		if (IsClearCacheBeforeRead)
-		{
-			ClearSerialCache();
-		}
-
-		OperateResult operateResult2 = SPSend(m_ReadData, array);
-		if (!operateResult2.IsSuccess)
-		{
-			hybirdLock.Leave();
-			return OperateResult.Error<byte[]>(operateResult2);
-		}
-
-		if (!hasResponseData)
-		{
-			hybirdLock.Leave();
-			return OperateResult.Ok(Array.Empty<byte>());
-		}
-
-		OperateResult<byte[]> operateResult3 = SPReceived(m_ReadData, awaitData: true);
-		hybirdLock.Leave();
-		if (!operateResult3.IsSuccess)
-		{
-			return operateResult3;
-		}
-
-		Logger?.LogDebug("{str0} Receive: {str1}", ToString(), LogMsgFormatBinary ? operateResult3.Content.ToHexString(' ') : Encoding.ASCII.GetString(operateResult3.Content));
-		return usePackAndUnpack ? UnpackResponseContent(array, operateResult3.Content) : operateResult3;
+            OperateResult<byte[]> result = ReadFromCoreServer(_pipeSerial.GetPipe(), send, hasResponseData, usePackAndUnpack);
+            return result;
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            _pipeSerial.PipeLockLeave();
+        }
 	}
 
-	/// <summary>
-	/// 清除串口缓冲区的数据，并返回该数据，如果缓冲区没有数据，返回的字节数组长度为0
-	/// </summary>
-	/// <returns>是否操作成功的方法</returns>
-	public OperateResult<byte[]> ClearSerialCache()
+    public virtual OperateResult<byte[]> ReadFromCoreServer(SerialPort sp, byte[] send, bool hasResponseData = true, bool usePackAndUnpack = true)
+    {
+        byte[] array = usePackAndUnpack ? PackCommandWithHeader(send) : send;
+        if (IsClearCacheBeforeRead)
+        {
+            ClearSerialCache();
+        }
+
+        OperateResult operateResult = SPSend(sp, array);
+        if (!operateResult.IsSuccess)
+        {
+            return OperateResult.Error<byte[]>(operateResult);
+        }
+
+        if (!hasResponseData)
+        {
+            return OperateResult.Ok(Array.Empty<byte>());
+        }
+
+        OperateResult<byte[]> operateResult2 = SPReceived(sp, awaitData: true);
+        if (!operateResult2.IsSuccess)
+        {
+            return operateResult2;
+        }
+
+        return usePackAndUnpack ? UnpackResponseContent(array, operateResult2.Content) : operateResult2;
+    }
+
+    /// <summary>
+    /// 清除串口缓冲区的数据，并返回该数据，如果缓冲区没有数据，返回的字节数组长度为0
+    /// </summary>
+    /// <returns>是否操作成功的方法</returns>
+    public OperateResult<byte[]> ClearSerialCache()
 	{
 		return SPReceived(m_ReadData, awaitData: false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] value)
 	{
-		return await Task.Run(() => ReadFromCoreServer(value));
+		return await Task.Run(() => ReadFromCoreServer(value)).ConfigureAwait(false);
 	}
 
-	protected virtual OperateResult InitializationOnOpen()
+    public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send)
+    {
+        return await NetSupport.ReadFromCoreServerAsync(send, ReadFromCoreServerAsync).ConfigureAwait(false);
+    }
+
+
+    protected virtual OperateResult InitializationOnOpen()
 	{
 		return OperateResult.Ok();
 	}
@@ -278,13 +298,18 @@ public abstract class SerialBase : IDisposable
 		return OperateResult.Ok();
 	}
 
-	/// <summary>
-	/// 发送数据到串口去。
-	/// </summary>
-	/// <param name="serialPort">串口对象</param>
-	/// <param name="data">字节数据</param>
-	/// <returns>是否发送成功</returns>
-	protected virtual OperateResult SPSend(SerialPort serialPort, byte[] data)
+    protected virtual bool CheckReceiveDataComplete(MemoryStream ms)
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// 发送数据到串口去。
+    /// </summary>
+    /// <param name="serialPort">串口对象</param>
+    /// <param name="data">字节数据</param>
+    /// <returns>是否发送成功</returns>
+    protected virtual OperateResult SPSend(SerialPort serialPort, byte[] data)
 	{
 		if (data != null && data.Length != 0)
 		{
@@ -295,11 +320,7 @@ public abstract class SerialBase : IDisposable
 			}
 			catch (Exception ex)
 			{
-				if (connectErrorCount < 100000000)
-				{
-					connectErrorCount++;
-				}
-				return new OperateResult(-connectErrorCount, ex.Message);
+				return new OperateResult((int)ErrorCode.SerialPortSendException, ex.Message);
 			}
 		}
 		return OperateResult.Ok();
@@ -316,46 +337,65 @@ public abstract class SerialBase : IDisposable
 		byte[] array = new byte[1024];
 		using var memoryStream = new MemoryStream();
 		DateTime now = DateTime.Now;
-		while (true)
+        int num = 0, num2 = 0;
+
+        while (true)
 		{
-			Thread.Sleep(sleepTime);
-			try
+            num2++;
+            if (num2 > 1)
+            {
+                Thread.Sleep(sleepTime);
+            }
+
+            try
 			{
 				if (serialPort.BytesToRead < 1)
 				{
-					if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
+                    if (num2 == 1)
+                    {
+                        continue;
+                    }
+
+                    if ((DateTime.Now - now).TotalMilliseconds > ReceiveTimeout)
 					{
-						if (connectErrorCount < 100000000)
-						{
-							connectErrorCount++;
-						}
-						return new OperateResult<byte[]>(-connectErrorCount, $"Time out: {ReceiveTimeout}");
+						return new OperateResult<byte[]>(0, $"Time out: {ReceiveTimeout}");
 					}
 
-					if (memoryStream.Length > 0 || !awaitData)
-					{
-						break;
-					}
-					continue;
+                    if (memoryStream.Length >= AtLeastReceiveLength)
+                    {
+                        num++;
+                        if (num >= ReceiveEmptyDataCount)
+                        {
+                            break;
+                        }
+                    }
+                    else if (!awaitData)
+                    {
+                        break;
+                    }
+
+                    continue;
 				}
 
-				int count = serialPort.Read(array, 0, array.Length);
+                num = 0;
+                int num3 = serialPort.Read(array, 0, array.Length);
+                if (num3 > 0)
+                {
+                    memoryStream.Write(array, 0, num3);
+                }
+
+                int count = serialPort.Read(array, 0, array.Length);
 				memoryStream.Write(array, 0, count);
+
 				continue;
 			}
 			catch (Exception ex)
 			{
-				if (connectErrorCount < 100000000)
-				{
-					connectErrorCount++;
-				}
-				return new OperateResult<byte[]>(-connectErrorCount, ex.Message);
+				return new OperateResult<byte[]>((int)ErrorCode.SerialPortReceiveException, ex.Message);
 			}
 		}
 
-		byte[] value = memoryStream.ToArray();
-		connectErrorCount = 0;
-		return OperateResult.Ok(value);
+		return OperateResult.Ok(memoryStream.ToArray());
 	}
 
 	/// <summary>
@@ -368,8 +408,7 @@ public abstract class SerialBase : IDisposable
 		{
 			if (disposing)
 			{
-				hybirdLock?.Dispose();
-				((Component)(object)m_ReadData)?.Dispose();
+                _pipeSerial?.Dispose();
 			}
 			disposedValue = true;
 		}
@@ -385,6 +424,6 @@ public abstract class SerialBase : IDisposable
 
 	public override string ToString()
 	{
-		return $"SerialBase[{m_ReadData.PortName},{m_ReadData.BaudRate},{m_ReadData.DataBits},{m_ReadData.StopBits},{m_ReadData.Parity}]";
+		return $"SerialBase{_pipeSerial}";
 	}
 }

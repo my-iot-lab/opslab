@@ -400,9 +400,9 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 				}
 				return OperateResult.Ok(array);
 			}
-			return new OperateResult<byte[]>($"Parse error code failed, [{Encoding.ASCII.GetString(response, 19, 4)}]{Environment.NewLine} Source Data: {response.ToHexString(' ')}");
+			return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, $"Parse error code failed, [{Encoding.ASCII.GetString(response, 19, 4)}]{Environment.NewLine} Source Data: {response.ToHexString(' ')}");
 		}
 
-		return new OperateResult<byte[]>($"{ErrorCode.OmronReceiveDataError.Desc()} Source Data: {response.ToHexString(' ')}");
+		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, $"{ErrorCode.OmronReceiveDataError.Desc()} Source Data: {response.ToHexString(' ')}");
 	}
 }

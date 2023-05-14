@@ -11,19 +11,6 @@ namespace Ops.Communication.Profinet.Omron;
 /// </remarks>
 public sealed class OmronFinsUdp : NetworkUdpDeviceBase
 {
-	public override string IpAddress
-	{
-		get
-		{
-			return base.IpAddress;
-		}
-		set
-		{
-			base.IpAddress = value;
-			DA1 = Convert.ToByte(base.IpAddress[(base.IpAddress.LastIndexOf(".") + 1)..]);
-		}
-	}
-
 	public byte ICF { get; set; } = 128;
 
 	public byte RSV { get; private set; } = 0;
@@ -110,7 +97,12 @@ public sealed class OmronFinsUdp : NetworkUdpDeviceBase
 		return base.Write(address, value, Encoding.UTF8);
 	}
 
-	public override OperateResult<bool[]> ReadBool(string address, ushort length)
+    public OperateResult<byte[]> Read(string[] address)
+    {
+        return OmronFinsNetHelper.Read(this, address);
+    }
+
+    public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
 		return OmronFinsNetHelper.ReadBool(this, address, length, ReadSplits);
 	}

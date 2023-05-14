@@ -15,11 +15,6 @@ namespace Ops.Communication.Core.Net;
 public abstract class NetworkBase
 {
 	/// <summary>
-	/// 连接服务器成功后的套接字。
-	/// </summary>
-	protected Socket CoreSocket;
-
-	/// <summary>
 	/// 组件的日志工具，支持日志记录，只要实例化后，当前网络的基本信息，就以DEBUG等级进行输出。
 	/// </summary>
 	/// <remarks>
@@ -44,7 +39,7 @@ public abstract class NetworkBase
 	/// <param name="timeOut">单位：毫秒，超时时间，默认为60秒，如果设置小于0，则不检查超时时间</param>
 	/// <returns>包含了字节数据的结果类</returns>
 	/// <exception cref="RemoteCloseException"></exception>
-	private OperateResult<byte[]> Receive(Socket socket, int length, int timeOut = 60000)
+	private OperateResult<byte[]> Receive(Socket socket, int length, int timeOut = 60_000)
 	{
 		if (length == 0)
 		{

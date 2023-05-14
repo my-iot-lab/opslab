@@ -34,6 +34,8 @@ public enum ErrorCode : int
 
     CommandLengthCheckFailed,
 
+    UnpackResponseContentError,
+
     [Description("连接超时")]
     ConnectTimeout,
 
@@ -106,6 +108,16 @@ public enum ErrorCode : int
     [Description("远程主机强迫关闭了一个现有的连接")]
     SocketRemoteCloseException,
 
+    [Description("打开串口出现异常")]
+    OpenSerialPortException,
+
+    [Description("关闭串口出现异常")]
+    CloseSerialPortException,
+
+    SerialPortSendException,
+
+    SerialPortReceiveException,
+
     [Description("DB块数据无法大于255")]
     SiemensDBAddressNotAllowedLargerThan255 = 20101,
 
@@ -115,8 +127,10 @@ public enum ErrorCode : int
     [Description("写入数据异常")]
     SiemensWriteError,
 
+    [Description("西门子PLC启动异常")]
     SiemensStartPLCError,
 
+    [Description("西门子PLC停止异常")]
     SiemensStopPLCError,
 
     [Description("读取的数组数量不允许大于19")]
@@ -148,6 +162,10 @@ public enum ErrorCode : int
 
     [Description("数据接收异常")]
     OmronReceiveDataError,
+
+    OmronAddressWrong,
+
+    OmronForwardOpenFailed,
 
     [Description("通讯正常")]
     OmronStatus0,
@@ -199,6 +217,18 @@ public enum ErrorCode : int
 
     [Description("PLC反馈报文的和校验失败")]
     MelsecFxCrcCheckFailed,
+
+    MelsecReadPlcTypeError,
+
+    MelsecStartPLCFailed,
+
+    MelsecStopPLCFailed,
+
+    MelsecReadFailed,
+
+    MelsecWriteFailed,
+
+    MelsecError,
 
     [Description("读/写”(入/出)软元件的指定范围不正确")]
     MelsecError02,

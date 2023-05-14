@@ -10,15 +10,44 @@ namespace Ops.Communication.Profinet.Omron;
 /// </summary>
 public static class OmronFinsNetHelper
 {
-	/// <summary>
-	/// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文。
-	/// </summary>
-	/// <param name="address">地址，具体格式请参照示例说明</param>
-	/// <param name="length">读取的数据长度</param>
-	/// <param name="isBit">是否使用位读取</param>
-	/// <param name="splitLength">读取的长度切割，默认500</param>
-	/// <returns>带有成功标识的Fins核心报文</returns>
-	public static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length, bool isBit, int splitLength = 500)
+    public static OperateResult<List<byte[]>> BuildReadCommand(string[] address)
+    {
+        List<byte[]> list = new();
+        List<string[]> list2 = SoftBasic.ArraySplitByLength(address, 89);
+        for (int i = 0; i < list2.Count; i++)
+        {
+            string[] array = list2[i];
+            byte[] array2 = new byte[2 + 4 * array.Length];
+            array2[0] = 1;
+            array2[1] = 4;
+            for (int j = 0; j < array.Length; j++)
+            {
+                OperateResult<OmronFinsAddress> operateResult = OmronFinsAddress.ParseFrom(array[j], 1);
+                if (!operateResult.IsSuccess)
+                {
+                    return OperateResult.Error<List<byte[]>>(operateResult);
+                }
+
+                array2[2 + 4 * j] = operateResult.Content.WordCode;
+                array2[3 + 4 * j] = (byte)(operateResult.Content.AddressStart / 16 / 256);
+                array2[4 + 4 * j] = (byte)(operateResult.Content.AddressStart / 16 % 256);
+                array2[5 + 4 * j] = (byte)(operateResult.Content.AddressStart % 16);
+            }
+            list.Add(array2);
+        }
+
+        return OperateResult.Ok(list);
+    }
+
+    /// <summary>
+    /// 根据读取的地址，长度，是否位读取创建Fins协议的核心报文。
+    /// </summary>
+    /// <param name="address">地址，具体格式请参照示例说明</param>
+    /// <param name="length">读取的数据长度</param>
+    /// <param name="isBit">是否使用位读取</param>
+    /// <param name="splitLength">读取的长度切割，默认500</param>
+    /// <returns>带有成功标识的Fins核心报文</returns>
+    public static OperateResult<List<byte[]>> BuildReadCommand(string address, ushort length, bool isBit, int splitLength = 500)
 	{
 		OperateResult<OmronFinsAddress> operateResult = OmronFinsAddress.ParseFrom(address, length);
 		if (!operateResult.IsSuccess)
@@ -27,25 +56,11 @@ public static class OmronFinsNetHelper
 		}
 
 		var list = new List<byte[]>();
-		int[] array = SoftBasic.SplitIntegerToArray(length, isBit ? int.MaxValue : splitLength);
+		int[] array = SoftBasic.SplitIntegerToArray(length, isBit ? 1998 : splitLength);
 		for (int i = 0; i < array.Length; i++)
 		{
-			byte[] array2 = new byte[8] { 1, 1, 0, 0, 0, 0, 0, 0 };
-			if (isBit)
-			{
-				array2[2] = operateResult.Content.BitCode;
-			}
-			else
-			{
-				array2[2] = operateResult.Content.WordCode;
-			}
-			array2[3] = (byte)(operateResult.Content.AddressStart / 16 / 256);
-			array2[4] = (byte)(operateResult.Content.AddressStart / 16 % 256);
-			array2[5] = (byte)(operateResult.Content.AddressStart % 16);
-			array2[6] = (byte)(array[i] / 256);
-			array2[7] = (byte)(array[i] % 256);
-			list.Add(array2);
-			operateResult.Content.AddressStart += (isBit ? array[i] : (array[i] * 16));
+            list.Add(BuildReadCommand(operateResult.Content, (ushort)array[i], isBit));
+            operateResult.Content.AddressStart += isBit ? array[i] : (array[i] * 16);
 		}
 		return OperateResult.Ok(list);
 	}
@@ -93,12 +108,32 @@ public static class OmronFinsNetHelper
 		return OperateResult.Ok(array);
 	}
 
-	/// <summary>
-	/// 验证欧姆龙的Fins-TCP返回的数据是否正确的数据，如果正确的话，并返回所有的数据内容。
-	/// </summary>
-	/// <param name="response">来自欧姆龙返回的数据内容</param>
-	/// <returns>带有是否成功的结果对象</returns>
-	public static OperateResult<byte[]> ResponseValidAnalysis(byte[] response)
+    public static byte[] BuildReadCommand(OmronFinsAddress address, ushort length, bool isBit)
+    {
+        byte[] array = new byte[8] { 1, 1, 0, 0, 0, 0, 0, 0 };
+        if (isBit)
+        {
+            array[2] = address.BitCode;
+        }
+        else
+        {
+            array[2] = address.WordCode;
+        }
+        array[3] = (byte)(address.AddressStart / 16 / 256);
+        array[4] = (byte)(address.AddressStart / 16 % 256);
+        array[5] = (byte)(address.AddressStart % 16);
+        array[6] = (byte)(length / 256);
+        array[7] = (byte)(length % 256);
+        return array;
+    }
+
+
+    /// <summary>
+    /// 验证欧姆龙的Fins-TCP返回的数据是否正确的数据，如果正确的话，并返回所有的数据内容。
+    /// </summary>
+    /// <param name="response">来自欧姆龙返回的数据内容</param>
+    /// <returns>带有是否成功的结果对象</returns>
+    public static OperateResult<byte[]> ResponseValidAnalysis(byte[] response)
 	{
 		if (response.Length >= 16)
 		{
@@ -112,11 +147,12 @@ public static class OmronFinsNetHelper
 
 			if (num > 0)
 			{
-				return new OperateResult<byte[]>(num, GetStatusDescription(num));
+				return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, GetStatusDescription(num));
 			}
+
 			return UdpResponseValidAnalysis(response.RemoveBegin(16));
 		}
-		return new OperateResult<byte[]>(ErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -150,21 +186,22 @@ public static class OmronFinsNetHelper
 
 				OperateResult<byte[]> operateResult = OperateResult.Ok(array);
 				if (array.Length == 0)
-				{
-					operateResult.IsSuccess = false;
-				}
+                {
+                    operateResult.IsSuccess = false;
+                }
 
-				operateResult.ErrorCode = num;
-				operateResult.Message = $"{GetStatusDescription(num)} Received:{SoftBasic.ByteToHexString(response, ' ')}";
+				operateResult.ErrorCode = (int)GetErrorCode(num);
+				operateResult.Message = $"Received:{SoftBasic.ByteToHexString(response, ' ')}";
 				return operateResult;
 			}
 
 			OperateResult<byte[]> operateResult2 = OperateResult.Ok(Array.Empty<byte>());
-			operateResult2.ErrorCode = num;
-			operateResult2.Message = $"{GetStatusDescription(num)} Received:{SoftBasic.ByteToHexString(response, ' ')}";
+			operateResult2.ErrorCode = (int)GetErrorCode(num);
+            operateResult2.Message = $"Received:{SoftBasic.ByteToHexString(response, ' ')}";
 			return operateResult2;
 		}
-		return new OperateResult<byte[]>(ErrorCode.OmronReceiveDataError.Desc());
+
+		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -174,33 +211,36 @@ public static class OmronFinsNetHelper
 	/// <returns>文本描述</returns>
 	public static string GetStatusDescription(int err)
 	{
-		ErrorCode errCode = err switch
-		{
-			0 => ErrorCode.OmronStatus0,
-			1 => ErrorCode.OmronStatus1,
-			2 => ErrorCode.OmronStatus2,
-			3 => ErrorCode.OmronStatus3,
-			32 => ErrorCode.OmronStatus20,
-			33 => ErrorCode.OmronStatus21,
-			34 => ErrorCode.OmronStatus22,
-			35 => ErrorCode.OmronStatus23,
-			36 => ErrorCode.OmronStatus24,
-			37 => ErrorCode.OmronStatus25,
-			_ => ErrorCode.UnknownError,
-		};
-
-		return errCode.Desc();
+		return GetErrorCode(err).Desc();
 	}
 
-	/// <summary>
-	/// 从欧姆龙PLC中读取想要的数据，返回读取结果，读取长度的单位为字，地址格式为"D100","C100","W100","H100","A100"。
-	/// </summary>
-	/// <param name="omron">PLC设备的连接对象</param>
-	/// <param name="address">读取地址，格式为"D100","C100","W100","H100","A100"</param>
-	/// <param name="length">读取的数据长度</param>
-	/// <param name="splits">分割信息</param>
-	/// <returns>带成功标志的结果数据对象</returns>
-	public static OperateResult<byte[]> Read(IReadWriteDevice omron, string address, ushort length, int splits)
+    public static ErrorCode GetErrorCode(int err)
+    {
+        return err switch
+        {
+            0 => ErrorCode.OmronStatus0,
+            1 => ErrorCode.OmronStatus1,
+            2 => ErrorCode.OmronStatus2,
+            3 => ErrorCode.OmronStatus3,
+            32 => ErrorCode.OmronStatus20,
+            33 => ErrorCode.OmronStatus21,
+            34 => ErrorCode.OmronStatus22,
+            35 => ErrorCode.OmronStatus23,
+            36 => ErrorCode.OmronStatus24,
+            37 => ErrorCode.OmronStatus25,
+            _ => ErrorCode.UnknownError,
+        };
+    }
+
+    /// <summary>
+    /// 从欧姆龙PLC中读取想要的数据，返回读取结果，读取长度的单位为字，地址格式为"D100","C100","W100","H100","A100"。
+    /// </summary>
+    /// <param name="omron">PLC设备的连接对象</param>
+    /// <param name="address">读取地址，格式为"D100","C100","W100","H100","A100"</param>
+    /// <param name="length">读取的数据长度</param>
+    /// <param name="splits">分割信息</param>
+    /// <returns>带成功标志的结果数据对象</returns>
+    public static OperateResult<byte[]> Read(IReadWriteDevice omron, string address, ushort length, int splits)
 	{
 		OperateResult<List<byte[]>> operateResult = BuildReadCommand(address, length, isBit: false, splits);
 		if (!operateResult.IsSuccess)
@@ -221,14 +261,25 @@ public static class OmronFinsNetHelper
 		return OperateResult.Ok(list.ToArray());
 	}
 
-	/// <summary>
-	/// 向PLC写入数据，数据格式为原始的字节类型，地址格式为"D100","C100","W100","H100","A100"。
-	/// </summary>
-	/// <param name="omron">PLC设备的连接对象</param>
-	/// <param name="address">初始地址</param>
-	/// <param name="value">原始的字节数据</param>
-	/// <returns>结果</returns>
-	public static OperateResult Write(IReadWriteDevice omron, string address, byte[] value)
+    public static OperateResult<byte[]> Read(IReadWriteDevice omron, string[] address)
+    {
+        OperateResult<List<byte[]>> operateResult = BuildReadCommand(address);
+        if (!operateResult.IsSuccess)
+        {
+            return OperateResult.Error<byte[]>(operateResult);
+        }
+        return omron.ReadFromCoreServer(operateResult.Content);
+    }
+
+
+    /// <summary>
+    /// 向PLC写入数据，数据格式为原始的字节类型，地址格式为"D100","C100","W100","H100","A100"。
+    /// </summary>
+    /// <param name="omron">PLC设备的连接对象</param>
+    /// <param name="address">初始地址</param>
+    /// <param name="value">原始的字节数据</param>
+    /// <returns>结果</returns>
+    public static OperateResult Write(IReadWriteDevice omron, string address, byte[] value)
 	{
 		OperateResult<byte[]> operateResult = BuildWriteWordCommand(address, value, isBit: false);
 		if (!operateResult.IsSuccess)

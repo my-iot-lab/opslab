@@ -14,13 +14,11 @@ public sealed class ModbusAscii : ModbusRtu
 	/// </summary>
 	public ModbusAscii()
 	{
-		LogMsgFormatBinary = false;
 	}
 
 	public ModbusAscii(byte station = 1)
 		: base(station)
 	{
-		LogMsgFormatBinary = false;
 	}
 
 	protected override byte[] PackCommandWithHeader(byte[] command)

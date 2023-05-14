@@ -398,22 +398,22 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 	{
 		if (ack.Length == 0)
 		{
-			return new OperateResult(ErrorCode.MelsecFxReceiveZero.Desc());
+			return new OperateResult((int)ErrorCode.MelsecFxReceiveZero, ErrorCode.MelsecFxReceiveZero.Desc());
 		}
 
 		if (ack[0] == 21)
 		{
-			return new OperateResult($"{ErrorCode.MelsecFxAckNagative.Desc()} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
+			return new OperateResult((int)ErrorCode.MelsecFxAckNagative, $"{ErrorCode.MelsecFxAckNagative.Desc()} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
 		}
 
 		if (ack[0] != 2)
 		{
-			return new OperateResult($"{ErrorCode.MelsecFxAckWrong.Desc()} {ack[0]} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
+			return new OperateResult((int)ErrorCode.MelsecFxAckWrong, $"{ErrorCode.MelsecFxAckWrong.Desc()} {ack[0]} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
 		}
 
 		if (!MelsecHelper.CheckCRC(ack))
 		{
-			return new OperateResult(ErrorCode.MelsecFxCrcCheckFailed.Desc());
+			return new OperateResult((int)ErrorCode.MelsecFxCrcCheckFailed, ErrorCode.MelsecFxCrcCheckFailed.Desc());
 		}
 		return OperateResult.Ok();
 	}
@@ -427,17 +427,17 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 	{
 		if (ack.Length == 0)
 		{
-			return new OperateResult(ErrorCode.MelsecFxReceiveZero.Desc());
+			return new OperateResult((int)ErrorCode.MelsecFxReceiveZero, ErrorCode.MelsecFxReceiveZero.Desc());
 		}
 
 		if (ack[0] == 21)
 		{
-			return new OperateResult($"{ErrorCode.MelsecFxAckNagative.Desc()} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
+			return new OperateResult((int)ErrorCode.MelsecFxAckNagative, $"{ErrorCode.MelsecFxAckNagative.Desc()} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
 		}
 
 		if (ack[0] != 6)
 		{
-			return new OperateResult($"{ErrorCode.MelsecFxAckWrong.Desc()} {ack[0]} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
+			return new OperateResult((int)ErrorCode.MelsecFxAckWrong, $"{ErrorCode.MelsecFxAckWrong.Desc()} {ack[0]} Actual: {SoftBasic.ByteToHexString(ack, ' ')}");
 		}
 		return OperateResult.Ok();
 	}
@@ -497,7 +497,7 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		{
 			if (operateResult.Content1 != MelsecMcDataType.TN)
 			{
-				return new OperateResult<byte[]>(ErrorCode.MelsecCurrentTypeNotSupportedBitOperate.Desc());
+				return new OperateResult<byte[]>((int)ErrorCode.MelsecCurrentTypeNotSupportedBitOperate, ErrorCode.MelsecCurrentTypeNotSupportedBitOperate.Desc());
 			}
 			content = (ushort)(content + 1536);
 		}
@@ -589,7 +589,7 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 			return OperateResult.Error<byte[], int>(operateResult);
 		}
 
-		ushort num = (ushort)((operateResult.Content2 + length - 1) / 8 - (int)operateResult.Content2 / 8 + 1);
+		ushort num = (ushort)((operateResult.Content2 + length - 1) / 8 - operateResult.Content2 / 8 + 1);
 		ushort content = operateResult.Content1;
 		byte[] array = new byte[11]
 		{
@@ -687,9 +687,12 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		}
 		catch (Exception ex)
 		{
-			OperateResult<byte[]> operateResult = new();
-			operateResult.Message = "Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response);
-			return operateResult;
+            OperateResult<byte[]> operateResult = new()
+            {
+                ErrorCode = (int)ErrorCode.MelsecError,
+                Message = "Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response)
+            };
+            return operateResult;
 		}
 	}
 
@@ -722,6 +725,7 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		{
 			var operateResult2 = new OperateResult<bool[]>
 			{
+				ErrorCode = (int)ErrorCode.MelsecError,
 				Message = "Extract Msg：" + ex.Message + Environment.NewLine + "Data: " + SoftBasic.ByteToHexString(response)
 			};
 			return operateResult2;
@@ -806,7 +810,8 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		}
 		catch (Exception ex)
 		{
-			operateResult.Message = ex.Message;
+			operateResult.ErrorCode = (int)ErrorCode.NotSupportedDataType;
+            operateResult.Message = ex.Message;
 			return operateResult;
 		}
 
@@ -841,7 +846,7 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		{
 			if (operateResult.Content1 != MelsecMcDataType.TN)
 			{
-				return new OperateResult<ushort>(ErrorCode.MelsecCurrentTypeNotSupportedWordOperate.Desc());
+				return new OperateResult<ushort>((int)ErrorCode.MelsecCurrentTypeNotSupportedWordOperate, ErrorCode.MelsecCurrentTypeNotSupportedWordOperate.Desc());
 			}
 			content = (ushort)(content * 2 + 2048);
 		}
@@ -867,36 +872,36 @@ public sealed class MelsecFxSerialOverTcp : NetworkDeviceBase
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.X)
 		{
-			content = (ushort)((int)content / 8 + 128);
+			content = (ushort)(content / 8 + 128);
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.Y)
 		{
-			content = (ushort)((int)content / 8 + 160);
+			content = (ushort)(content / 8 + 160);
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.S)
 		{
-			content = (ushort)((int)content / 8);
+			content = (ushort)(content / 8);
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.CS)
 		{
-			content = (ushort)((int)content / 8 + 448);
+			content = (ushort)(content / 8 + 448);
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.CC)
 		{
-			content = (ushort)((int)content / 8 + 960);
+			content = (ushort)(content / 8 + 960);
 		}
 		else if (operateResult.Content1 == MelsecMcDataType.TS)
 		{
-			content = (ushort)((int)content / 8 + 192);
+			content = (ushort)(content / 8 + 192);
 		}
 		else
 		{
 			if (operateResult.Content1 != MelsecMcDataType.TC)
 			{
-				return new OperateResult<ushort, ushort, ushort>(ErrorCode.MelsecCurrentTypeNotSupportedBitOperate.Desc());
+				return new OperateResult<ushort, ushort, ushort>((int)ErrorCode.MelsecCurrentTypeNotSupportedBitOperate, ErrorCode.MelsecCurrentTypeNotSupportedBitOperate.Desc());
 			}
-			content = (ushort)((int)content / 8 + 704);
+			content = (ushort)(content / 8 + 704);
 		}
-		return OperateResult.Ok(content, operateResult.Content2, (ushort)((int)operateResult.Content2 % 8));
+		return OperateResult.Ok(content, operateResult.Content2, (ushort)(operateResult.Content2 % 8));
 	}
 }

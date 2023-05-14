@@ -30,6 +30,47 @@ internal static class NetSupport
         };
     }
 
+    internal static OperateResult<byte[]> ReadFromCoreServer(IEnumerable<byte[]> send, Func<byte[], OperateResult<byte[]>> funcRead)
+    {
+        List<byte> list = new();
+        foreach (byte[] item in send)
+        {
+            OperateResult<byte[]> operateResult = funcRead(item);
+            if (!operateResult.IsSuccess)
+            {
+                return operateResult;
+            }
+
+            if (operateResult.Content != null)
+            {
+                list.AddRange(operateResult.Content);
+            }
+        }
+
+        return OperateResult.Ok(list.ToArray());
+    }
+
+
+    internal static async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send, Func<byte[], Task<OperateResult<byte[]>>> funcRead)
+    {
+        List<byte> array = new();
+        foreach (byte[] data in send)
+        {
+            OperateResult<byte[]> read = await funcRead(data).ConfigureAwait(false);
+            if (!read.IsSuccess)
+            {
+                return read;
+            }
+
+            if (read.Content != null)
+            {
+                array.AddRange(read.Content);
+            }
+        }
+
+        return OperateResult.Ok(array.ToArray());
+    }
+
     /// <summary>
     /// 从socket的网络中读取数据内容，需要指定数据长度和超时的时间，为了防止数据太大导致接收失败，所以此处接收到新的数据之后就更新时间。
     /// </summary>

@@ -1,4 +1,6 @@
+using System.IO.Ports;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using Ops.Communication.Utils;
 
 namespace Ops.Communication.Extensions;
@@ -186,4 +188,46 @@ public static class OpsExtension
 			return 0;
 		}
 	}
+
+    public static void InitSerialByFormatString(this SerialPort serialPort, string format)
+    {
+        string[] array = format.Split(new char[] { '-', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        if (array.Length != 0)
+        {
+            int num = 0;
+            if (!Regex.IsMatch(array[0], "^[0-9]+$"))
+            {
+                serialPort.PortName = array[0];
+                num = 1;
+            }
+            if (num < array.Length)
+            {
+                serialPort.BaudRate = Convert.ToInt32(array[num++]);
+            }
+            if (num < array.Length)
+            {
+                serialPort.DataBits = Convert.ToInt32(array[num++]);
+            }
+            if (num < array.Length)
+            {
+                serialPort.Parity = array[num++].ToUpper() switch
+                {
+                    "E" => Parity.Even,
+                    "O" => Parity.Odd,
+                    "N" => Parity.None,
+                    _ => Parity.Space,
+                };
+            }
+            if (num < array.Length)
+            {
+                serialPort.StopBits = array[num++] switch
+                {
+                    "0" => StopBits.None,
+                    "2" => StopBits.Two,
+                    "1" => StopBits.One,
+                    _ => StopBits.OnePointFive,
+                };
+            }
+        }
+    }
 }

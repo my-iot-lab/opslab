@@ -119,7 +119,8 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			operateResult.Message = ex.Message;
+			operateResult.ErrorCode = (int)ErrorCode.NotSupportedDataType;
+            operateResult.Message = ex.Message;
 			return operateResult;
 		}
 
@@ -146,8 +147,8 @@ public static class MelsecHelper
 			BitConverter.GetBytes(addressData.AddressStart)[1],
 			BitConverter.GetBytes(addressData.AddressStart)[2],
 			addressData.McDataType.DataCode,
-			(byte)((int)addressData.Length % 256),
-			(byte)((int)addressData.Length / 256)
+			(byte)(addressData.Length % 256),
+			(byte)(addressData.Length / 256)
 		};
 	}
 
@@ -328,8 +329,8 @@ public static class MelsecHelper
 			BitConverter.GetBytes(extend)[0],
 			BitConverter.GetBytes(extend)[1],
 			249,
-			(byte)((int)addressData.Length % 256),
-			(byte)((int)addressData.Length / 256)
+			(byte)(addressData.Length % 256),
+			(byte)(addressData.Length / 256)
 		};
 	}
 
@@ -377,8 +378,8 @@ public static class MelsecHelper
 			array[i * 6 + 7] = BitConverter.GetBytes(address[i].AddressStart)[1];
 			array[i * 6 + 8] = BitConverter.GetBytes(address[i].AddressStart)[2];
 			array[i * 6 + 9] = address[i].McDataType.DataCode;
-			array[i * 6 + 10] = (byte)((int)address[i].Length % 256);
-			array[i * 6 + 11] = (byte)((int)address[i].Length / 256);
+			array[i * 6 + 10] = (byte)(address[i].Length % 256);
+			array[i * 6 + 11] = (byte)(address[i].Length / 256);
 		}
 		return array;
 	}
@@ -516,7 +517,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>($"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, $"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
 		}
 	}
 
@@ -547,7 +548,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>(ex.Message);
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -567,7 +568,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>(ex.Message);
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -601,7 +602,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>(ex.Message);
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -623,7 +624,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>(ex.Message);
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -632,9 +633,9 @@ public static class MelsecHelper
 	/// </summary>
 	/// <param name="code">错误码</param>
 	/// <returns>描述信息</returns>
-	public static string GetErrorDescription(int code)
+	public static ErrorCode GetErrorDescription(int code)
 	{
-		ErrorCode errcode = code switch
+		return code switch
 		{
 			2 => ErrorCode.MelsecError02,
 			81 => ErrorCode.MelsecError51,
@@ -665,7 +666,6 @@ public static class MelsecHelper
 			49268 => ErrorCode.MelsecErrorC074,
 			_ => ErrorCode.MelsecPleaseReferToManualDocument,
 		};
-		return errcode.Desc();
 	}
 
 	/// <summary>

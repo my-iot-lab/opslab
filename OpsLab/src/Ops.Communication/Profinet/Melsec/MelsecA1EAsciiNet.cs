@@ -375,7 +375,7 @@ public sealed class MelsecA1EAsciiNet : NetworkDeviceBase
 	{
 		if (response.Length < 4)
 		{
-			return new OperateResult(ErrorCode.ReceiveDataLengthTooShort.Desc());
+			return new OperateResult((int)ErrorCode.MelsecPleaseReferToManualDocument, ErrorCode.ReceiveDataLengthTooShort.Desc());
 		}
 		if (response[2] == 48 && response[3] == 48)
 		{
@@ -383,9 +383,9 @@ public sealed class MelsecA1EAsciiNet : NetworkDeviceBase
 		}
 		if (response[2] == 53 && response[3] == 66)
 		{
-			return new OperateResult(Convert.ToInt32(Encoding.ASCII.GetString(response, 4, 2), 16), ErrorCode.MelsecPleaseReferToManualDocument.Desc());
+			return new OperateResult((int)ErrorCode.MelsecPleaseReferToManualDocument, ErrorCode.MelsecPleaseReferToManualDocument.Desc());
 		}
-		return new OperateResult(Convert.ToInt32(Encoding.ASCII.GetString(response, 2, 2), 16), ErrorCode.MelsecPleaseReferToManualDocument.Desc());
+		return new OperateResult((int)ErrorCode.MelsecPleaseReferToManualDocument, ErrorCode.MelsecPleaseReferToManualDocument.Desc());
 	}
 
 	/// <summary>

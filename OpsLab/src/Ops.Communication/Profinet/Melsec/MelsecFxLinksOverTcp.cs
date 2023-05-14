@@ -23,21 +23,11 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// </summary>
 	public byte WaittingTime
 	{
-		get
-		{
-			return watiingTime;
-		}
+		get => watiingTime;
 		set
 		{
-			if (watiingTime > 15)
-			{
-				watiingTime = 15;
-			}
-			else
-			{
-				watiingTime = value;
-			}
-		}
+			watiingTime = watiingTime > 15 ? (byte)15 : value;
+        }
 	}
 
 	/// <summary>
@@ -91,7 +81,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>(operateResult2.Content[0], "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 
 		byte[] array = new byte[length * 2];
@@ -126,7 +116,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult(operateResult2.Content[0], "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -148,7 +138,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>(read.Content[0], "Read Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<byte[]>((int)ErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 
 		byte[] Content = new byte[length * 2];
@@ -177,7 +167,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult(read.Content[0], "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -205,7 +195,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>(operateResult2.Content[0], "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<bool[]>((int)ErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		byte[] array = new byte[length];
 		Array.Copy(operateResult2.Content, 5, array, 0, length);
@@ -235,7 +225,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult(operateResult2.Content[0], "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -257,7 +247,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>(read.Content[0], "Read Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<bool[]>((int)ErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		byte[] buffer = new byte[length];
 		Array.Copy(read.Content, 5, buffer, 0, length);
@@ -281,7 +271,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult(read.Content[0], "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -308,7 +298,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult(operateResult2.Content[0], "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -335,7 +325,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult(operateResult2.Content[0], "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -362,7 +352,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult<string>(operateResult2.Content[0], "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<string>((int)ErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return GetPlcTypeFromCode(Encoding.ASCII.GetString(operateResult2.Content, 5, 2));
 	}
@@ -384,7 +374,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult(read.Content[0], "Start Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -406,7 +396,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult(read.Content[0], "Stop Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -428,7 +418,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult<string>(read.Content[0], "ReadPlcType Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<string>((int)ErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return GetPlcTypeFromCode(Encoding.ASCII.GetString(read.Content, 5, 2));
 	}
