@@ -243,7 +243,7 @@ public class McAddressData : DeviceAddressDataBase
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<McAddressData>(ex.Message);
+			return new OperateResult<McAddressData>((int)ErrorCode.NotSupportedDataType, ex.Message);
 		}
 
 		return OperateResult.Ok(mcAddressData);

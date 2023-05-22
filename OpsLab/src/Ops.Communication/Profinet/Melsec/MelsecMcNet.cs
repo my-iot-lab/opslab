@@ -597,7 +597,12 @@ public class MelsecMcNet : NetworkDeviceBase
 		return OperateResult.Ok(base.ByteTransform.TransInt16(operateResult.Content, 0, address.Length));
 	}
 
-	public async Task<OperateResult<byte[]>> ReadRandomAsync(string[] address)
+    /// <summary>
+    /// 随机读取PLC的数据信息，可以跨地址，跨类型组合，但是每个地址只能读取一个word，也就是2个字节的内容。收到结果后，需要自行解析数据。
+    /// </summary>
+    /// <param name="address">所有的地址的集合</param>
+    /// <returns></returns>
+    public async Task<OperateResult<byte[]>> ReadRandomAsync(string[] address)
 	{
 		McAddressData[] mcAddressDatas = new McAddressData[address.Length];
 		for (int i = 0; i < address.Length; i++)
@@ -625,7 +630,13 @@ public class MelsecMcNet : NetworkDeviceBase
 		return ExtractActualData(read.Content.RemoveBegin(11), isBit: false);
 	}
 
-	public async Task<OperateResult<byte[]>> ReadRandomAsync(string[] address, ushort[] length)
+    /// <summary>
+    /// 随机读取PLC的数据信息，可以跨地址，跨类型组合，每个地址是任意的长度。收到结果后，需要自行解析数据，目前只支持字地址，比如D区，W区，R区，不支持X，Y，M，B，L等等。
+    /// </summary>
+    /// <param name="address">所有的地址的集合</param>
+    /// <param name="length">每个地址的长度信息</param>
+    /// <returns></returns>
+    public async Task<OperateResult<byte[]>> ReadRandomAsync(string[] address, ushort[] length)
 	{
 		if (length.Length != address.Length)
 		{
@@ -642,8 +653,7 @@ public class MelsecMcNet : NetworkDeviceBase
 			}
 			mcAddressDatas[i] = addressResult.Content;
 		}
-
-		byte[] coreResult = MelsecHelper.BuildReadRandomCommand(mcAddressDatas);
+        byte[] coreResult = MelsecHelper.BuildReadRandomCommand(mcAddressDatas);
 		OperateResult<byte[]> read = await ReadFromCoreServerAsync(PackMcCommand(coreResult, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
@@ -1256,7 +1266,12 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>是否合法</returns>
 	public static OperateResult CheckResponseContentHelper(byte[] content)
 	{
-		ushort num = BitConverter.ToUInt16(content, 9);
+        if (content == null || content.Length < 11)
+        {
+            return new OperateResult((int)ErrorCode.ReceiveDataLengthTooShort, $"{ErrorCode.ReceiveDataLengthTooShort.Desc()} 11, Content: {content.ToHexString(' ')}");
+        }
+
+        ushort num = BitConverter.ToUInt16(content, 9);
 		if (num != 0)
 		{
 			var errCode = MelsecHelper.GetErrorDescription(num);
