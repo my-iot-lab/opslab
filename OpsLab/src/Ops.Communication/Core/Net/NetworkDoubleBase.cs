@@ -358,8 +358,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
             }
 
 			// 不自动连接服务，抛出异常。
-			string err = _pipeSocket.IsSocketError ? "Socket error" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
+			string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
+            return new OperateResult<Socket>((int)ErrorCode.SocketUnavailable, err);
         }
 
 		// 使用已创建的Socket。
@@ -597,8 +597,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
             }
 
             // 不自动连接服务，抛出异常。
-            string err = _pipeSocket.IsSocketError ? "Socket error" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)ErrorCode.SocketException, err);
+            string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
+            return new OperateResult<Socket>((int)ErrorCode.SocketUnavailable, err);
         }
 
         // 使用已创建的Socket。

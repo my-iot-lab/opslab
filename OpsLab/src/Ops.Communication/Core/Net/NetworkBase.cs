@@ -69,12 +69,18 @@ public abstract class NetworkBase
 			socket?.Close();
 			return new OperateResult<byte[]>((int)ErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
 		}
-		catch (Exception ex2)
-		{
-			socket?.Close();
-			return new OperateResult<byte[]>((int)ErrorCode.SocketException, $"Socket Exception -> {ex2.Message}");
-		}
-	}
+        catch (SocketException ex)
+        {
+            // 已断开连接 ex.NativeErrorCode.Equals(10035), 10035 == WSAEWOULDBLOCK
+            // 详细参考：https://learn.microsoft.com/zh-cn/dotnet/api/system.net.sockets.socket.connected?view=net-7.0#system-net-sockets-socket-connected
+            //if (ex.SocketErrorCode != SocketError.WouldBlock)
+            //{
+            //}
+
+            socket?.Close();
+            return new OperateResult<byte[]>((int)ErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+        }
+    }
 
 	/// <summary>
 	/// 接收一条完整的 <seealso cref="INetMessage" /> 数据内容，需要指定超时时间，单位为毫秒。
@@ -152,7 +158,7 @@ public abstract class NetworkBase
 
             return OperateResult.Ok();
 		}
-		catch (Exception ex)
+		catch (SocketException ex)
 		{
 			socket?.Close();
 			return new OperateResult<byte[]>((int)ErrorCode.SocketSendException, ex.Message);
@@ -201,7 +207,7 @@ public abstract class NetworkBase
             await socket.SendAsync(data, SocketFlags.None).ConfigureAwait(false);
 			return OperateResult.Ok();
 		}
-		catch (Exception ex)
+		catch (SocketException ex)
 		{
 			socket.Close();
 			return new OperateResult<byte[]>((int)ErrorCode.SocketSendException, ex.Message);
@@ -278,17 +284,12 @@ public abstract class NetworkBase
 		{
             // 已断开连接 ex.NativeErrorCode.Equals(10035), 10035 == WSAEWOULDBLOCK
             // 详细参考：https://learn.microsoft.com/zh-cn/dotnet/api/system.net.sockets.socket.connected?view=net-7.0#system-net-sockets-socket-connected
-			//if (ex.SocketErrorCode != SocketError.WouldBlock)
-			//{
-			//}
-			
+            //if (ex.SocketErrorCode != SocketError.WouldBlock)
+            //{
+            //}
+
             socket.Close();
-            return new OperateResult<byte[]>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            socket.Close();
-            return new OperateResult<byte[]>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
+            return new OperateResult<byte[]>((int)ErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
         }
     }
 

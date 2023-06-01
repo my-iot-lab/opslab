@@ -72,8 +72,17 @@ public enum ErrorCode : int
     [Description("套接字传送数据异常")]
     SocketIOException = 10201,
 
+    [Description("套接字连接异常")]
+    SocketConnectException,
+
+    [Description("套接字连接超时异常")]
+    SocketConnectTimeoutException,
+
     [Description("套接字异常")]
     SocketException,
+
+    [Description("套接字不可用")]
+    SocketUnavailable,
 
     [Description("同步数据发送异常")]
     SocketSendException,
@@ -99,7 +108,7 @@ public enum ErrorCode : int
     [Description("异步数据结束挂起发送出错")]
     SocketEndSendException,
 
-    [Description("异步数据发送出错")]
+    [Description("异步数据接收出错")]
     SocketReceiveException,
 
     [Description("异步数据结束接收指令头出错")]

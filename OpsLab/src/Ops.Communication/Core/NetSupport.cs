@@ -170,12 +170,12 @@ internal static class NetSupport
         catch (OperationCanceledException)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, EndPoint:{endPoint}, Timeout: {timeOut}ms");
+            return new OperateResult<Socket>((int)ErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
-        catch (Exception ex)
+        catch (SocketException ex)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
+            return new OperateResult<Socket>((int)ErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
         }
     }
 
@@ -202,12 +202,12 @@ internal static class NetSupport
         catch (OperationCanceledException)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.ConnectTimeout, $"ConnectTimeout, EndPoint:{endPoint}, Timeout: {timeOut}ms");
+            return new OperateResult<Socket>((int)ErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
-        catch (Exception ex)
+        catch (SocketException ex)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)ErrorCode.SocketException, $"Socket Exception -> {ex.Message}");
+            return new OperateResult<Socket>((int)ErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
         }
     }
 }
