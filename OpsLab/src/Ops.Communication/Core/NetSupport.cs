@@ -109,29 +109,6 @@ internal static class NetSupport
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="socket"></param>
-    /// <param name="stream"></param>
-    /// <param name="length"></param>
-    /// <exception cref="RemoteCloseException"></exception>
-    internal static void ReceiveBytesFromSocket(Socket socket, Stream stream, int length)
-    {
-        int num = 0;
-        byte[] array = new byte[GetSplitLengthFromTotal(length)];
-        while (num < length)
-        {
-            int num2 = socket.Receive(array, 0, array.Length, SocketFlags.None);
-            stream.Write(array, 0, num2);
-            num += num2;
-            if (num2 == 0)
-            {
-                throw new RemoteCloseException();
-            }
-        }
-    }
-
-    /// <summary>
     /// 创建 Socket，并连接远程主机。
     /// </summary>
     /// <param name="endPoint">终结点</param>

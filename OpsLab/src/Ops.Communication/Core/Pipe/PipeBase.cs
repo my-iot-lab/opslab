@@ -6,6 +6,8 @@ public abstract class PipeBase : IDisposable
 
     private readonly AsyncSimpleHybirdLock _asyncHybirdLock;
 
+    public readonly Nito.AsyncEx.AsyncLock AsyncLock = new();
+
     public PipeBase()
     {
         _hybirdLock = new();

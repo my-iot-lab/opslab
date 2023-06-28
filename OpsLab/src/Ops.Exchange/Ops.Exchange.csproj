@@ -4,14 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/my-iot-lab/opslab.git</PackageProjectUrl>
     <RepositoryUrl>https://github.com/my-iot-lab/opslab.git</RepositoryUrl>
     <PackageTags></PackageTags>
 	<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<Description>Ops.Exchange is a library that communicate with popular PLC</Description>
-	<Company>OpsLab</Company>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 

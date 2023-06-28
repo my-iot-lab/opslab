@@ -1,5 +1,6 @@
 using System.IO.Ports;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Ops.Communication.Utils;
 
@@ -166,26 +167,30 @@ public static class OpsExtension
         return str.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 	}
 
-	/// <summary>
-	/// 设置客户端的Socket的心跳时间信息
-	/// </summary>
-	/// <param name="socket"></param>
-	/// <param name="keepAliveTime"></param>
-	/// <param name="keepAliveInterval"></param>
-	/// <returns></returns>
-	public static int SetKeepAlive(this Socket socket, int keepAliveTime, int keepAliveInterval)
+    /// <summary>
+    /// 设置客户端的Socket的心跳时间信息
+    /// </summary>
+    /// <param name="socket"></param>
+    /// <param name="keepAliveTime">keep-alive 时间间隔</param>
+    /// <param name="retryInterval">尝试时间间隔</param>
+    /// <returns></returns>
+    public static void SetKeepAlive(this Socket socket, int keepAliveTime, int retryInterval)
 	{
-		byte[] array = new byte[12];
-		BitConverter.GetBytes((keepAliveTime >= 0) ? 1 : 0).CopyTo(array, 0); // 启用 KeepAlive
-		BitConverter.GetBytes(keepAliveTime).CopyTo(array, 4); // 此时间段内若没有数据交互，则发送探测包
-		BitConverter.GetBytes(keepAliveInterval).CopyTo(array, 8); // 发送探测包的时间间隔
+        int size = sizeof(uint);
+        uint on = keepAliveTime >= 0 ? 1U : 0U;
+
+        byte[] inOptionValues = new byte[size * 3];
+        BitConverter.GetBytes(on).CopyTo(inOptionValues, 0); // 启用 KeepAlive
+        BitConverter.GetBytes((uint)keepAliveTime).CopyTo(inOptionValues, size); // keep-alive 间隔。此时间段内若没有数据交互，则发送探测包
+        BitConverter.GetBytes((uint)retryInterval).CopyTo(inOptionValues, size * 2); // 尝试间隔。发送探测包的时间间隔
+
 		try
 		{
-			return socket.IOControl(IOControlCode.KeepAliveValues, array, null);
+            // socket.IOControl(IOControlCode.KeepAliveValues, array, null) // 会出现跨平台问题
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, inOptionValues);
 		}
 		catch
 		{
-			return 0;
 		}
 	}
 

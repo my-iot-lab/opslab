@@ -219,7 +219,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
         _pipeSocket.Socket = operateResult.Content;
 		if (SocketKeepAliveTime > 0)
 		{
-            _pipeSocket.Socket.SetKeepAlive(SocketKeepAliveTime, SocketKeepAliveTime);
+            _pipeSocket.Socket.SetKeepAlive(SocketKeepAliveTime, 1000);
 		}
 
 		Logger?.LogDebug("{str0} -- NetEngineStart", ToString());
@@ -499,7 +499,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	{
 		var result = new OperateResult<byte[]>();
 
-        // 锁，只允许单线程执行
+		// 锁，只允许单线程执行
         await _pipeSocket.AsyncPipeLockEnter().ConfigureAwait(false); 
 		OperateResult<Socket> resultSocket;
 		try

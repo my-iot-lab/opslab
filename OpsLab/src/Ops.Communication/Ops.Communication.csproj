@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description></Description>
     <PackageProjectUrl>https://github.com/my-iot-lab/opslab.git</PackageProjectUrl>
     <RepositoryUrl>https://github.com/my-iot-lab/opslab.git</RepositoryUrl>
