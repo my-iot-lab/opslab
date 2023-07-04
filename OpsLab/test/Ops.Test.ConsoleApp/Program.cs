@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ops.Exchange.DependencyInjection;
 using Ops.Exchange.Forwarder;
+using Ops.Exchange.Monitors;
 using Ops.Test.ConsoleApp.Forwarder;
 using Ops.Test.ConsoleApp.Suits;
 using Serilog;
@@ -19,7 +20,9 @@ try
 {
     Log.Information("控制台应用程序启动");
     var host = CreateHostBuilder(null).Build();
-    host.Start();
+    _ = host.StartAsync();
+
+    Console.WriteLine("Host Start");
 
     //var modbusTcpSuit = host.Services.GetRequiredService<ModbusTcpSuit>();
     //await modbusTcpSuit.InitAsync();
@@ -29,9 +32,12 @@ try
     //await s7Suit.InitAsync();
     //await s7Suit.RunAsync();
 
-    var melsecMCSuit = host.Services.GetRequiredService<MelsecMCSuit>();
-    await melsecMCSuit.InitAsync();
-    await melsecMCSuit.RunAsync();
+    //var melsecMCSuit = host.Services.GetRequiredService<MelsecMCSuit>();
+    //await melsecMCSuit.InitAsync();
+    //await melsecMCSuit.RunAsync();
+
+    var monitorManager = host.Services.GetRequiredService<MonitorManager>();
+    _ = monitorManager.StartAsync();
 
     Console.ReadLine();
 }

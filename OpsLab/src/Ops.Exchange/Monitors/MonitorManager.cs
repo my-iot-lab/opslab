@@ -115,9 +115,9 @@ public sealed class MonitorManager : IDisposable
             int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
             while (_cts != null && !_cts.Token.IsCancellationRequested)
             {
-                await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                await Task.Delay(pollingInterval).ConfigureAwait(false);
 
-                if (_cts != null)
+                if (_cts == null)
                 {
                     break;
                 }
@@ -148,7 +148,7 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.HeartbeatDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                            await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                         }
                     }
                 }
@@ -172,7 +172,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                    await Task.Delay(pollingInterval).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -237,7 +237,7 @@ public sealed class MonitorManager : IDisposable
                             _monitorStartOptions!.TriggerDelegate?.Invoke(eventData);
                             if (_cts != null)
                             {
-                                await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                                await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                             }
                         }
                     }
@@ -262,7 +262,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                    await Task.Delay(pollingInterval).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -296,7 +296,7 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.NoticeDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                            await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
@@ -321,7 +321,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = _monitorStartOptions!.SwitchPollingInterval > 0 ? _monitorStartOptions!.SwitchPollingInterval : 10;
                 while (mre.WaitOne() && _cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                    await Task.Delay(pollingInterval).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -368,7 +368,7 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions.SwitchDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                            await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
@@ -385,7 +385,7 @@ public sealed class MonitorManager : IDisposable
                 bool isOn = false; // 开关开启状态
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                    await Task.Delay(pollingInterval).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -413,7 +413,7 @@ public sealed class MonitorManager : IDisposable
 
                                 if (_cts != null)
                                 {
-                                    await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                                    await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                                 }
 
                                 // 开关开启时，发送信号，让子任务执行。
@@ -433,7 +433,7 @@ public sealed class MonitorManager : IDisposable
 
                                 if (_cts != null)
                                 {
-                                    await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                                    await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                                 }
 
                                 // 读取失败或开关关闭时，重置信号，让子任务阻塞。
@@ -465,7 +465,7 @@ public sealed class MonitorManager : IDisposable
                 int pollingInterval = variable.PollingInterval > 0 ? variable.PollingInterval : _opsConfig.Monitor.DefaultPollingInterval;
                 while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    await Task.Delay(pollingInterval, _cts.Token).ConfigureAwait(false);
+                    await Task.Delay(pollingInterval).ConfigureAwait(false);
 
                     if (_cts == null)
                     {
@@ -526,7 +526,7 @@ public sealed class MonitorManager : IDisposable
                         _monitorStartOptions!.UnderlyDelegate?.Invoke(eventData);
                         if (_cts != null)
                         {
-                            await _eventBus.TriggerAsync(eventData, _cts.Token).ConfigureAwait(false);
+                            await _eventBus.TriggerAsync(eventData).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
@@ -545,7 +545,7 @@ public sealed class MonitorManager : IDisposable
         {
             while (_cts != null && !_cts.Token.IsCancellationRequested)
             {
-                var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync(_cts.Token).ConfigureAwait(false);
+                var (ok, ctx) = await _callbackTaskQueue.WaitDequeueAsync().ConfigureAwait(false);
                 if (!ok)
                 {
                     break;
@@ -563,19 +563,7 @@ public sealed class MonitorManager : IDisposable
                             var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                             if (!connector.CanConnect)
                             {
-                                // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中执行回写。
-                                CancellationTokenSource cts1 = new(_opsConfig.Monitor.CallbackTimeout); // 回写超时
-                                using var cts2 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
-                                while (!cts2.Token.IsCancellationRequested)
-                                {
-                                    if (connector.CanConnect)
-                                    {
-                                        break;
-                                    }
-
-                                    await Task.Delay(1000).ConfigureAwait(false); // 延迟1s
-                                    connector = _driverConnectorManager[ctx.Request.DeviceInfo.Name];
-                                }
+                                return;
                             }
 
                             for (int i = 0; i < ctx.Response.Values.Count; i++)
@@ -603,7 +591,7 @@ public sealed class MonitorManager : IDisposable
                                     value?.Tag ?? "",
                                     value?.Value ?? "");
                         }
-                    }, _cts.Token);
+                    });
                 }
                 catch (Exception ex) when (ex is OperationCanceledException)
                 {
@@ -631,10 +619,10 @@ public sealed class MonitorManager : IDisposable
             CancellationTokenSource cts = _cts;
             _cts = null;
             cts.Cancel();
-            cts.Dispose();
+            //cts.Dispose();
         }
 
-        Task.Delay(500).ConfigureAwait(false).GetAwaiter().GetResult(); // 阻塞 500ms
+        Task.Delay(1000).ConfigureAwait(false).GetAwaiter().GetResult(); // 阻塞 1000ms
         _driverConnectorManager.Close();
 
         _logger.LogInformation("[Monitor] 监控停止");

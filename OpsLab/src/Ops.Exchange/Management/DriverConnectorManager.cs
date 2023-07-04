@@ -102,8 +102,10 @@ public sealed class DriverConnector
 public sealed class DriverConnectorManager : IDisposable
 {
     private readonly Dictionary<string, DriverConnector> _connectors = new(); // Key 为设备编号
-    private bool _isConnectedServer;
-    private Timer? _heartbeatTimer;
+
+    private bool _hasTryConnectServer;
+    private bool _fristConnectSuccessful;
+    private PeriodicTimer? _periodicTimer;
 
     private readonly DeviceInfoManager _deviceInfoManager;
     private readonly DeviceHealthManager _deviceHealthManager;
@@ -192,43 +194,120 @@ public sealed class DriverConnectorManager : IDisposable
     /// <returns></returns>
     public async Task ConnectAsync()
     {
-        if (!_isConnectedServer)
+        if (!_hasTryConnectServer)
         {
             foreach (var connector in _connectors.Values)
             {
                 if (connector.Driver is NetworkDeviceBase networkDevice)
                 {
-                    networkDevice.SetPersistentConnection(); // 设置为长连接
+                    connector.ConnectedStatus = ConnectionStatus.Disconnected; // 初始化
+
+                    // 关闭自动连接
+                    networkDevice.AutoConnectServerWhenSocketIsErrorOrNull = false;
 
                     // 注册方法，在每次连接成功或失败后重置连接状态。
                     networkDevice.ConnectServerPostDelegate = (ok) =>
                     {
-                        connector.ConnectedStatus = ok ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+                        if (ok)
+                        {
+                            connector.ConnectedStatus = ConnectionStatus.Connected;
+                        }
+                    };
+
+                    // 回调，在长连接异常关闭后设置连接状态为 Disconnected。
+                    networkDevice.SocketReadErrorClosedDelegate = code =>
+                    {
+                        // TODO: 根据错误代码来判断是否断开连接
+                        if (connector.ConnectedStatus != ConnectionStatus.Disconnected)
+                        {
+                            connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                        }
                     };
 
                     // 先检查服务器能否访问
-                    var ipStatus = await networkDevice.PingIpAddressAsync(1_000).ConfigureAwait(false);
-                    if (ipStatus == IPStatus.Success)
+                    try
                     {
-                        connector.Available = true;
-                        _ = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                        var ipStatus = await networkDevice.PingIpAddressAsync(1_000).ConfigureAwait(false);
+                        if (ipStatus == IPStatus.Success)
+                        {
+                            connector.Available = true;
+                            var ret = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                            if (!ret.IsSuccess)
+                            {
+                                _logger.LogWarning("尝试连接服务失败，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
+                            }
+
+                            _fristConnectSuccessful = ret.IsSuccess;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("尝试 Ping 服务失败，主机：{Host}", connector.Host);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        connector.ConnectedStatus = ConnectionStatus.Disconnected;
+                        _logger.LogError(ex, "尝试连接服务错误，主机：{Host}，端口：{Port}", connector.Host, connector.Port);
                     }
                 }
             }
 
-            _isConnectedServer = true;
+            _hasTryConnectServer = true;
 
             // 健康检测
             _deviceHealthManager.Check();
 
             // 开启心跳检测
-            var state = new WeakReference<DriverConnectorManager>(this);
-            _heartbeatTimer = new Timer(Heartbeat, state, 1000, 2000); // 2s 监听一次能否 ping 通服务器
+            // 采用 PeriodicTimer 而不是普通的 Timer 定时器，是为了防止产生任务重叠执行。
+            _ = PeriodicHeartbeat();
         }
+    }
+
+    private Task PeriodicHeartbeat()
+    {
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(3000).ConfigureAwait(false); // 延迟3s后开始监听
+
+            // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
+            _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+            while (await _periodicTimer.WaitForNextTickAsync().ConfigureAwait(false))
+            {
+                foreach (var connector in _connectors.Values)
+                {
+                    // 若连接状态处于断开状态，网络检查 OK 后会进行重连。
+                    // 对于初始时设备不可用，后续可用的情况下会自动进行连接。
+                    if (connector.Driver is NetworkDeviceBase networkDevice)
+                    {
+                        try
+                        {
+                            connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+
+                            // 注： networkDevice 中连接成功一次，即使服务器断开一段时间后再恢复，连接依旧可用，
+                            // 所以，在连接成功一次后，不要再重复连接。
+                            if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
+                            {
+                                // 内部 Socket 异常，或是还没有连接过服务器
+                                if (networkDevice.IsSocketError || !_fristConnectSuccessful)
+                                {
+                                    var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
+                                    if (result.IsSuccess)
+                                    {
+                                        _logger.LogInformation("已连接上服务，主机：{Host}", connector.Host);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            connector.Available = false;
+                            _logger.LogError(ex, "[DriverConnectorManager] Ping 驱动服务器出现异常，主机：{Host}。", connector.Host);
+                        }
+                    }
+                }
+            }
+        });
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -269,7 +348,7 @@ public sealed class DriverConnectorManager : IDisposable
     {
         lock (SyncLock)
         {
-            if (_isConnectedServer)
+            if (_hasTryConnectServer)
             {
                 foreach (var connector in _connectors.Values)
                 {
@@ -281,8 +360,8 @@ public sealed class DriverConnectorManager : IDisposable
                 }
 
                 _connectors.Clear();
-                _heartbeatTimer?.Dispose();
-                _isConnectedServer = false;
+                _periodicTimer?.Dispose();
+                _hasTryConnectServer = false;
             }
         }
     }
@@ -290,41 +369,5 @@ public sealed class DriverConnectorManager : IDisposable
     public void Dispose()
     {
         Close();
-    }
-
-    /// <summary>
-    /// 轮询监听是否能访问服务器
-    /// </summary>
-    private void Heartbeat(object? state)
-    {
-        var weakReference = (WeakReference<DriverConnectorManager>)state!;
-        if (weakReference.TryGetTarget(out var target))
-        {
-            target.Heartbeat2();
-        }
-    }
-
-    private void Heartbeat2()
-    {
-        DriverConnector[] driverConnectors;
-        lock (SyncLock)
-        {
-            driverConnectors = _connectors.Values.ToArray();
-        }
-
-        foreach (var connector in driverConnectors)
-        {
-            // 若连接状态处于断开状态，网络检查 OK 后会进行重连。
-            // 对于初始时设备不可用，后续可用的情况下会自动进行连接。
-            if (connector.Driver is NetworkDeviceBase networkDevice
-                && connector.ConnectedStatus == ConnectionStatus.Disconnected)
-            {
-                connector.Available = _deviceHealthManager.CanConnect(connector.Id);
-                if (connector.Available)
-                {
-                    _ = networkDevice.ConnectServer();
-                }
-            }
-        }
     }
 }
