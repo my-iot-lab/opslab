@@ -563,7 +563,19 @@ public sealed class MonitorManager : IDisposable
                             var connector = _driverConnectorManager[ctx!.Request.DeviceInfo.Name];
                             if (!connector.CanConnect)
                             {
-                                return;
+                                // 若某个写入卡死，可能导致整个回写卡住，考虑在 Task.Run 中执行回写。
+                                CancellationTokenSource cts1 = new(_opsConfig.Monitor.CallbackTimeout); // 回写超时
+                                using var cts2 = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, cts1.Token);
+                                while (!cts2.Token.IsCancellationRequested)
+                                {
+                                    if (connector.CanConnect)
+                                    {
+                                        break;
+                                    }
+
+                                    await Task.Delay(1000).ConfigureAwait(false); // 延迟1s
+                                    connector = _driverConnectorManager[ctx.Request.DeviceInfo.Name];
+                                }
                             }
 
                             for (int i = 0; i < ctx.Response.Values.Count; i++)
