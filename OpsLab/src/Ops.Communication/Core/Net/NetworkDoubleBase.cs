@@ -507,9 +507,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			resultSocket = await GetAvailableSocketAsync().ConfigureAwait(false);
 			if (!resultSocket.IsSuccess)
 			{
-                SocketReadErrorClosedDelegate?.Invoke(resultSocket.ErrorCode);
-
                 _pipeSocket.IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(resultSocket.ErrorCode);
 				result.CopyErrorFromOther(resultSocket);
 				return result;
 			}
@@ -524,9 +523,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			}
 			else
 			{
-                SocketReadErrorClosedDelegate?.Invoke(read.ErrorCode);
-
                 _pipeSocket.IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(read.ErrorCode);
 				result.CopyErrorFromOther(read);
 			}
 			ExtraAfterReadFromCoreServer(read);
@@ -719,9 +717,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			operateResult2 = GetAvailableSocket();
 			if (!operateResult2.IsSuccess)
 			{
-                SocketReadErrorClosedDelegate?.Invoke(operateResult2.ErrorCode);
-
                 _pipeSocket.IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(operateResult2.ErrorCode);
 				operateResult.CopyErrorFromOther(operateResult2);
 				return operateResult;
 			}
@@ -736,9 +733,8 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 			}
 			else
 			{
-                SocketReadErrorClosedDelegate?.Invoke(operateResult3.ErrorCode);
-
                 _pipeSocket.IsSocketError = true;
+                SocketReadErrorClosedDelegate?.Invoke(operateResult3.ErrorCode);
 				operateResult.CopyErrorFromOther(operateResult3);
 			}
 			ExtraAfterReadFromCoreServer(operateResult3);

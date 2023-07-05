@@ -69,6 +69,11 @@ public abstract class NetworkBase
 			socket?.Close();
 			return new OperateResult<byte[]>((int)ErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
 		}
+        catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionAborted)
+        {
+            socket.Close();
+            return new OperateResult<byte[]>((int)ErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+        }
         catch (SocketException ex)
         {
             // 已断开连接 ex.NativeErrorCode.Equals(10035), 10035 == WSAEWOULDBLOCK
@@ -254,34 +259,39 @@ public abstract class NetworkBase
             return OperateResult.Ok(Array.Empty<byte>());
         }
 
-        try
-        {
-            // 设置超时
-            using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(timeOut));
+		try
+		{
+			// 设置超时
+			using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(timeOut));
 
 			byte[] buffer = new byte[length > 0 ? length : 2048];
-            int count = await socket.ReceiveAsync(buffer, SocketFlags.None, cts.Token).ConfigureAwait(false); // 读取数据，直至填满缓冲区。
+			int count = await socket.ReceiveAsync(buffer, SocketFlags.None, cts.Token).ConfigureAwait(false); // 读取数据，直至填满缓冲区。
 
-            // 0 => Socket 被动关闭; -1 => Socket 主动关闭
-            if (count == 0)
-            {
-                throw new RemoteCloseException();
-            }
+			// 0 => Socket 被动关闭; -1 => Socket 主动关闭
+			if (count == 0)
+			{
+				throw new RemoteCloseException();
+			}
 
-            return OperateResult.Ok(length > 0 ? buffer : SoftBasic.ArraySelectBegin(buffer, count));
-        }
-        catch (RemoteCloseException)
-        {
-            socket.Close();
-            return new OperateResult<byte[]>((int)ErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
-        }
-        catch (OperationCanceledException)
-        {
-            socket.Close();
-            return new OperateResult<byte[]>((int)ErrorCode.ReceiveDataTimeout, $"ReceiveDataTimeout: {timeOut}ms");
-        }
-		catch (SocketException ex)
+			return OperateResult.Ok(length > 0 ? buffer : SoftBasic.ArraySelectBegin(buffer, count));
+		}
+		catch (RemoteCloseException)
 		{
+			socket.Close();
+			return new OperateResult<byte[]>((int)ErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
+		}
+		catch (OperationCanceledException)
+		{
+			socket.Close();
+			return new OperateResult<byte[]>((int)ErrorCode.ReceiveDataTimeout, $"ReceiveDataTimeout: {timeOut}ms");
+		}
+		catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionAborted)
+		{
+            socket.Close();
+            return new OperateResult<byte[]>((int)ErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+        }
+        catch (SocketException ex)
+        {
             // 已断开连接 ex.NativeErrorCode.Equals(10035), 10035 == WSAEWOULDBLOCK
             // 详细参考：https://learn.microsoft.com/zh-cn/dotnet/api/system.net.sockets.socket.connected?view=net-7.0#system-net-sockets-socket-connected
             //if (ex.SocketErrorCode != SocketError.WouldBlock)

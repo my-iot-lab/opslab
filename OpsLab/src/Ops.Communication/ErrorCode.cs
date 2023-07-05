@@ -117,6 +117,9 @@ public enum ErrorCode : int
     [Description("远程主机强迫关闭了一个现有的连接")]
     SocketRemoteCloseException,
 
+    [Description("你的主机中的软件中止了一个已建立的连接")]
+    SocketConnectionAborted,
+
     [Description("打开串口出现异常")]
     OpenSerialPortException,
 
