@@ -1,4 +1,5 @@
-﻿using Ops.Communication.Core;
+﻿using Ops.Communication;
+using Ops.Communication.Core;
 using Ops.Communication.Core.Net;
 using Ops.Communication.Modbus;
 using Ops.Communication.Profinet.AllenBradley;
@@ -108,17 +109,14 @@ public sealed class DriverConnectorManager : IDisposable
     private PeriodicTimer? _periodicTimer;
 
     private readonly DeviceInfoManager _deviceInfoManager;
-    private readonly DeviceHealthManager _deviceHealthManager;
     private readonly ILogger _logger;
 
     private object SyncLock => _connectors;
 
     public DriverConnectorManager(DeviceInfoManager deviceInfoManager,
-        DeviceHealthManager deviceHealthManager,
         ILogger<DriverConnectorManager> logger)
     {
         _deviceInfoManager = deviceInfoManager;
-        _deviceHealthManager = deviceHealthManager;
         _logger = logger;
     }
 
@@ -218,9 +216,18 @@ public sealed class DriverConnectorManager : IDisposable
                     networkDevice.SocketReadErrorClosedDelegate = code =>
                     {
                         // TODO: 根据错误代码来判断是否断开连接
-                        if (connector.ConnectedStatus != ConnectionStatus.Disconnected)
+                        if (networkDevice.IsSocketError)
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
+
+                            if (code is (int)ErrorCode.SocketConnectionAborted
+                                    or (int)ErrorCode.RemoteClosedConnection
+                                    or (int)ErrorCode.ReceiveDataTimeout
+                                    or (int)ErrorCode.SocketSendException
+                                    or (int)ErrorCode.SocketReceiveException)
+                            {
+                                _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
+                            }
                         }
                     };
 
@@ -253,9 +260,6 @@ public sealed class DriverConnectorManager : IDisposable
 
             _hasTryConnectServer = true;
 
-            // 健康检测
-            _deviceHealthManager.Check();
-
             // 开启心跳检测
             // 采用 PeriodicTimer 而不是普通的 Timer 定时器，是为了防止产生任务重叠执行。
             _ = PeriodicHeartbeat();
@@ -267,6 +271,8 @@ public sealed class DriverConnectorManager : IDisposable
         _ = Task.Run(async () =>
         {
             await Task.Delay(3000).ConfigureAwait(false); // 延迟3s后开始监听
+
+            HashSet<string> pingSuccessHosts = new(); // 存放已 Ping 成功的主机信息。
 
             // PeriodicTimer 定时器，可以让任务不堆积，不会因上一个任务阻塞在下个任务开始时导致多个任务同时进行。
             _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(2));
@@ -280,13 +286,25 @@ public sealed class DriverConnectorManager : IDisposable
                     {
                         try
                         {
-                            connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+                            // 若连接器 Host 相同，每次轮询只需要 Ping 一次即可
+                            if (pingSuccessHosts.Contains(connector.Host))
+                            {
+                                connector.Available = true;
+                            }
+                            else
+                            {
+                                connector.Available = networkDevice.PingIpAddress(1000) == IPStatus.Success;
+                                if (connector.Available)
+                                {
+                                    pingSuccessHosts.Add(connector.Host);
+                                }
+                            }
 
                             // 注： networkDevice 中连接成功一次，即使服务器断开一段时间后再恢复，连接依旧可用，
                             // 所以，在连接成功一次后，不要再重复连接。
                             if (connector.Available && connector.ConnectedStatus == ConnectionStatus.Disconnected)
                             {
-                                // 内部 Socket 异常，或是还没有连接过服务器
+                                // 内部 Socket 异常，或是第一次尝试连接过服务器失败
                                 if (networkDevice.IsSocketError || !_fristConnectSuccessful)
                                 {
                                     var result = await networkDevice.ConnectServerAsync().ConfigureAwait(false);
@@ -304,6 +322,9 @@ public sealed class DriverConnectorManager : IDisposable
                         }
                     }
                 }
+
+                // 一次循环结束后，清空已 Ping 的主机
+                pingSuccessHosts.Clear();
             }
         });
 

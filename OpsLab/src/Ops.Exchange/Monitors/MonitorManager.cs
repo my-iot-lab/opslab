@@ -9,6 +9,7 @@ using Ops.Exchange.Handlers.Switch;
 using Ops.Exchange.Handlers.Underly;
 using Ops.Exchange.Management;
 using Ops.Exchange.Model;
+using Ops.Exchange.Stateless;
 using Ops.Exchange.Utils;
 
 namespace Ops.Exchange.Monitors;
@@ -25,6 +26,7 @@ public sealed class MonitorManager : IDisposable
     private readonly DriverConnectorManager _driverConnectorManager;
     private readonly EventBus _eventBus;
     private readonly CallbackTaskQueueManager _callbackTaskQueue;
+    private readonly TriggerStateManager _stateManager;
     private readonly OpsConfig _opsConfig;
     private readonly ILogger _logger;
 
@@ -32,6 +34,7 @@ public sealed class MonitorManager : IDisposable
         DriverConnectorManager driverConnectorManager,
         EventBus eventBus,
         CallbackTaskQueueManager callbackTaskQueue,
+        TriggerStateManager stateManager,
         IOptions<OpsConfig> opsConfig,
         ILogger<MonitorManager> logger)
     {
@@ -39,6 +42,7 @@ public sealed class MonitorManager : IDisposable
         _driverConnectorManager = driverConnectorManager;
         _eventBus = eventBus;
         _callbackTaskQueue = callbackTaskQueue;
+        _stateManager = stateManager;
         _opsConfig = opsConfig.Value;
         _logger = logger;
 
@@ -199,7 +203,9 @@ public sealed class MonitorManager : IDisposable
                             continue;
                         }
 
-                        if (result.Content == ExStatusCode.Trigger)
+                        // 检查数据是否能下发。当上一次数据还未处理完，此次数据是不能下发的。
+                        var stateKey = new StateKey(deviceInfo.Schema.Station, variable.Tag);
+                        if (_stateManager.CanTransfer(stateKey, result.Content) && result.Content == ExStatusCode.Trigger)
                         {
                             // TODO: 此处校验是否能下发，若能，再去获取其明细数据。
                             // 由于数据处于触发状态的时间很短（取决于后端执行的速度），目前暂时可按获取全部数据来处理。
