@@ -107,7 +107,12 @@ public static class OpsExtension
 		return SoftBasic.ArrayRemoveLast(value, length);
 	}
 
-	public static T[] SelectMiddle<T>(this T[] value, int index, int length)
+    public static byte[] ReverseByWord(this byte[] inBytes)
+    {
+        return SoftBasic.BytesReverseByWord(inBytes);
+    }
+
+    public static T[] SelectMiddle<T>(this T[] value, int index, int length)
 	{
 		return SoftBasic.ArraySelectMiddle(value, index, length);
 	}

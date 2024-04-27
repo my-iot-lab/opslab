@@ -989,7 +989,38 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// <returns>是否写入成功的结果对象</returns>
 	public OperateResult WriteWString(string address, string value)
 	{
-		return Write(address, value, Encoding.Unicode);
+        if (CurrentPlc != SiemensPLCS.S200Smart)
+        {
+            value ??= string.Empty;
+
+            byte[] array = Encoding.Unicode.GetBytes(value).ReverseByWord();
+            OperateResult<byte[]> operateResult = Read(address, 4);
+            if (!operateResult.IsSuccess)
+            {
+                return operateResult;
+            }
+
+            int num = operateResult.Content[0] * 256 + operateResult.Content[1];
+            if (num == 0)
+            {
+                num = 254;
+                operateResult.Content[1] = 254;
+            }
+
+            if (value.Length > num)
+            {
+                return new OperateResult<string>("String length is too long than plc defined");
+            }
+
+            byte[] array2 = new byte[array.Length + 4];
+            array2[0] = operateResult.Content[0];
+            array2[1] = operateResult.Content[1];
+            array2[2] = BitConverter.GetBytes(value.Length)[1];
+            array2[3] = BitConverter.GetBytes(value.Length)[0];
+            array.CopyTo(array2, 4);
+            return Write(address, array2);
+        }
+        return Write(address, value, Encoding.Unicode);
 	}
 
 	public override OperateResult<string> ReadString(string address, ushort length, Encoding encoding)
@@ -1051,23 +1082,18 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		if (CurrentPlc != SiemensPLCS.S200Smart)
 		{
-			var operateResult = Read(address, 2);  // TODO: 如何避免字符串每次请求的预读校验？
+			var operateResult = Read(address, 4);
 			if (!operateResult.IsSuccess)
 			{
 				return OperateResult.Error<string>(operateResult);
 			}
 
-			if (operateResult.Content[0] == 0 || operateResult.Content[0] == byte.MaxValue)
-			{
-				return new OperateResult<string>((int)ErrorCode.SiemensValueOfPlcIsNotStringType, ErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
-			}
-
-			var operateResult2 = Read(address, (ushort)(2 + operateResult.Content[1] * 2));
+            OperateResult<byte[]> operateResult2 = Read(address, (ushort)(4 + (operateResult.Content[2] * 256 + operateResult.Content[3]) * 2));
 			if (!operateResult2.IsSuccess)
 			{
 				return OperateResult.Error<string>(operateResult2);
 			}
-			return OperateResult.Ok(Encoding.Unicode.GetString(SoftBasic.BytesReverseByWord(operateResult2.Content.RemoveBegin(2))));
+			return OperateResult.Ok(Encoding.Unicode.GetString(SoftBasic.BytesReverseByWord(operateResult2.Content.RemoveBegin(4))));
 		}
 
 		var operateResult3 = Read(address, 1);
@@ -1128,7 +1154,40 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	public async Task<OperateResult> WriteWStringAsync(string address, string value)
 	{
-		return await WriteAsync(address, value, Encoding.Unicode).ConfigureAwait(false);
+        if (CurrentPlc != SiemensPLCS.S200Smart)
+        {
+            value ??= string.Empty;
+
+            byte[] buffer2 = Encoding.Unicode.GetBytes(value);
+            buffer2 = SoftBasic.BytesReverseByWord(buffer2);
+            OperateResult<byte[]> readLength = await ReadAsync(address, 4).ConfigureAwait(false);
+            if (!readLength.IsSuccess)
+            {
+                return readLength;
+            }
+
+            int defineLength = readLength.Content[0] * 256 + readLength.Content[1];
+            if (defineLength == 0)
+            {
+                defineLength = 254;
+                readLength.Content[1] = 254;
+            }
+
+            if (value.Length > defineLength)
+            {
+                return new OperateResult<string>("String length is too long than plc defined");
+            }
+
+            byte[] write = new byte[buffer2.Length + 4];
+            write[0] = readLength.Content[0];
+            write[1] = readLength.Content[1];
+            write[2] = BitConverter.GetBytes(value.Length)[1];
+            write[3] = BitConverter.GetBytes(value.Length)[0];
+            buffer2.CopyTo(write, 4);
+            return await WriteAsync(address, write).ConfigureAwait(false);
+        }
+
+        return await WriteAsync(address, value, Encoding.Unicode).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<string>> ReadStringAsync(string address, ushort length, Encoding encoding)
@@ -1195,18 +1254,13 @@ public class SiemensS7Net : NetworkDeviceBase
 				return OperateResult.Error<string>(read2);
 			}
 
-			if (read2.Content[0] == 0 || read2.Content[0] == byte.MaxValue)
+			var readString = await ReadAsync(address, (ushort)(4 + (read2.Content[2] * 256 + read2.Content[3]) * 2)).ConfigureAwait(false);
+			if (!readString.IsSuccess)
 			{
-				return new OperateResult<string>((int)ErrorCode.SiemensValueOfPlcIsNotStringType, ErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
+				return OperateResult.Error<string>(readString);
 			}
 
-			var readString2 = await ReadAsync(address, (ushort)(2 + read2.Content[1] * 2));
-			if (!readString2.IsSuccess)
-			{
-				return OperateResult.Error<string>(readString2);
-			}
-
-			return OperateResult.Ok(Encoding.Unicode.GetString(SoftBasic.BytesReverseByWord(readString2.Content.RemoveBegin(2))));
+			return OperateResult.Ok(Encoding.Unicode.GetString(SoftBasic.BytesReverseByWord(readString.Content.RemoveBegin(4))));
 		}
 
 		var read = await ReadAsync(address, 1);
@@ -1215,13 +1269,13 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<string>(read);
 		}
 
-		var readString = await ReadAsync(address, (ushort)(1 + read.Content[0] * 2)).ConfigureAwait(false);
-		if (!readString.IsSuccess)
+		var readString2 = await ReadAsync(address, (ushort)(1 + read.Content[0] * 2)).ConfigureAwait(false);
+		if (!readString2.IsSuccess)
 		{
-			return OperateResult.Error<string>(readString);
+			return OperateResult.Error<string>(readString2);
 		}
 
-		return OperateResult.Ok(Encoding.Unicode.GetString(readString.Content, 1, readString.Content.Length - 1));
+		return OperateResult.Ok(Encoding.Unicode.GetString(readString2.Content, 1, readString2.Content.Length - 1));
 	}
 
 	/// <summary>
