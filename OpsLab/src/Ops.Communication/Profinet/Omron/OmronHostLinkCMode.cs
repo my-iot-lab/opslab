@@ -82,7 +82,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		int num = Convert.ToInt32(Encoding.ASCII.GetString(operateResult.Content, 5, 2), 16);
 		if (num > 0)
 		{
-			return new OperateResult<string>((int)ErrorCode.UnknownError, "Unknown Error");
+			return new OperateResult<string>((int)OpsErrorCode.UnknownError, "Unknown Error");
 		}
 
 		string @string = Encoding.ASCII.GetString(operateResult.Content, 7, 2);
@@ -126,7 +126,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 					operateResult.Content1 = (isRead ? "RE" : "WE") + Encoding.ASCII.GetString(SoftBasic.BuildAsciiBytesFrom((byte)num));
 					break;
 				default:
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 			}
 
 			if (address[0] == 'E' || address[0] == 'e')
@@ -144,7 +144,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		}
 		catch (Exception ex)
 		{
-			operateResult.ErrorCode = (int)ErrorCode.NotSupportedDataType;
+			operateResult.ErrorCode = (int)OpsErrorCode.NotSupportedDataType;
             operateResult.Message = ex.Message;
 			return operateResult;
 		}
@@ -225,7 +225,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 			{
 				return new OperateResult<byte[]>
 				{
-					ErrorCode = (int)ErrorCode.OmronReceiveDataError,
+					ErrorCode = (int)OpsErrorCode.OmronReceiveDataError,
 					Content = array
 				};
 			}
@@ -233,7 +233,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 			return OperateResult.Ok(array);
 		}
 
-		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>

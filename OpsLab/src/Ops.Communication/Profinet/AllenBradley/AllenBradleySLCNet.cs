@@ -521,7 +521,7 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 	{
 		if (content.Length < 36)
 		{
-			return new OperateResult<byte[]>($"{ErrorCode.ReceiveDataLengthTooShort.Desc()} {content.ToHexString(' ')}");
+			return new OperateResult<byte[]>($"{OpsErrorCode.ReceiveDataLengthTooShort.Desc()} {content.ToHexString(' ')}");
 		}
 		return OperateResult.Ok(content.RemoveBegin(36));
 	}

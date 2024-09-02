@@ -56,7 +56,7 @@ public sealed class PipeSerial : PipeBase, IDisposable
         }
         catch (Exception ex)
         {
-            return new OperateResult((int)ErrorCode.OpenSerialPortException, ex.Message);
+            return new OperateResult((int)OpsErrorCode.OpenSerialPortException, ex.Message);
         }
     }
 
@@ -84,7 +84,7 @@ public sealed class PipeSerial : PipeBase, IDisposable
             }
             catch (Exception ex)
             {
-                return new OperateResult((int)ErrorCode.CloseSerialPortException, ex.Message);
+                return new OperateResult((int)OpsErrorCode.CloseSerialPortException, ex.Message);
             }
         }
 

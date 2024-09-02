@@ -125,14 +125,14 @@ public class NetworkUdpBase : NetworkBase
             }
             catch (Exception ex)
             {
-                return new OperateResult<byte[]>((int)ErrorCode.UnpackResponseContentError, $"UnpackResponseContent failed: {ex.Message}");
+                return new OperateResult<byte[]>((int)OpsErrorCode.UnpackResponseContentError, $"UnpackResponseContent failed: {ex.Message}");
             }
         }
 		catch (SocketException ex)
 		{
             _pipeSocket.ChangePorts();
             _pipeSocket.IsSocketError = true;
-            return new OperateResult<byte[]>((int)ErrorCode.SocketReceiveException, ex.Message);
+            return new OperateResult<byte[]>((int)OpsErrorCode.SocketReceiveException, ex.Message);
 		}
 		finally
 		{
@@ -171,7 +171,7 @@ public class NetworkUdpBase : NetworkBase
             catch (SocketException ex)
             {
                 _pipeSocket.IsSocketError = true;
-                operateResult = new OperateResult((int)ErrorCode.SocketException, ex.Message);
+                operateResult = new OperateResult((int)OpsErrorCode.SocketException, ex.Message);
             }
 
             if (!operateResult.IsSuccess)

@@ -359,7 +359,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 
 			// 不自动连接服务，抛出异常。
 			string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)ErrorCode.SocketUnavailable, err);
+            return new OperateResult<Socket>((int)OpsErrorCode.SocketUnavailable, err);
         }
 
 		// 使用已创建的Socket。
@@ -471,7 +471,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		if (netMessage != null && !netMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-            return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
+            return new OperateResult<byte[]>((int)OpsErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(sendValue, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(resultReceive.Content, ' ')}");
 		}
@@ -596,7 +596,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 
             // 不自动连接服务，抛出异常。
             string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)ErrorCode.SocketUnavailable, err);
+            return new OperateResult<Socket>((int)OpsErrorCode.SocketUnavailable, err);
         }
 
         // 使用已创建的Socket。
@@ -674,7 +674,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		if (newNetMessage != null && !newNetMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>((int)ErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed {Environment.NewLine}" +
+			return new OperateResult<byte[]>((int)OpsErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed {Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(array, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(operateResult2.Content, ' ')}");
 		}

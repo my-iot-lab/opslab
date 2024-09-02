@@ -711,13 +711,13 @@ public static class AllenBradleyHelper
 			string empty = string.Empty;
 			return new OperateResult(num, num switch
 			{
-				1 => ErrorCode.AllenBradleySessionStatus01.Desc(),
-				2 => ErrorCode.AllenBradleySessionStatus02.Desc(),
-				3 => ErrorCode.AllenBradleySessionStatus03.Desc(),
-				100 => ErrorCode.AllenBradleySessionStatus64.Desc(),
-				101 => ErrorCode.AllenBradleySessionStatus65.Desc(),
-				105 => ErrorCode.AllenBradleySessionStatus69.Desc(),
-				_ => ErrorCode.UnknownError.Desc(),
+				1 => OpsErrorCode.AllenBradleySessionStatus01.Desc(),
+				2 => OpsErrorCode.AllenBradleySessionStatus02.Desc(),
+				3 => OpsErrorCode.AllenBradleySessionStatus03.Desc(),
+				100 => OpsErrorCode.AllenBradleySessionStatus64.Desc(),
+				101 => OpsErrorCode.AllenBradleySessionStatus65.Desc(),
+				105 => OpsErrorCode.AllenBradleySessionStatus69.Desc(),
+				_ => OpsErrorCode.UnknownError.Desc(),
 			});
 		}
 		catch (Exception ex)
@@ -754,13 +754,13 @@ public static class AllenBradleyHelper
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley04.Desc(),
+							Message = OpsErrorCode.AllenBradley04.Desc(),
 						};
 					case 5:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley05.Desc(),
+							Message = OpsErrorCode.AllenBradley05.Desc(),
 						};
 					case 6:
 						if (response[num + 2] == 210 || response[num + 2] == 204)
@@ -768,7 +768,7 @@ public static class AllenBradleyHelper
 							return new OperateResult<byte[], ushort, bool>
 							{
 								ErrorCode = num6,
-								Message = ErrorCode.AllenBradley06.Desc(),
+								Message = OpsErrorCode.AllenBradley06.Desc(),
 							};
 						}
 						break;
@@ -776,37 +776,37 @@ public static class AllenBradleyHelper
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley0A.Desc(),
+							Message = OpsErrorCode.AllenBradley0A.Desc(),
 						};
 					case 19:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley13.Desc(),
+							Message = OpsErrorCode.AllenBradley13.Desc(),
 						};
 					case 28:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley1C.Desc(),
+							Message = OpsErrorCode.AllenBradley1C.Desc(),
 						};
 					case 30:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley1E.Desc(),
+							Message = OpsErrorCode.AllenBradley1E.Desc(),
 						};
 					case 38:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.AllenBradley26.Desc(),
+							Message = OpsErrorCode.AllenBradley26.Desc(),
 						};
 					default:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = ErrorCode.UnknownError.Desc(),
+							Message = OpsErrorCode.UnknownError.Desc(),
 						};
 					case 0:
 						break;
@@ -830,13 +830,13 @@ public static class AllenBradleyHelper
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley04.Desc(),
+						Message = OpsErrorCode.AllenBradley04.Desc(),
 					};
 				case 5:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley05.Desc(),
+						Message = OpsErrorCode.AllenBradley05.Desc(),
 					};
 				case 6:
 					value = true;
@@ -845,43 +845,43 @@ public static class AllenBradleyHelper
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley0A.Desc(),
+						Message = OpsErrorCode.AllenBradley0A.Desc(),
 					};
 				case 19:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley13.Desc(),
+						Message = OpsErrorCode.AllenBradley13.Desc(),
 					};
 				case 28:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley1C.Desc(),
+						Message = OpsErrorCode.AllenBradley1C.Desc(),
 					};
 				case 30:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley1E.Desc(),
+						Message = OpsErrorCode.AllenBradley1E.Desc(),
 					};
 				case 32:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley20.Desc(),
+						Message = OpsErrorCode.AllenBradley20.Desc(),
 					};
 				case 38:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.AllenBradley26.Desc(),
+						Message = OpsErrorCode.AllenBradley26.Desc(),
 					};
 				default:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = ErrorCode.UnknownError.Desc(),
+						Message = OpsErrorCode.UnknownError.Desc(),
 					};
 				case 0:
 					break;

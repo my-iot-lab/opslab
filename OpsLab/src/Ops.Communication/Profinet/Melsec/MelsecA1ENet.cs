@@ -499,7 +499,7 @@ public sealed class MelsecA1ENet : NetworkDeviceBase
 	{
 		if (response.Length < 2)
 		{
-			return new OperateResult((int)ErrorCode.ReceiveDataLengthTooShort, ErrorCode.ReceiveDataLengthTooShort.Desc());
+			return new OperateResult((int)OpsErrorCode.ReceiveDataLengthTooShort, OpsErrorCode.ReceiveDataLengthTooShort.Desc());
 		}
 		if (response[1] == 0)
 		{
@@ -507,9 +507,9 @@ public sealed class MelsecA1ENet : NetworkDeviceBase
 		}
 		if (response[1] == 91)
 		{
-			return new OperateResult((int)ErrorCode.MelsecPleaseReferToManualDocument, ErrorCode.MelsecPleaseReferToManualDocument.Desc());
+			return new OperateResult((int)OpsErrorCode.MelsecPleaseReferToManualDocument, OpsErrorCode.MelsecPleaseReferToManualDocument.Desc());
 		}
-		return new OperateResult((int)ErrorCode.MelsecPleaseReferToManualDocument, ErrorCode.MelsecPleaseReferToManualDocument.Desc());
+		return new OperateResult((int)OpsErrorCode.MelsecPleaseReferToManualDocument, OpsErrorCode.MelsecPleaseReferToManualDocument.Desc());
 	}
 
 	/// <summary>

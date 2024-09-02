@@ -663,7 +663,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 				return OperateResult.Ok(list.ToArray());
 			}
 		}
-		return new OperateResult<AbTagItem[]>(ErrorCode.UnknownError.Desc());
+		return new OperateResult<AbTagItem[]>(OpsErrorCode.UnknownError.Desc());
 	}
 
 	public async Task<OperateResult<AbTagItem[]>> TagEnumeratorAsync()
@@ -714,7 +714,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 				return OperateResult.Ok(lists.ToArray());
 			}
 		}
-		return new OperateResult<AbTagItem[]>(ErrorCode.UnknownError.Desc());
+		return new OperateResult<AbTagItem[]>(OpsErrorCode.UnknownError.Desc());
 	}
 
 	public override OperateResult<short[]> ReadInt16(string address, ushort length)

@@ -147,12 +147,12 @@ public static class OmronFinsNetHelper
 
 			if (num > 0)
 			{
-				return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, GetStatusDescription(num));
+				return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, GetStatusDescription(num));
 			}
 
 			return UdpResponseValidAnalysis(response.RemoveBegin(16));
 		}
-		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -201,7 +201,7 @@ public static class OmronFinsNetHelper
 			return operateResult2;
 		}
 
-		return new OperateResult<byte[]>((int)ErrorCode.OmronReceiveDataError, ErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -214,21 +214,21 @@ public static class OmronFinsNetHelper
 		return GetErrorCode(err).Desc();
 	}
 
-    public static ErrorCode GetErrorCode(int err)
+    public static OpsErrorCode GetErrorCode(int err)
     {
         return err switch
         {
-            0 => ErrorCode.OmronStatus0,
-            1 => ErrorCode.OmronStatus1,
-            2 => ErrorCode.OmronStatus2,
-            3 => ErrorCode.OmronStatus3,
-            32 => ErrorCode.OmronStatus20,
-            33 => ErrorCode.OmronStatus21,
-            34 => ErrorCode.OmronStatus22,
-            35 => ErrorCode.OmronStatus23,
-            36 => ErrorCode.OmronStatus24,
-            37 => ErrorCode.OmronStatus25,
-            _ => ErrorCode.UnknownError,
+            0 => OpsErrorCode.OmronStatus0,
+            1 => OpsErrorCode.OmronStatus1,
+            2 => OpsErrorCode.OmronStatus2,
+            3 => OpsErrorCode.OmronStatus3,
+            32 => OpsErrorCode.OmronStatus20,
+            33 => OpsErrorCode.OmronStatus21,
+            34 => OpsErrorCode.OmronStatus22,
+            35 => OpsErrorCode.OmronStatus23,
+            36 => OpsErrorCode.OmronStatus24,
+            37 => OpsErrorCode.OmronStatus25,
+            _ => OpsErrorCode.UnknownError,
         };
     }
 

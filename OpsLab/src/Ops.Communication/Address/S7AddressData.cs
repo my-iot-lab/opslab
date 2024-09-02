@@ -135,7 +135,7 @@ public class S7AddressData : DeviceAddressDataBase
 			{
 				if (address[0] != 'V')
 				{
-					return new OperateResult<S7AddressData>(ErrorCode.NotSupportedDataType.Desc());
+					return new OperateResult<S7AddressData>(OpsErrorCode.NotSupportedDataType.Desc());
 				}
 
 				s7AddressData.DataCode = 132;

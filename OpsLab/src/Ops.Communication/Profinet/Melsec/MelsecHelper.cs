@@ -40,7 +40,7 @@ public static class MelsecHelper
 						operateResult.Content2 = Convert.ToInt32(address[2..], MelsecA1EDataType.TN.FromBase);
 						break;
 					}
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 				case 'C' or 'c':
 					if (address[1] == 'S' || address[1] == 's')
 					{
@@ -60,7 +60,7 @@ public static class MelsecHelper
 						operateResult.Content2 = Convert.ToInt32(address[2..], MelsecA1EDataType.CN.FromBase);
 						break;
 					}
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 				case 'X' or 'x':
 					operateResult.Content1 = MelsecA1EDataType.X;
 					address = address[1..];
@@ -114,12 +114,12 @@ public static class MelsecHelper
 					operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.W.FromBase);
 					break;
 				default:
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 			}
 		}
 		catch (Exception ex)
 		{
-			operateResult.ErrorCode = (int)ErrorCode.NotSupportedDataType;
+			operateResult.ErrorCode = (int)OpsErrorCode.NotSupportedDataType;
             operateResult.Message = ex.Message;
 			return operateResult;
 		}
@@ -467,7 +467,7 @@ public static class MelsecHelper
 	{
 		if (tags.Length != lengths.Length)
 		{
-			throw new Exception(ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			throw new Exception(OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		using var memoryStream = new MemoryStream();
@@ -517,7 +517,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, $"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
+			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, $"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
 		}
 	}
 
@@ -548,7 +548,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -568,7 +568,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -602,7 +602,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -624,7 +624,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -633,38 +633,38 @@ public static class MelsecHelper
 	/// </summary>
 	/// <param name="code">错误码</param>
 	/// <returns>描述信息</returns>
-	public static ErrorCode GetErrorDescription(int code)
+	public static OpsErrorCode GetErrorDescription(int code)
 	{
 		return code switch
 		{
-			2 => ErrorCode.MelsecError02,
-			81 => ErrorCode.MelsecError51,
-			82 => ErrorCode.MelsecError52,
-			84 => ErrorCode.MelsecError54,
-			85 => ErrorCode.MelsecError55,
-			86 => ErrorCode.MelsecError56,
-			88 => ErrorCode.MelsecError58,
-			89 => ErrorCode.MelsecError59,
-			49229 => ErrorCode.MelsecErrorC04D,
-			49232 => ErrorCode.MelsecErrorC050,
-			49233 or 49234 or 49235 or 49236 => ErrorCode.MelsecErrorC051_54,
-			49237 => ErrorCode.MelsecErrorC055,
-			49238 => ErrorCode.MelsecErrorC056,
-			49239 => ErrorCode.MelsecErrorC057,
-			49240 => ErrorCode.MelsecErrorC058,
-			49241 => ErrorCode.MelsecErrorC059,
-			49242 or 49243 => ErrorCode.MelsecErrorC05A_B,
-			49244 => ErrorCode.MelsecErrorC05C,
-			49245 => ErrorCode.MelsecErrorC05D,
-			49246 => ErrorCode.MelsecErrorC05E,
-			49247 => ErrorCode.MelsecErrorC05F,
-			49248 => ErrorCode.MelsecErrorC060,
-			49249 => ErrorCode.MelsecErrorC061,
-			49250 => ErrorCode.MelsecErrorC062,
-			49264 => ErrorCode.MelsecErrorC070,
-			49266 => ErrorCode.MelsecErrorC072,
-			49268 => ErrorCode.MelsecErrorC074,
-			_ => ErrorCode.MelsecPleaseReferToManualDocument,
+			2 => OpsErrorCode.MelsecError02,
+			81 => OpsErrorCode.MelsecError51,
+			82 => OpsErrorCode.MelsecError52,
+			84 => OpsErrorCode.MelsecError54,
+			85 => OpsErrorCode.MelsecError55,
+			86 => OpsErrorCode.MelsecError56,
+			88 => OpsErrorCode.MelsecError58,
+			89 => OpsErrorCode.MelsecError59,
+			49229 => OpsErrorCode.MelsecErrorC04D,
+			49232 => OpsErrorCode.MelsecErrorC050,
+			49233 or 49234 or 49235 or 49236 => OpsErrorCode.MelsecErrorC051_54,
+			49237 => OpsErrorCode.MelsecErrorC055,
+			49238 => OpsErrorCode.MelsecErrorC056,
+			49239 => OpsErrorCode.MelsecErrorC057,
+			49240 => OpsErrorCode.MelsecErrorC058,
+			49241 => OpsErrorCode.MelsecErrorC059,
+			49242 or 49243 => OpsErrorCode.MelsecErrorC05A_B,
+			49244 => OpsErrorCode.MelsecErrorC05C,
+			49245 => OpsErrorCode.MelsecErrorC05D,
+			49246 => OpsErrorCode.MelsecErrorC05E,
+			49247 => OpsErrorCode.MelsecErrorC05F,
+			49248 => OpsErrorCode.MelsecErrorC060,
+			49249 => OpsErrorCode.MelsecErrorC061,
+			49250 => OpsErrorCode.MelsecErrorC062,
+			49264 => OpsErrorCode.MelsecErrorC070,
+			49266 => OpsErrorCode.MelsecErrorC072,
+			49268 => OpsErrorCode.MelsecErrorC074,
+			_ => OpsErrorCode.MelsecPleaseReferToManualDocument,
 		};
 	}
 

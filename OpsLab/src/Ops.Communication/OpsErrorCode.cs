@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Ops.Communication;
@@ -6,7 +7,7 @@ namespace Ops.Communication;
 /// <summary>
 /// 错误代码
 /// </summary>
-public enum ErrorCode : int
+public enum OpsErrorCode : int
 {
     [Description("Success")]
     Success = 0,
@@ -385,10 +386,11 @@ public static class ErrorCodeExtensions
     /// </summary>
     /// <param name="source">错误代码枚举对象</param>
     /// <returns></returns>
-    public static string Desc(this ErrorCode source)
+    public static string Desc(this OpsErrorCode source)
     {
-        var fi = source.GetType().GetField(source.ToString());
-        var attr = fi.GetCustomAttribute<DescriptionAttribute>(false);
+        var fieldName = source.ToString();
+        MemberExpression memberExpression = Expression.Field(null, typeof(OpsErrorCode), fieldName);
+        var attr = memberExpression.Member.GetCustomAttribute<DescriptionAttribute>(false);
         if (attr == null)
         {
             return $"[{(int)source}]";

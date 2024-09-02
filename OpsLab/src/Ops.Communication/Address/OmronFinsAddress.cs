@@ -95,7 +95,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
 					}
 					break;
 				default:
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 			}
 
 			if (address[0] == 'E' || address[0] == 'e')

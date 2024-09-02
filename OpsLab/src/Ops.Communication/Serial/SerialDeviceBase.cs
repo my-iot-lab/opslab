@@ -63,17 +63,17 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public virtual OperateResult<byte[]> Read(string address, ushort length)
 	{
-		return new OperateResult<byte[]>(ErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<byte[]>(OpsErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, byte[] value)
 	{
-		return new OperateResult(ErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		return new OperateResult<bool[]>(ErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<bool[]>(OpsErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool> ReadBool(string address)
@@ -83,7 +83,7 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public virtual OperateResult Write(string address, bool[] value)
 	{
-		return new OperateResult(ErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, bool value)

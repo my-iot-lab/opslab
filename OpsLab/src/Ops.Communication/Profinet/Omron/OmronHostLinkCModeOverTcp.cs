@@ -139,7 +139,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 		int num = Convert.ToInt32(Encoding.ASCII.GetString(operateResult.Content, 5, 2), 16);
 		if (num > 0)
 		{
-			return new OperateResult<string>((int)ErrorCode.UnknownError, "Unknown Error");
+			return new OperateResult<string>((int)OpsErrorCode.UnknownError, "Unknown Error");
 		}
 
 		string @string = Encoding.ASCII.GetString(operateResult.Content, 7, 2);

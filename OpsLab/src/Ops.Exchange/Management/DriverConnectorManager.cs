@@ -220,11 +220,11 @@ public sealed class DriverConnectorManager : IDisposable
                         {
                             connector.ConnectedStatus = ConnectionStatus.Disconnected;
 
-                            if (code is (int)ErrorCode.SocketConnectionAborted
-                                    or (int)ErrorCode.RemoteClosedConnection
-                                    or (int)ErrorCode.ReceiveDataTimeout
-                                    or (int)ErrorCode.SocketSendException
-                                    or (int)ErrorCode.SocketReceiveException)
+                            if (code is (int)OpsErrorCode.SocketConnectionAborted
+                                    or (int)OpsErrorCode.RemoteClosedConnection
+                                    or (int)OpsErrorCode.ReceiveDataTimeout
+                                    or (int)OpsErrorCode.SocketSendException
+                                    or (int)OpsErrorCode.SocketReceiveException)
                             {
                                 _logger.LogWarning("已与服务器断开，主机：{Host}，错误代码：{Code}", connector.Host, code);
                             }

@@ -545,7 +545,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>(ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>(OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] array = new McAddressData[address.Length];
@@ -640,7 +640,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>((int)ErrorCode.TwoParametersLengthIsNotSame, ErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)OpsErrorCode.TwoParametersLengthIsNotSame, OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] mcAddressDatas = new McAddressData[address.Length];
@@ -1268,7 +1268,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
         if (content == null || content.Length < 11)
         {
-            return new OperateResult((int)ErrorCode.ReceiveDataLengthTooShort, $"{ErrorCode.ReceiveDataLengthTooShort.Desc()} 11, Content: {content.ToHexString(' ')}");
+            return new OperateResult((int)OpsErrorCode.ReceiveDataLengthTooShort, $"{OpsErrorCode.ReceiveDataLengthTooShort.Desc()} 11, Content: {content.ToHexString(' ')}");
         }
 
         ushort num = BitConverter.ToUInt16(content, 9);

@@ -151,7 +151,7 @@ public abstract class SerialBase : IDisposable
         OperateResult operateResult = _pipeSerial.Open();
         if (!operateResult.IsSuccess)
         {
-            return new OperateResult((int)ErrorCode.OpenSerialPortException, operateResult.Message);
+            return new OperateResult((int)OpsErrorCode.OpenSerialPortException, operateResult.Message);
         }
 
         return InitializationOnOpen(_pipeSerial.GetPipe());
@@ -320,7 +320,7 @@ public abstract class SerialBase : IDisposable
 			}
 			catch (Exception ex)
 			{
-				return new OperateResult((int)ErrorCode.SerialPortSendException, ex.Message);
+				return new OperateResult((int)OpsErrorCode.SerialPortSendException, ex.Message);
 			}
 		}
 		return OperateResult.Ok();
@@ -391,7 +391,7 @@ public abstract class SerialBase : IDisposable
 			}
 			catch (Exception ex)
 			{
-				return new OperateResult<byte[]>((int)ErrorCode.SerialPortReceiveException, ex.Message);
+				return new OperateResult<byte[]>((int)OpsErrorCode.SerialPortReceiveException, ex.Message);
 			}
 		}
 

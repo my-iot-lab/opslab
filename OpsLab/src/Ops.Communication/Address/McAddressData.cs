@@ -216,7 +216,7 @@ public class McAddressData : DeviceAddressDataBase
 						mcAddressData.AddressStart = Convert.ToInt32(address[2..], MelsecMcDataType.TC.FromBase);
 						break;
 					}
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 				case 'C' or 'c':
 					if (address[1] == 'N' || address[1] == 'n')
 					{
@@ -236,14 +236,14 @@ public class McAddressData : DeviceAddressDataBase
 						mcAddressData.AddressStart = Convert.ToInt32(address[2..], MelsecMcDataType.CC.FromBase);
 						break;
 					}
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 				default:
-					throw new Exception(ErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
 			}
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<McAddressData>((int)ErrorCode.NotSupportedDataType, ex.Message);
+			return new OperateResult<McAddressData>((int)OpsErrorCode.NotSupportedDataType, ex.Message);
 		}
 
 		return OperateResult.Ok(mcAddressData);

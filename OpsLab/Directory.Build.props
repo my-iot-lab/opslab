@@ -15,7 +15,7 @@
 	<GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">True</GeneratePackageOnBuild>
 	<IncludeSymbols>true</IncludeSymbols>
 
-	<PackageVersion>0.7.36</PackageVersion>
+	<PackageVersion>0.7.37</PackageVersion>
 	<Version>$(PackageVersion)</Version>
 	<Authors>Gang.Yang</Authors>
 	<Company>OpsLab</Company>
