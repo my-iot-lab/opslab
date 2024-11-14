@@ -17,13 +17,13 @@ public class MelsecQnA3EAsciiMessage : INetMessage
 
 	public int GetContentLengthByHeadBytes()
 	{
-		byte[] bytes = new byte[4]
-		{
-			HeadBytes[14],
+		byte[] bytes =
+        [
+            HeadBytes[14],
 			HeadBytes[15],
 			HeadBytes[16],
 			HeadBytes[17]
-		};
+		];
 		return Convert.ToInt32(Encoding.ASCII.GetString(bytes), 16);
 	}
 

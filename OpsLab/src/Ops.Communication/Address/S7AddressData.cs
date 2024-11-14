@@ -49,7 +49,7 @@ public class S7AddressData : DeviceAddressDataBase
 			return Convert.ToInt32(address) * 8;
 		}
 
-		string[] array = address.Split(new char[1] { '.' });
+		string[] array = address.Split(['.']);
 		return Convert.ToInt32(array[0]) * 8 + Convert.ToInt32(array[1]);
 	}
 
@@ -104,7 +104,7 @@ public class S7AddressData : DeviceAddressDataBase
 			else if (address[0] == 'D' || address[0..2] == "DB")
 			{
 				s7AddressData.DataCode = 132;
-				string[] array = address.Split(new char[1] { '.' });
+				string[] array = address.Split(['.']);
 				if (address[1] == 'B')
 				{
 					s7AddressData.DbBlock = Convert.ToUInt16(array[0][2..]);
@@ -135,7 +135,7 @@ public class S7AddressData : DeviceAddressDataBase
 			{
 				if (address[0] != 'V')
 				{
-					return new OperateResult<S7AddressData>(OpsErrorCode.NotSupportedDataType.Desc());
+					return new OperateResult<S7AddressData>(ConnErrorCode.NotSupportedDataType.Desc());
 				}
 
 				s7AddressData.DataCode = 132;

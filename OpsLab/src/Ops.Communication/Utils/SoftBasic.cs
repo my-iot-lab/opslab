@@ -328,7 +328,7 @@ public static class SoftBasic
 	{
 		if (inBytes.Length == 0)
 		{
-			return Array.Empty<byte>();
+			return [];
 		}
 
 		byte[] array = ArrayExpandToLengthEven(inBytes.CopyArray());
@@ -505,7 +505,7 @@ public static class SoftBasic
 	/// <returns>转换后的bool数组</returns>
 	public static bool[] ByteToBoolArray(byte[] InBytes)
 	{
-		return InBytes == null ? Array.Empty<bool>() : ByteToBoolArray(InBytes, InBytes.Length * 8);
+		return InBytes == null ? [] : ByteToBoolArray(InBytes, InBytes.Length * 8);
 	}
 
 	/// <summary>
@@ -520,7 +520,7 @@ public static class SoftBasic
 	{
 		if (value.Length <= leftLength + rightLength)
 		{
-			return Array.Empty<T>();
+			return [];
 		}
 
 		T[] array = new T[value.Length - leftLength - rightLength];

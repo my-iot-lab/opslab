@@ -210,140 +210,140 @@ public class ModbusRtuOverTcp : NetworkDeviceBase, IModbus, IReadWriteDevice, IR
 
 	public override OperateResult<int[]> ReadInt32(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransInt32(m, 0, length));
 	}
 
 	public override OperateResult<uint[]> ReadUInt32(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransUInt32(m, 0, length));
 	}
 
 	public override OperateResult<float[]> ReadFloat(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 2)), (byte[] m) => transform.TransSingle(m, 0, length));
 	}
 
 	public override OperateResult<long[]> ReadInt64(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransInt64(m, 0, length));
 	}
 
 	public override OperateResult<ulong[]> ReadUInt64(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransUInt64(m, 0, length));
 	}
 
 	public override OperateResult<double[]> ReadDouble(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, (ushort)(length * base.WordLength * 4)), (byte[] m) => transform.TransDouble(m, 0, length));
 	}
 
 	public override OperateResult Write(string address, int[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override OperateResult Write(string address, uint[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override OperateResult Write(string address, float[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override OperateResult Write(string address, long[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override OperateResult Write(string address, ulong[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override OperateResult Write(string address, double[] values)
 	{
-		IByteTransform byteTransform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform byteTransform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return Write(address, byteTransform.TransByte(values));
 	}
 
 	public override async Task<OperateResult<int[]>> ReadInt32Async(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<uint[]>> ReadUInt32Async(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransUInt32(m, 0, length));
 	}
 
 	public override async Task<OperateResult<float[]>> ReadFloatAsync(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 2)).ConfigureAwait(false), (byte[] m) => transform.TransSingle(m, 0, length));
 	}
 
 	public override async Task<OperateResult<long[]>> ReadInt64Async(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<ulong[]>> ReadUInt64Async(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransUInt64(m, 0, length));
 	}
 
 	public override async Task<OperateResult<double[]>> ReadDoubleAsync(string address, ushort length)
 	{
-		IByteTransform transform = OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform);
+		IByteTransform transform = ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, (ushort)(length * base.WordLength * 4)).ConfigureAwait(false), (byte[] m) => transform.TransDouble(m, 0, length));
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, int[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, uint[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, float[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, long[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, ulong[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, double[] values)
 	{
-		return await WriteAsync(value: OpsHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
+		return await WriteAsync(value: ConnHelper.ExtractTransformParameter(ref address, base.ByteTransform).TransByte(values), address: address).ConfigureAwait(false);
 	}
 
 	public override string ToString()

@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using Ops.Communication.Core.Pipe;
 using Ops.Communication.Extensions;
@@ -125,14 +124,14 @@ public class NetworkUdpBase : NetworkBase
             }
             catch (Exception ex)
             {
-                return new OperateResult<byte[]>((int)OpsErrorCode.UnpackResponseContentError, $"UnpackResponseContent failed: {ex.Message}");
+                return new OperateResult<byte[]>((int)ConnErrorCode.UnpackResponseContentError, $"UnpackResponseContent failed: {ex.Message}");
             }
         }
 		catch (SocketException ex)
 		{
             _pipeSocket.ChangePorts();
             _pipeSocket.IsSocketError = true;
-            return new OperateResult<byte[]>((int)OpsErrorCode.SocketReceiveException, ex.Message);
+            return new OperateResult<byte[]>((int)ConnErrorCode.SocketReceiveException, ex.Message);
 		}
 		finally
 		{
@@ -171,7 +170,7 @@ public class NetworkUdpBase : NetworkBase
             catch (SocketException ex)
             {
                 _pipeSocket.IsSocketError = true;
-                operateResult = new OperateResult((int)OpsErrorCode.SocketException, ex.Message);
+                operateResult = new OperateResult((int)ConnErrorCode.SocketException, ex.Message);
             }
 
             if (!operateResult.IsSuccess)

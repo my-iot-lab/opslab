@@ -163,7 +163,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			var list = new List<byte[]>();
 			for (int i = 0; i < address.Length; i++)
 			{
-				b = (byte)OpsHelper.ExtractParameter(ref address[i], "slot", Slot);
+				b = (byte)ConnHelper.ExtractParameter(ref address[i], "slot", Slot);
 				list.Add(AllenBradleyHelper.PackRequsetRead(address[i], length[i]));
 			}
 
@@ -208,9 +208,9 @@ public class AllenBradleyNet : NetworkDeviceBase
 	{
 		try
 		{
-			byte b = (byte)OpsHelper.ExtractParameter(ref address, "slot", Slot);
+			byte b = (byte)ConnHelper.ExtractParameter(ref address, "slot", Slot);
 			byte[] array = AllenBradleyHelper.PackRequestWrite(address, typeCode, data, length);
-			byte[] value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, b }, array));
+			byte[] value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, b], array));
 			return OperateResult.Ok(value);
 		}
 		catch (Exception ex)
@@ -229,9 +229,9 @@ public class AllenBradleyNet : NetworkDeviceBase
 	{
 		try
 		{
-			byte b = (byte)OpsHelper.ExtractParameter(ref address, "slot", Slot);
+			byte b = (byte)ConnHelper.ExtractParameter(ref address, "slot", Slot);
 			byte[] array = AllenBradleyHelper.PackRequestWrite(address, data);
-			byte[] value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, b }, array));
+			byte[] value = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, b], array));
 			return OperateResult.Ok(value);
 		}
 		catch (Exception ex)
@@ -252,7 +252,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 		{
 			return ReadSegment(address, 0, length);
 		}
-		return Read(new string[1] { address }, new int[1] { length });
+		return Read([address], [length]);
 	}
 
 	/// <summary>
@@ -360,7 +360,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 	/// <returns>Results Bytes</returns>
 	public OperateResult<byte[]> ReadCipFromServer(params byte[][] cips)
 	{
-		byte[] send = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, Slot }, cips.ToArray()));
+		byte[] send = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, Slot], cips.ToArray()));
 		var operateResult = ReadFromCoreServer(send);
 		if (!operateResult.IsSuccess)
 		{
@@ -456,7 +456,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 		{
 			return await ReadSegmentAsync(address, 0, length).ConfigureAwait(false);
 		}
-		return await ReadAsync(new string[1] { address }, new int[1] { length });
+		return await ReadAsync([address], [length]);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadAsync(string[] address)
@@ -542,7 +542,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 
 	public async Task<OperateResult<byte[]>> ReadCipFromServerAsync(params byte[][] cips)
 	{
-		byte[] commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? new byte[2] { 1, Slot }, cips.ToArray()));
+		byte[] commandSpecificData = AllenBradleyHelper.PackCommandSpecificData(new byte[4], PackCommandService(PortSlot ?? [1, Slot], [.. cips]));
 		var read = await ReadFromCoreServerAsync(commandSpecificData).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
@@ -663,7 +663,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 				return OperateResult.Ok(list.ToArray());
 			}
 		}
-		return new OperateResult<AbTagItem[]>(OpsErrorCode.UnknownError.Desc());
+		return new OperateResult<AbTagItem[]>(ConnErrorCode.UnknownError.Desc());
 	}
 
 	public async Task<OperateResult<AbTagItem[]>> TagEnumeratorAsync()
@@ -714,7 +714,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 				return OperateResult.Ok(lists.ToArray());
 			}
 		}
-		return new OperateResult<AbTagItem[]>(OpsErrorCode.UnknownError.Desc());
+		return new OperateResult<AbTagItem[]>(ConnErrorCode.UnknownError.Desc());
 	}
 
 	public override OperateResult<short[]> ReadInt16(string address, ushort length)
@@ -1000,7 +1000,7 @@ public class AllenBradleyNet : NetworkDeviceBase
 			}
 			return AllenBradleyHelper.ExtractActualData(operateResult2.Content, isRead: false);
 		}
-		return WriteTag(address, 193, (!value) ? new byte[2] : new byte[2] { 255, 255 });
+		return WriteTag(address, 193, (!value) ? new byte[2] : [255, 255]);
 	}
 
 	/// <summary>
@@ -1094,12 +1094,12 @@ public class AllenBradleyNet : NetworkDeviceBase
 			return AllenBradleyHelper.ExtractActualData(read.Content, isRead: false);
 		}
 
-		return await WriteTagAsync(address, 193, (!value) ? new byte[2] : new byte[2] { 255, 255 }).ConfigureAwait(false);
+		return await WriteTagAsync(address, 193, (!value) ? new byte[2] : [255, 255]).ConfigureAwait(false);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 194, new byte[2] { value, 0 }).ConfigureAwait(false);
+		return await WriteTagAsync(address, 194, [value, 0]).ConfigureAwait(false);
 	}
 
 	protected virtual byte[] PackCommandService(byte[] portSlot, params byte[][] cips)

@@ -122,7 +122,7 @@ public sealed class ModbusInfo
 		var list = new List<byte[]>();
 		if (mAddress.Function == ReadCoil || mAddress.Function == ReadDiscrete || mAddress.Function == ReadRegister || mAddress.Function == ReadInputRegister)
 		{
-			var operateResult = OpsHelper.SplitReadLength(mAddress.Address, length, (ushort)((mAddress.Function == ReadCoil || mAddress.Function == ReadDiscrete) ? 2000 : 120));
+			var operateResult = ConnHelper.SplitReadLength(mAddress.Address, length, (ushort)((mAddress.Function == ReadCoil || mAddress.Function == ReadDiscrete) ? 2000 : 120));
 			for (int i = 0; i < operateResult.Content1.Length; i++)
 			{
 				list.Add(new byte[6]
@@ -553,7 +553,7 @@ public sealed class ModbusInfo
 	{
 		byte[] inBytes = SoftLRC.LRC(modbus);
 		byte[] array = SoftBasic.BytesToAsciiBytes(inBytes);
-		return SoftBasic.SpliceArray(new byte[1] { 58 }, array, new byte[2] { 13, 10 });
+		return SoftBasic.SpliceArray(":"u8.ToArray(), array, "\r\n"u8.ToArray());
 	}
 
 	/// <summary>
@@ -567,20 +567,20 @@ public sealed class ModbusInfo
 		{
 			if (modbusAscii[0] != 58 || modbusAscii[^2] != 13 || modbusAscii[^1] != 10)
 			{
-				return new OperateResult<byte[]>((int)OpsErrorCode.ModbusAsciiFormatCheckFailed, $"ModbusAsciiFormatCheckFailed: {modbusAscii.ToHexString(' ')}");
+				return new OperateResult<byte[]>((int)ConnErrorCode.ModbusAsciiFormatCheckFailed, $"ModbusAsciiFormatCheckFailed: {modbusAscii.ToHexString(' ')}");
 			}
 
 			byte[] array = SoftBasic.AsciiBytesToBytes(modbusAscii.RemoveDouble(1, 2));
 			if (!SoftLRC.CheckLRC(array))
 			{
-                return new OperateResult<byte[]>((int)OpsErrorCode.ModbusLRCCheckFailed, $"ModbusLRCCheckFailed: {modbusAscii.ToHexString(' ')}");
+                return new OperateResult<byte[]>((int)ConnErrorCode.ModbusLRCCheckFailed, $"ModbusLRCCheckFailed: {modbusAscii.ToHexString(' ')}");
 			}
 
 			return OperateResult.Ok(array.RemoveLast(1));
 		}
 		catch (Exception ex)
 		{
-            return new OperateResult<byte[]>((int)OpsErrorCode.ModbusTransAsciiPackError, $"{ex.Message}: {modbusAscii.ToHexString(' ')}");
+            return new OperateResult<byte[]>((int)ConnErrorCode.ModbusTransAsciiPackError, $"{ex.Message}: {modbusAscii.ToHexString(' ')}");
 		}
 	}
 

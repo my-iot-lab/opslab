@@ -56,7 +56,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 	/// <returns>读取结果信息</returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return ReadHelper(address, length, b, ReadWithPackCommand);
 	}
 
@@ -68,13 +68,13 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 	/// <returns>是否写入成功</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return WriteHelper(address, value, b, ReadWithPackCommand);
 	}
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<McAddressData> addressResult = McAddressData.ParseMelsecFrom(address, length);
 		if (!addressResult.IsSuccess)
 		{
@@ -90,21 +90,21 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 
-		byte[] Content = new byte[length * 2];
-		for (int i = 0; i < Content.Length / 2; i++)
+		byte[] content = new byte[length * 2];
+		for (int i = 0; i < content.Length / 2; i++)
 		{
 			ushort tmp = Convert.ToUInt16(Encoding.ASCII.GetString(read.Content, i * 4 + 11, 4), 16);
-			BitConverter.GetBytes(tmp).CopyTo(Content, i * 2);
+			BitConverter.GetBytes(tmp).CopyTo(content, i * 2);
 		}
-		return OperateResult.Ok(Content);
+		return OperateResult.Ok(content);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<McAddressData> addressResult = McAddressData.ParseMelsecFrom(address, 0);
 		if (!addressResult.IsSuccess)
 		{
@@ -120,7 +120,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -133,7 +133,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 	/// <returns>读取结果信息</returns>
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return ReadBoolHelper(address, length, b, ReadWithPackCommand);
 	}
 
@@ -145,13 +145,13 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 	/// <returns>是否写入成功</returns>
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return WriteHelper(address, value, b, ReadWithPackCommand);
 	}
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<McAddressData> addressResult = McAddressData.ParseMelsecFrom(address, length);
 		if (!addressResult.IsSuccess)
 		{
@@ -167,7 +167,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>((int)OpsErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult<bool[]>((int)ConnErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 
 		byte[] buffer = new byte[length];
@@ -177,7 +177,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<McAddressData> addressResult = McAddressData.ParseMelsecFrom(address, 0);
 		if (!addressResult.IsSuccess)
 		{
@@ -193,7 +193,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -223,7 +223,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6 && read.Content[0] != 2)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStartPLCFailed, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecStartPLCFailed, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -238,7 +238,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6 && read.Content[0] != 2)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStopPLCFailed, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecStopPLCFailed, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -253,7 +253,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6 && read.Content[0] != 2)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.MelsecReadPlcTypeError, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
+			return new OperateResult<string>((int)ConnErrorCode.MelsecReadPlcTypeError, "Failed:" + Encoding.ASCII.GetString(read.Content, 1, read.Content.Length - 1));
 		}
 		return OperateResult.Ok(Encoding.ASCII.GetString(read.Content, 11, 16).TrimEnd(Array.Empty<char>()));
 	}
@@ -288,7 +288,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecReadFailed, "Read Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
 		}
 
 		byte[] array = new byte[length * 2];
@@ -325,7 +325,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -355,7 +355,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>((int)OpsErrorCode.MelsecReadFailed, "Read Faild:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
+			return new OperateResult<bool[]>((int)ConnErrorCode.MelsecReadFailed, "Read Faild:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
 		}
 		byte[] array = new byte[length];
 		Array.Copy(operateResult2.Content, 11, array, 0, length);
@@ -387,7 +387,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Failed:" + Encoding.ASCII.GetString(operateResult2.Content, 1, operateResult2.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -408,7 +408,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult.Content[0] != 6 && operateResult.Content[0] != 2)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStartPLCFailed, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecStartPLCFailed, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -429,7 +429,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult.Content[0] != 6 && operateResult.Content[0] != 2)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStopPLCFailed, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
+			return new OperateResult((int)ConnErrorCode.MelsecStopPLCFailed, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
 		}
 		return OperateResult.Ok();
 	}
@@ -450,7 +450,7 @@ public sealed class MelsecA3CNet1OverTcp : NetworkDeviceBase
 
 		if (operateResult.Content[0] != 6 && operateResult.Content[0] != 2)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.MelsecReadPlcTypeError, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
+			return new OperateResult<string>((int)ConnErrorCode.MelsecReadPlcTypeError, "Failed:" + Encoding.ASCII.GetString(operateResult.Content, 1, operateResult.Content.Length - 1));
 		}
 		return OperateResult.Ok(Encoding.ASCII.GetString(operateResult.Content, 11, 16).TrimEnd(Array.Empty<char>()));
 	}

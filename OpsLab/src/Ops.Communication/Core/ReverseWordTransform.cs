@@ -29,7 +29,7 @@ public sealed class ReverseWordTransform : ByteTransformBase
 	{
 		if (buffer == null)
 		{
-			return Array.Empty<byte>();
+			return [];
 		}
 		return SoftBasic.BytesReverseByWord(buffer.SelectMiddle(index, length));
 	}

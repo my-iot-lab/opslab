@@ -10,7 +10,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// </summary>
 public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 {
-	private readonly IncrementCount incrementCount;
+	private readonly IncrementCount _incrementCount;
 
 	/// <summary>
 	/// 站号信息
@@ -39,7 +39,7 @@ public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 	{
 		base.WordLength = 2;
 		base.ByteTransform = new RegularByteTransform();
-		incrementCount = new IncrementCount(65535L, 0L);
+		_incrementCount = new IncrementCount(65535L, 0L);
 		CheckType = CheckType.CRC16;
 	}
 
@@ -51,10 +51,10 @@ public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 	/// <returns>是否读取成功的结果对象</returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		byte dstNode = (byte)OpsHelper.ExtractParameter(ref address, "dst", DstNode);
-		byte srcNode = (byte)OpsHelper.ExtractParameter(ref address, "src", SrcNode);
-		var operateResult = BuildProtectedTypedLogicalRead(dstNode, srcNode, (int)incrementCount.GetCurrentValue(), address, length);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		byte dstNode = (byte)ConnHelper.ExtractParameter(ref address, "dst", DstNode);
+		byte srcNode = (byte)ConnHelper.ExtractParameter(ref address, "src", SrcNode);
+		var operateResult = BuildProtectedTypedLogicalRead(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, length);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -76,10 +76,10 @@ public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 	/// <returns>是否写入成功</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		byte dstNode = (byte)OpsHelper.ExtractParameter(ref address, "dst", DstNode);
-		byte srcNode = (byte)OpsHelper.ExtractParameter(ref address, "src", SrcNode);
-		var operateResult = BuildProtectedTypedLogicalWrite(dstNode, srcNode, (int)incrementCount.GetCurrentValue(), address, value);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		byte dstNode = (byte)ConnHelper.ExtractParameter(ref address, "dst", DstNode);
+		byte srcNode = (byte)ConnHelper.ExtractParameter(ref address, "src", SrcNode);
+		var operateResult = BuildProtectedTypedLogicalWrite(dstNode, srcNode, (int)_incrementCount.GetCurrentValue(), address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -104,9 +104,9 @@ public sealed class AllenBradleyDF1Serial : SerialDeviceBase
 			}
 			num = (byte)(~num);
 			num++;
-			return new byte[1] { (byte)num };
+			return [(byte)num];
 		}
-		byte[] value = SoftBasic.SpliceArray(new byte[1] { station }, new byte[1] { 2 }, command, new byte[1] { 3 });
+		byte[] value = SoftBasic.SpliceArray([station], new byte[1] { 2 }, command, new byte[1] { 3 });
 		return SoftCRC16.CRC16(value, 160, 1, 0, 0).SelectLast(2);
 	}
 

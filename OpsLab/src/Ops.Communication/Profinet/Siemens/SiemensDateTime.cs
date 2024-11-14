@@ -170,6 +170,6 @@ public static class SiemensDateTime
 		{
 			list.AddRange(ToByteArray(dateTime));
 		}
-		return list.ToArray();
+		return [.. list];
 	}
 }

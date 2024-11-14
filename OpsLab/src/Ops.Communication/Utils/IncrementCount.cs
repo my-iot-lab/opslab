@@ -9,8 +9,7 @@ public sealed class IncrementCount : IDisposable
 {
 	private long _start = 0L;
 	private long _current = 0L;
-	private long _max = long.MaxValue;
-	private readonly SimpleHybirdLock _hybirdLock;
+    private readonly SimpleHybirdLock _hybirdLock;
 	private bool _disposedValue = false;
 
 	/// <summary>
@@ -18,21 +17,21 @@ public sealed class IncrementCount : IDisposable
 	/// </summary>
 	public int IncreaseTick { get; set; } = 1;
 
-	/// <summary>
-	/// 获取当前的计数器的最大的设置值。
-	/// </summary>
-	public long MaxValue => _max;
+    /// <summary>
+    /// 获取当前的计数器的最大的设置值。
+    /// </summary>
+    public long MaxValue { get; private set; } = long.MaxValue;
 
-	/// <summary>
-	/// 实例化一个自增信息的对象，包括最大值，初始值，增量值
-	/// </summary>
-	/// <param name="max">数据的最大值，必须指定</param>
-	/// <param name="start">数据的起始值，默认为0</param>
-	/// <param name="tick">每次的增量值</param>
-	public IncrementCount(long max, long start = 0L, int tick = 1)
+    /// <summary>
+    /// 实例化一个自增信息的对象，包括最大值，初始值，增量值
+    /// </summary>
+    /// <param name="max">数据的最大值，必须指定</param>
+    /// <param name="start">数据的起始值，默认为0</param>
+    /// <param name="tick">每次的增量值</param>
+    public IncrementCount(long max, long start = 0L, int tick = 1)
 	{
 		this._start = start;
-		this._max = max;
+		this.MaxValue = max;
 		_current = start;
 		IncreaseTick = tick;
 		_hybirdLock = new SimpleHybirdLock();
@@ -47,13 +46,13 @@ public sealed class IncrementCount : IDisposable
 		_hybirdLock.Enter();
 		long num = _current;
 		_current += IncreaseTick;
-		if (_current > _max)
+		if (_current > MaxValue)
 		{
 			_current = _start;
 		}
 		else if (_current < _start)
 		{
-			_current = _max;
+			_current = MaxValue;
 		}
 
 		_hybirdLock.Leave();
@@ -73,7 +72,7 @@ public sealed class IncrementCount : IDisposable
 			{
 				_current = _start;
 			}
-			this._max = max;
+			this.MaxValue = max;
 		}
 		_hybirdLock.Leave();
 	}
@@ -85,7 +84,7 @@ public sealed class IncrementCount : IDisposable
 	public void ResetStartValue(long start)
 	{
 		_hybirdLock.Enter();
-		if (start < _max)
+		if (start < MaxValue)
 		{
 			if (_current < start)
 			{
@@ -113,9 +112,9 @@ public sealed class IncrementCount : IDisposable
 	public void ResetCurrentValue(long value)
 	{
 		_hybirdLock.Enter();
-		if (value > _max)
+		if (value > MaxValue)
 		{
-			_current = _max;
+			_current = MaxValue;
 		}
 		else if (value < _start)
 		{

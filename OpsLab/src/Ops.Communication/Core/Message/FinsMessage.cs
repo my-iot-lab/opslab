@@ -15,13 +15,13 @@ public class FinsMessage : INetMessage
 
 	public int GetContentLengthByHeadBytes()
 	{
-		return BitConverter.ToInt32(new byte[4]
-		{
-			HeadBytes[7],
+		return BitConverter.ToInt32(
+        [
+            HeadBytes[7],
 			HeadBytes[6],
 			HeadBytes[5],
 			HeadBytes[4]
-		}, 0);
+		], 0);
 	}
 
 	public bool CheckHeadBytesLegal(byte[] token)

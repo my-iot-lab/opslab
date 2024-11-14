@@ -63,7 +63,7 @@ public sealed class OmronCpuUnitData
 	/// <param name="data">原始字节数</param>
 	public OmronCpuUnitData(byte[] data)
 	{
-		Model = Encoding.ASCII.GetString(data, 0, 20).Trim(new char[1] { ' ' });
+		Model = Encoding.ASCII.GetString(data, 0, 20).Trim([' ']);
 		Version = Encoding.ASCII.GetString(data, 20, 10).Trim(' ', '\0');
 		LargestEMNumber = data[41];
 		ProgramAreaSize = data[80] * 256 + data[81];

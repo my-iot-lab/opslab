@@ -43,7 +43,7 @@ public sealed class OmronHostLink : SerialDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<List<byte[]>> operateResult = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: false, ReadSplits);
 		if (!operateResult.IsSuccess)
 		{
@@ -71,7 +71,7 @@ public sealed class OmronHostLink : SerialDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<byte[]> operateResult = OmronFinsNetHelper.BuildWriteWordCommand(address, value, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
@@ -97,7 +97,7 @@ public sealed class OmronHostLink : SerialDeviceBase
         byte station = UnitNumber;
         if (address != null && address.Length != 0)
         {
-            station = (byte)OpsHelper.ExtractParameter(ref address[0], "s", UnitNumber);
+            station = (byte)ConnHelper.ExtractParameter(ref address[0], "s", UnitNumber);
         }
 
         OperateResult<List<byte[]>> operateResult = OmronFinsNetHelper.BuildReadCommand(address);
@@ -123,7 +123,7 @@ public sealed class OmronHostLink : SerialDeviceBase
 
     public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<List<byte[]>> operateResult = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: true);
 		if (!operateResult.IsSuccess)
 		{
@@ -151,7 +151,7 @@ public sealed class OmronHostLink : SerialDeviceBase
 
 	public override OperateResult Write(string address, bool[] values)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronFinsNetHelper.BuildWriteWordCommand(address, values.Select((bool m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
 		if (!operateResult.IsSuccess)
 		{

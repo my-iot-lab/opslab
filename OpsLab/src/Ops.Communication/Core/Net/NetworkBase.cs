@@ -67,12 +67,12 @@ public abstract class NetworkBase
 		catch (RemoteCloseException)
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
+			return new OperateResult<byte[]>((int)ConnErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
 		}
         catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionAborted)
         {
             socket.Close();
-            return new OperateResult<byte[]>((int)OpsErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+            return new OperateResult<byte[]>((int)ConnErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
         }
         catch (SocketException ex)
         {
@@ -83,7 +83,7 @@ public abstract class NetworkBase
             //}
 
             socket?.Close();
-            return new OperateResult<byte[]>((int)OpsErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+            return new OperateResult<byte[]>((int)ConnErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
         }
     }
 
@@ -166,7 +166,7 @@ public abstract class NetworkBase
 		catch (SocketException ex)
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.SocketSendException, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.SocketSendException, ex.Message);
 		}
 	}
 
@@ -215,7 +215,7 @@ public abstract class NetworkBase
 		catch (SocketException ex)
 		{
 			socket.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.SocketSendException, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.SocketSendException, ex.Message);
 		}
 	}
 
@@ -278,17 +278,17 @@ public abstract class NetworkBase
 		catch (RemoteCloseException)
 		{
 			socket.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
+			return new OperateResult<byte[]>((int)ConnErrorCode.RemoteClosedConnection, "RemoteClosedConnection");
 		}
 		catch (OperationCanceledException)
 		{
 			socket.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.ReceiveDataTimeout, $"ReceiveDataTimeout: {timeOut}ms");
+			return new OperateResult<byte[]>((int)ConnErrorCode.ReceiveDataTimeout, $"ReceiveDataTimeout: {timeOut}ms");
 		}
 		catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionAborted)
 		{
             socket.Close();
-            return new OperateResult<byte[]>((int)OpsErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+            return new OperateResult<byte[]>((int)ConnErrorCode.SocketConnectionAborted, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
         }
         catch (SocketException ex)
         {
@@ -299,7 +299,7 @@ public abstract class NetworkBase
             //}
 
             socket.Close();
-            return new OperateResult<byte[]>((int)OpsErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
+            return new OperateResult<byte[]>((int)ConnErrorCode.SocketReceiveException, $"Socket Exception [{ex.NativeErrorCode}] -> {ex.Message}");
         }
     }
 

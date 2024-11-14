@@ -85,7 +85,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransInt16(buffer, index, row * col), row, col);
 	}
 
 	public virtual ushort TransUInt16(byte[] buffer, int index)
@@ -111,7 +111,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransUInt16(buffer, index, row * col), row, col);
 	}
 
 	public virtual int TransInt32(byte[] buffer, int index)
@@ -137,7 +137,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransInt32(buffer, index, row * col), row, col);
 	}
 
 	public virtual uint TransUInt32(byte[] buffer, int index)
@@ -161,7 +161,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransUInt32(buffer, index, row * col), row, col);
 	}
 
 	public virtual long TransInt64(byte[] buffer, int index)
@@ -187,7 +187,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransInt64(buffer, index, row * col), row, col);
 	}
 
 	public virtual ulong TransUInt64(byte[] buffer, int index)
@@ -213,7 +213,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransUInt64(buffer, index, row * col), row, col);
 	}
 
 	public virtual float TransSingle(byte[] buffer, int index)
@@ -239,7 +239,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransSingle(buffer, index, row * col), row, col);
 	}
 
 	public virtual double TransDouble(byte[] buffer, int index)
@@ -265,7 +265,7 @@ public class ByteTransformBase : IByteTransform
 	{
 		Contract.Requires(buffer != null);
 
-		return OpsHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
+		return ConnHelper.CreateTwoArrayFromOneArray(TransDouble(buffer, index, row * col), row, col);
 	}
 
 	public virtual string TransString(byte[] buffer, int index, int length, Encoding encoding)
@@ -289,7 +289,7 @@ public class ByteTransformBase : IByteTransform
 
 	public virtual byte[] TransByte(bool value)
 	{
-		return TransByte(new bool[1] { value });
+		return TransByte([value]);
 	}
 
 	public virtual byte[] TransByte(bool[] values)
@@ -301,7 +301,7 @@ public class ByteTransformBase : IByteTransform
 
 	public virtual byte[] TransByte(byte value)
 	{
-		return new byte[1] { value };
+		return [value];
 	}
 
 	public virtual byte[] TransByte(short value)
@@ -425,7 +425,7 @@ public class ByteTransformBase : IByteTransform
 
 	public virtual byte[] TransByte(double value)
 	{
-		return TransByte(new double[1] { value });
+		return TransByte([value]);
 	}
 
 	public virtual byte[] TransByte(double[] values)

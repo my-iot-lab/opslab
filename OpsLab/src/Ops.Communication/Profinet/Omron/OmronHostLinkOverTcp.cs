@@ -124,7 +124,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: false, ReadSplits);
 		if (!operateResult.IsSuccess)
 		{
@@ -152,7 +152,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronFinsNetHelper.BuildWriteWordCommand(address, value, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
@@ -175,7 +175,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: false, ReadSplits);
 		if (!command.IsSuccess)
 		{
@@ -203,7 +203,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronFinsNetHelper.BuildWriteWordCommand(address, value, isBit: false);
 		if (!command.IsSuccess)
 		{
@@ -226,7 +226,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: true);
 		if (!operateResult.IsSuccess)
 		{
@@ -254,7 +254,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override OperateResult Write(string address, bool[] values)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronFinsNetHelper.BuildWriteWordCommand(address, values.Select((bool m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
 		if (!operateResult.IsSuccess)
 		{
@@ -277,7 +277,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronFinsNetHelper.BuildReadCommand(address, length, isBit: true);
 		if (!command.IsSuccess)
 		{
@@ -305,7 +305,7 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] values)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronFinsNetHelper.BuildWriteWordCommand(address, values.Select((bool m) => (byte)(m ? 1 : 0)).ToArray(), isBit: true);
 		if (!command.IsSuccess)
 		{
@@ -400,9 +400,9 @@ public sealed class OmronHostLinkOverTcp : NetworkDeviceBase
 				}
 				return OperateResult.Ok(array);
 			}
-			return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, $"Parse error code failed, [{Encoding.ASCII.GetString(response, 19, 4)}]{Environment.NewLine} Source Data: {response.ToHexString(' ')}");
+			return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, $"Parse error code failed, [{Encoding.ASCII.GetString(response, 19, 4)}]{Environment.NewLine} Source Data: {response.ToHexString(' ')}");
 		}
 
-		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, $"{OpsErrorCode.OmronReceiveDataError.Desc()} Source Data: {response.ToHexString(' ')}");
+		return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, $"{ConnErrorCode.OmronReceiveDataError.Desc()} Source Data: {response.ToHexString(' ')}");
 	}
 }

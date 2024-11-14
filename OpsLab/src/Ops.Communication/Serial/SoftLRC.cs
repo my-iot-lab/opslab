@@ -16,7 +16,7 @@ public static class SoftLRC
 	{
 		if (value == null)
 		{
-			return Array.Empty<byte>();
+			return [];
 		}
 
 		int num = 0;
@@ -26,7 +26,7 @@ public static class SoftLRC
 		}
 		num %= 256;
 		num = 256 - num;
-		byte[] array = new byte[1] { (byte)num };
+		byte[] array = [(byte)num];
 		return SoftBasic.SpliceArray(value, array);
 	}
 

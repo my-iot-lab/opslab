@@ -20,85 +20,85 @@ namespace Ops.Communication.Profinet.Siemens;
 /// </summary>
 public class SiemensS7Net : NetworkDeviceBase
 {
-	private byte[] plcHead1 = new byte[22]
-	{
-		3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
+	private byte[] _plcHead1 =
+    [
+        3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
 		0, 192, 1, 10, 193, 2, 1, 2, 194, 2,
 		1, 0
-	};
+	];
 
-	private byte[] plcHead2 = new byte[25]
-	{
-		3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
+	private byte[] _plcHead2 =
+    [
+        3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
 		0, 4, 0, 0, 8, 0, 0, 240, 0, 0,
 		1, 0, 1, 1, 224
-	};
+	];
 
-	private readonly byte[] plcOrderNumber = new byte[33]
-	{
-		3, 0, 0, 33, 2, 240, 128, 50, 7, 0,
+	private readonly byte[] _plcOrderNumber =
+    [
+        3, 0, 0, 33, 2, 240, 128, 50, 7, 0,
 		0, 0, 1, 0, 8, 0, 8, 0, 1, 18,
 		4, 17, 68, 1, 0, 255, 9, 0, 4, 0,
 		17, 0, 0
-	};
+	];
 
-	private readonly byte[] plcHead1_200smart = new byte[22]
-	{
-		3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
+	private readonly byte[] _plcHead1_200smart =
+    [
+        3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
 		0, 193, 2, 16, 0, 194, 2, 3, 0, 192,
 		1, 10
-	};
+	];
 
-	private readonly byte[] plcHead2_200smart = new byte[25]
-	{
-		3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
+	private readonly byte[] _plcHead2_200smart =
+    [
+        3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
 		0, 204, 193, 0, 8, 0, 0, 240, 0, 0,
 		1, 0, 1, 3, 192
-	};
+	];
 
-	private readonly byte[] plcHead1_200 = new byte[22]
-	{
-		3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
+	private readonly byte[] _plcHead1_200 =
+    [
+        3, 0, 0, 22, 17, 224, 0, 0, 0, 1,
 		0, 193, 2, 77, 87, 194, 2, 77, 87, 192,
 		1, 9
-	};
+	];
 
-	private readonly byte[] plcHead2_200 = new byte[25]
-	{
-		3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
+	private readonly byte[] _plcHead2_200 =
+    [
+        3, 0, 0, 25, 2, 240, 128, 50, 1, 0,
 		0, 0, 0, 0, 8, 0, 0, 240, 0, 0,
 		1, 0, 1, 3, 192
-	};
+	];
 
-	private readonly byte[] S7_STOP = new byte[33]
-	{
-		3, 0, 0, 33, 2, 240, 128, 50, 1, 0,
+	private readonly byte[] _s7_STOP =
+    [
+        3, 0, 0, 33, 2, 240, 128, 50, 1, 0,
 		0, 14, 0, 0, 16, 0, 0, 41, 0, 0,
 		0, 0, 0, 9, 80, 95, 80, 82, 79, 71,
 		82, 65, 77
-	};
+	];
 
-	private readonly byte[] S7_HOT_START = new byte[37]
-	{
-		3, 0, 0, 37, 2, 240, 128, 50, 1, 0,
+	private readonly byte[] _s7_HOT_START =
+    [
+        3, 0, 0, 37, 2, 240, 128, 50, 1, 0,
 		0, 12, 0, 0, 20, 0, 0, 40, 0, 0,
 		0, 0, 0, 0, 253, 0, 0, 9, 80, 95,
 		80, 82, 79, 71, 82, 65, 77
-	};
+	];
 
-	private readonly byte[] S7_COLD_START = new byte[39]
-	{
-		3, 0, 0, 39, 2, 240, 128, 50, 1, 0,
+	private readonly byte[] _s7_COLD_START =
+    [
+        3, 0, 0, 39, 2, 240, 128, 50, 1, 0,
 		0, 15, 0, 0, 22, 0, 0, 40, 0, 0,
 		0, 0, 0, 0, 253, 0, 2, 67, 32, 9,
 		80, 95, 80, 82, 79, 71, 82, 65, 77
-	};
+	];
 
-	private byte plc_rack = 0;
+	private byte _plc_rack = 0;
 
-	private byte plc_slot = 0;
+	private byte _plc_slot = 0;
 
-	private int pdu_length = 0;
+	private int _pdu_length = 0;
 
     /// <summary>
     /// 当前适用的 PLC 型号。
@@ -112,12 +112,12 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		get
 		{
-			return plc_slot;
+			return _plc_slot;
 		}
 		set
 		{
-			plc_slot = value;
-			plcHead1[21] = (byte)(plc_rack * 32 + plc_slot);
+			_plc_slot = value;
+			_plcHead1[21] = (byte)(_plc_rack * 32 + _plc_slot);
 		}
 	}
 
@@ -128,12 +128,12 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		get
 		{
-			return plc_rack;
+			return _plc_rack;
 		}
 		set
 		{
-			plc_rack = value;
-			plcHead1[21] = (byte)(plc_rack * 32 + plc_slot);
+			_plc_rack = value;
+			_plcHead1[21] = (byte)(_plc_rack * 32 + _plc_slot);
 		}
 	}
 
@@ -144,13 +144,13 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		get
 		{
-			return plcHead1[20];
+			return _plcHead1[20];
 		}
 		set
 		{
 			if (CurrentPlc != SiemensPLCS.S200 && CurrentPlc != SiemensPLCS.S200Smart)
 			{
-				plcHead1[20] = value;
+				_plcHead1[20] = value;
 			}
 		}
 	}
@@ -164,21 +164,21 @@ public class SiemensS7Net : NetworkDeviceBase
 		{
 			if (CurrentPlc == SiemensPLCS.S200 || CurrentPlc == SiemensPLCS.S200Smart)
 			{
-				return plcHead1[13] * 256 + plcHead1[14];
+				return _plcHead1[13] * 256 + _plcHead1[14];
 			}
-			return plcHead1[16] * 256 + plcHead1[17];
+			return _plcHead1[16] * 256 + _plcHead1[17];
 		}
 		set
 		{
 			if (CurrentPlc == SiemensPLCS.S200 || CurrentPlc == SiemensPLCS.S200Smart)
 			{
-				plcHead1[13] = BitConverter.GetBytes(value)[1];
-				plcHead1[14] = BitConverter.GetBytes(value)[0];
+				_plcHead1[13] = BitConverter.GetBytes(value)[1];
+				_plcHead1[14] = BitConverter.GetBytes(value)[0];
 			}
 			else
 			{
-				plcHead1[16] = BitConverter.GetBytes(value)[1];
-				plcHead1[17] = BitConverter.GetBytes(value)[0];
+				_plcHead1[16] = BitConverter.GetBytes(value)[1];
+				_plcHead1[17] = BitConverter.GetBytes(value)[0];
 			}
 		}
 	}
@@ -193,21 +193,21 @@ public class SiemensS7Net : NetworkDeviceBase
 		{
 			if (CurrentPlc == SiemensPLCS.S200 || CurrentPlc == SiemensPLCS.S200Smart)
 			{
-				return plcHead1[17] * 256 + plcHead1[18];
+				return _plcHead1[17] * 256 + _plcHead1[18];
 			}
-			return plcHead1[20] * 256 + plcHead1[21];
+			return _plcHead1[20] * 256 + _plcHead1[21];
 		}
 		set
 		{
 			if (CurrentPlc == SiemensPLCS.S200 || CurrentPlc == SiemensPLCS.S200Smart)
 			{
-				plcHead1[17] = BitConverter.GetBytes(value)[1];
-				plcHead1[18] = BitConverter.GetBytes(value)[0];
+				_plcHead1[17] = BitConverter.GetBytes(value)[1];
+				_plcHead1[18] = BitConverter.GetBytes(value)[0];
 			}
 			else
 			{
-				plcHead1[20] = BitConverter.GetBytes(value)[1];
-				plcHead1[21] = BitConverter.GetBytes(value)[0];
+				_plcHead1[20] = BitConverter.GetBytes(value)[1];
+				_plcHead1[21] = BitConverter.GetBytes(value)[0];
 			}
 		}
 	}
@@ -215,7 +215,7 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// <summary>
 	/// 获取当前西门子的PDU的长度信息，不同型号PLC的值会不一样。
 	/// </summary>
-	public int PDULength => pdu_length;
+	public int PDULength => _pdu_length;
 
 	/// <summary>
 	/// 实例化一个西门子的S7协议的通讯对象。
@@ -256,28 +256,28 @@ public class SiemensS7Net : NetworkDeviceBase
 		switch (siemens)
 		{
 			case SiemensPLCS.S1200:
-				plcHead1[21] = 0;
+				_plcHead1[21] = 0;
 				break;
 			case SiemensPLCS.S300:
-				plcHead1[21] = 2;
+				_plcHead1[21] = 2;
 				break;
 			case SiemensPLCS.S400:
-				plcHead1[21] = 3;
-				plcHead1[17] = 0;
+				_plcHead1[21] = 3;
+				_plcHead1[17] = 0;
 				break;
 			case SiemensPLCS.S1500:
-				plcHead1[21] = 0;
+				_plcHead1[21] = 0;
 				break;
 			case SiemensPLCS.S200Smart:
-				plcHead1 = plcHead1_200smart;
-				plcHead2 = plcHead2_200smart;
+				_plcHead1 = _plcHead1_200smart;
+				_plcHead2 = _plcHead2_200smart;
 				break;
 			case SiemensPLCS.S200:
-				plcHead1 = plcHead1_200;
-				plcHead2 = plcHead2_200;
+				_plcHead1 = _plcHead1_200;
+				_plcHead2 = _plcHead2_200;
 				break;
 			default:
-				plcHead1[18] = 0;
+				_plcHead1[18] = 0;
 				break;
 		}
 	}
@@ -300,22 +300,22 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	protected override OperateResult InitializationOnConnect(Socket socket)
 	{
-		OperateResult<byte[]> operateResult = ReadFromCoreServer(socket, plcHead1);
+		OperateResult<byte[]> operateResult = ReadFromCoreServer(socket, _plcHead1);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
 
-		OperateResult<byte[]> operateResult2 = ReadFromCoreServer(socket, plcHead2);
+		OperateResult<byte[]> operateResult2 = ReadFromCoreServer(socket, _plcHead2);
 		if (!operateResult2.IsSuccess)
 		{
 			return operateResult2;
 		}
 
-		pdu_length = base.ByteTransform.TransUInt16(operateResult2.Content.SelectLast(2), 0) - 28;
-		if (pdu_length < 200)
+		_pdu_length = base.ByteTransform.TransUInt16(operateResult2.Content.SelectLast(2), 0) - 28;
+		if (_pdu_length < 200)
 		{
-			pdu_length = 200;
+			_pdu_length = 200;
 		}
 		return OperateResult.Ok();
 	}
@@ -338,22 +338,22 @@ public class SiemensS7Net : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		OperateResult<byte[]> read_first = await ReadFromCoreServerAsync(socket, plcHead1).ConfigureAwait(false);
+		OperateResult<byte[]> read_first = await ReadFromCoreServerAsync(socket, _plcHead1).ConfigureAwait(false);
 		if (!read_first.IsSuccess)
 		{
 			return read_first;
 		}
 
-		OperateResult<byte[]> read_second = await ReadFromCoreServerAsync(socket, plcHead2).ConfigureAwait(false);
+		OperateResult<byte[]> read_second = await ReadFromCoreServerAsync(socket, _plcHead2).ConfigureAwait(false);
 		if (!read_second.IsSuccess)
 		{
 			return read_second;
 		}
 
-		pdu_length = base.ByteTransform.TransUInt16(read_second.Content.SelectLast(2), 0) - 28;
-		if (pdu_length < 200)
+		_pdu_length = base.ByteTransform.TransUInt16(read_second.Content.SelectLast(2), 0) - 28;
+		if (_pdu_length < 200)
 		{
-			pdu_length = 200;
+			_pdu_length = 200;
 		}
 		return OperateResult.Ok();
 	}
@@ -363,27 +363,27 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// </summary>
 	public OperateResult<string> ReadOrderNumber()
 	{
-		return ByteTransformHelper.GetSuccessResultFromOther(ReadFromCoreServer(plcOrderNumber), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
+		return ByteTransformHelper.GetSuccessResultFromOther(ReadFromCoreServer(_plcOrderNumber), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
 	}
 
 	public async Task<OperateResult<string>> ReadOrderNumberAsync()
 	{
-		return ByteTransformHelper.GetSuccessResultFromOther(await ReadFromCoreServerAsync(plcOrderNumber).ConfigureAwait(false), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
+		return ByteTransformHelper.GetSuccessResultFromOther(await ReadFromCoreServerAsync(_plcOrderNumber).ConfigureAwait(false), (byte[] m) => Encoding.ASCII.GetString(m, 71, 20));
 	}
 
 	private OperateResult CheckStartResult(byte[] content)
 	{
 		if (content.Length < 19)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStartPLCError, "Receive error");
+			return new OperateResult((int)ConnErrorCode.SiemensStartPLCError, "Receive error");
 		}
 		if (content[19] != 40)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStartPLCError, "Can not start PLC");
+			return new OperateResult((int)ConnErrorCode.SiemensStartPLCError, "Can not start PLC");
 		}
 		if (content[20] != 2)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStartPLCError, "Can not start PLC");
+			return new OperateResult((int)ConnErrorCode.SiemensStartPLCError, "Can not start PLC");
 		}
 		return OperateResult.Ok();
 	}
@@ -392,15 +392,15 @@ public class SiemensS7Net : NetworkDeviceBase
 	{
 		if (content.Length < 19)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStopPLCError, "Receive error");
+			return new OperateResult((int)ConnErrorCode.SiemensStopPLCError, "Receive error");
 		}
 		if (content[19] != 41)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStopPLCError, "Can not stop PLC");
+			return new OperateResult((int)ConnErrorCode.SiemensStopPLCError, "Can not stop PLC");
 		}
 		if (content[20] != 7)
 		{
-			return new OperateResult((int)OpsErrorCode.SiemensStopPLCError, "Can not stop PLC");
+			return new OperateResult((int)ConnErrorCode.SiemensStopPLCError, "Can not stop PLC");
 		}
 		return OperateResult.Ok();
 	}
@@ -411,7 +411,7 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// <returns>是否启动成功的结果对象</returns>
 	public OperateResult HotStart()
 	{
-		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(S7_HOT_START), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(_s7_HOT_START), CheckStartResult);
 	}
 
 	/// <summary>
@@ -420,7 +420,7 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// <returns>是否启动成功的结果对象</returns>
 	public OperateResult ColdStart()
 	{
-		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(S7_COLD_START), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(_s7_COLD_START), CheckStartResult);
 	}
 
 	/// <summary>
@@ -429,22 +429,22 @@ public class SiemensS7Net : NetworkDeviceBase
 	/// <returns>是否启动成功的结果对象</returns>
 	public OperateResult Stop()
 	{
-		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(S7_STOP), CheckStopResult);
+		return ByteTransformHelper.GetResultFromOther(ReadFromCoreServer(_s7_STOP), CheckStopResult);
 	}
 
 	public async Task<OperateResult> HotStartAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_HOT_START).ConfigureAwait(false), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(_s7_HOT_START).ConfigureAwait(false), CheckStartResult);
 	}
 
 	public async Task<OperateResult> ColdStartAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_COLD_START).ConfigureAwait(false), CheckStartResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(_s7_COLD_START).ConfigureAwait(false), CheckStartResult);
 	}
 
 	public async Task<OperateResult> StopAsync()
 	{
-		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(S7_STOP).ConfigureAwait(false), CheckStopResult);
+		return ByteTransformHelper.GetResultFromOther(await ReadFromCoreServerAsync(_s7_STOP).ConfigureAwait(false), CheckStopResult);
 	}
 
 	/// <summary>
@@ -467,9 +467,9 @@ public class SiemensS7Net : NetworkDeviceBase
 		ushort num = 0;
 		while (num < length)
 		{
-			ushort num2 = (ushort)Math.Min(length - num, pdu_length);
+			ushort num2 = (ushort)Math.Min(length - num, _pdu_length);
 			operateResult.Content.Length = num2;
-			OperateResult<byte[]> operateResult2 = Read(new S7AddressData[1] { operateResult.Content });
+			OperateResult<byte[]> operateResult2 = Read([operateResult.Content]);
 			if (!operateResult2.IsSuccess)
 			{
 				return operateResult2;
@@ -620,7 +620,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		ushort num2 = 0;
 		while (num2 < num)
 		{
-			ushort num3 = (ushort)Math.Min(num - num2, pdu_length);
+			ushort num3 = (ushort)Math.Min(num - num2, _pdu_length);
 			byte[] data = base.ByteTransform.TransByte(value, num2, num3);
 			var operateResult2 = BuildWriteByteCommand(operateResult, data);
 			if (!operateResult2.IsSuccess)
@@ -653,9 +653,9 @@ public class SiemensS7Net : NetworkDeviceBase
 		ushort alreadyFinished = 0;
 		while (alreadyFinished < length)
 		{
-			ushort readLength = (ushort)Math.Min(length - alreadyFinished, pdu_length);
+			ushort readLength = (ushort)Math.Min(length - alreadyFinished, _pdu_length);
 			addressResult.Content.Length = readLength;
-			var read = await ReadAsync(new S7AddressData[1] { addressResult.Content }).ConfigureAwait(false);
+			var read = await ReadAsync([addressResult.Content]).ConfigureAwait(false);
 			if (!read.IsSuccess)
 			{
 				return read;
@@ -715,7 +715,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		if (s7Addresses.Length > 19)
 		{
 			var bytes = new List<byte>();
-			var groups = SoftBasic.ArraySplitByLength(s7Addresses, pdu_length);
+			var groups = SoftBasic.ArraySplitByLength(s7Addresses, _pdu_length);
 			for (int i = 0; i < groups.Count; i++)
 			{
 				OperateResult<byte[]> read = await ReadAsync(groups[i]).ConfigureAwait(false);
@@ -824,10 +824,10 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<bool[]>(operateResult);
 		}
 
-		OpsHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+		ConnHelper.CalculateStartBitIndexAndLength(operateResult.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
 		operateResult.Content.AddressStart = newStart;
 		operateResult.Content.Length = byteLength;
-		var operateResult2 = Read(new S7AddressData[1] { operateResult.Content });
+		var operateResult2 = Read([operateResult.Content]);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult2);
@@ -881,10 +881,10 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<bool[]>(analysis);
 		}
 
-		OpsHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
+		ConnHelper.CalculateStartBitIndexAndLength(analysis.Content.AddressStart, length, out var newStart, out var byteLength, out var offset);
 		analysis.Content.AddressStart = newStart;
 		analysis.Content.Length = byteLength;
-		var read = await ReadAsync(new S7AddressData[1] { analysis.Content }).ConfigureAwait(false);
+		var read = await ReadAsync([analysis.Content]).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(read);
@@ -958,7 +958,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 			if (operateResult.Content[0] == byte.MaxValue)
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensValueOfPlcIsNotStringType, OpsErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensValueOfPlcIsNotStringType, ConnErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
 
 			if (operateResult.Content[0] == 0)
@@ -968,17 +968,17 @@ public class SiemensS7Net : NetworkDeviceBase
 
 			if (value.Length > operateResult.Content[0])
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensStringlengthIsToolongThanPlcDefined, OpsErrorCode.SiemensStringlengthIsToolongThanPlcDefined.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensStringlengthIsToolongThanPlcDefined, ConnErrorCode.SiemensStringlengthIsToolongThanPlcDefined.Desc());
 			}
 
-			return Write(address, SoftBasic.SpliceArray(new byte[2]
-			{
-				operateResult.Content[0],
+			return Write(address, SoftBasic.SpliceArray(
+            [
+                operateResult.Content[0],
 				(byte)value.Length,
-			}, array));
+			], array));
 		}
 
-		return Write(address, SoftBasic.SpliceArray(new byte[1] { (byte)value.Length }, array));
+		return Write(address, SoftBasic.SpliceArray([(byte)value.Length], array));
 	}
 
 	/// <summary>
@@ -1048,7 +1048,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			}
 			if (operateResult.Content[0] == 0 || operateResult.Content[0] == byte.MaxValue)
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensValueOfPlcIsNotStringType, OpsErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensValueOfPlcIsNotStringType, ConnErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
 
 			var operateResult2 = Read(address, (ushort)(2 + operateResult.Content[1]));
@@ -1129,7 +1129,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 			if (readLength.Content[0] == byte.MaxValue)
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensValueOfPlcIsNotStringType, OpsErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensValueOfPlcIsNotStringType, ConnErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
 
 			if (readLength.Content[0] == 0)
@@ -1139,17 +1139,17 @@ public class SiemensS7Net : NetworkDeviceBase
 
 			if (value.Length > readLength.Content[0])
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensStringlengthIsToolongThanPlcDefined, OpsErrorCode.SiemensStringlengthIsToolongThanPlcDefined.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensStringlengthIsToolongThanPlcDefined, ConnErrorCode.SiemensStringlengthIsToolongThanPlcDefined.Desc());
 			}
 
-			return await WriteAsync(address, SoftBasic.SpliceArray(new byte[2]
-			{
-				readLength.Content[0],
+			return await WriteAsync(address, SoftBasic.SpliceArray(
+            [
+                readLength.Content[0],
 				(byte)value.Length
-			}, buffer)).ConfigureAwait(false);
+			], buffer)).ConfigureAwait(false);
 		}
 
-		return await WriteAsync(address, SoftBasic.SpliceArray(new byte[1] { (byte)value.Length }, buffer)).ConfigureAwait(false);
+		return await WriteAsync(address, SoftBasic.SpliceArray([(byte)value.Length], buffer)).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteWStringAsync(string address, string value)
@@ -1212,7 +1212,7 @@ public class SiemensS7Net : NetworkDeviceBase
 
 			if (read2.Content[0] == 0 || read2.Content[0] == byte.MaxValue)
 			{
-				return new OperateResult<string>((int)OpsErrorCode.SiemensValueOfPlcIsNotStringType, OpsErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
+				return new OperateResult<string>((int)ConnErrorCode.SiemensValueOfPlcIsNotStringType, ConnErrorCode.SiemensValueOfPlcIsNotStringType.Desc());
 			}
 
 			OperateResult<byte[]> readString2 = await ReadAsync(address, (ushort)(2 + read2.Content[1])).ConfigureAwait(false);
@@ -1327,7 +1327,7 @@ public class SiemensS7Net : NetworkDeviceBase
 		}
 		if (s7Addresses.Length > 19)
 		{
-			throw new Exception(OpsErrorCode.SiemensReadLengthCannotLargerThan19.Desc());
+			throw new Exception(ConnErrorCode.SiemensReadLengthCannotLargerThan19.Desc());
 		}
 
 		int num = s7Addresses.Length;
@@ -1503,7 +1503,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(operateResult);
 		}
 
-		byte[] array = new byte[1] { (byte)(data ? 1 : 0) };
+		byte[] array = [(byte)(data ? 1 : 0)];
 		byte[] array2 = new byte[35 + array.Length];
 		array2[0] = 3;
 		array2[1] = 0;
@@ -1606,17 +1606,17 @@ public class SiemensS7Net : NetworkDeviceBase
 				{
 					if (content[j] == 5 && content[j + 1] == 0)
 					{
-						return new OperateResult<byte[]>((int)OpsErrorCode.SiemensReadLengthOverPlcAssign, OpsErrorCode.SiemensReadLengthOverPlcAssign.Desc());
+						return new OperateResult<byte[]>((int)ConnErrorCode.SiemensReadLengthOverPlcAssign, ConnErrorCode.SiemensReadLengthOverPlcAssign.Desc());
 					}
 
 					if (content[j] == 6 && content[j + 1] == 0)
 					{
-						return new OperateResult<byte[]>((int)OpsErrorCode.SiemensError0006, OpsErrorCode.SiemensError0006.Desc());
+						return new OperateResult<byte[]>((int)ConnErrorCode.SiemensError0006, ConnErrorCode.SiemensError0006.Desc());
 					}
 
 					if (content[j] == 10 && content[j + 1] == 0)
 					{
-						return new OperateResult<byte[]>((int)OpsErrorCode.SiemensError000A, OpsErrorCode.SiemensError000A.Desc());
+						return new OperateResult<byte[]>((int)ConnErrorCode.SiemensError000A, ConnErrorCode.SiemensError000A.Desc());
 					}
 				}
 			}
@@ -1624,7 +1624,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			return OperateResult.Ok(array);
 		}
 
-		return new OperateResult<byte[]>((int)OpsErrorCode.SiemensDataLengthCheckFailed, $"{OpsErrorCode.SiemensDataLengthCheckFailed.Desc()}, Msg: {SoftBasic.ByteToHexString(content, ' ')}");
+		return new OperateResult<byte[]>((int)ConnErrorCode.SiemensDataLengthCheckFailed, $"{ConnErrorCode.SiemensDataLengthCheckFailed.Desc()}, Msg: {SoftBasic.ByteToHexString(content, ' ')}");
 	}
 
 	private static OperateResult<byte[]> AnalysisReadBit(byte[] content)
@@ -1639,7 +1639,7 @@ public class SiemensS7Net : NetworkDeviceBase
 			}
 			return OperateResult.Ok(array);
 		}
-		return new OperateResult<byte[]>((int)OpsErrorCode.SiemensDataLengthCheckFailed, OpsErrorCode.SiemensDataLengthCheckFailed.Desc());
+		return new OperateResult<byte[]>((int)ConnErrorCode.SiemensDataLengthCheckFailed, ConnErrorCode.SiemensDataLengthCheckFailed.Desc());
 	}
 
 	private static OperateResult AnalysisWrite(byte[] content)
@@ -1649,12 +1649,12 @@ public class SiemensS7Net : NetworkDeviceBase
             byte b = content[21];
             if (b != byte.MaxValue)
             {
-                return new OperateResult((int)OpsErrorCode.SiemensWriteError, $"{OpsErrorCode.SiemensWriteError.Desc()} {b} Msg: {SoftBasic.ByteToHexString(content, ' ')}");
+                return new OperateResult((int)ConnErrorCode.SiemensWriteError, $"{ConnErrorCode.SiemensWriteError.Desc()} {b} Msg: {SoftBasic.ByteToHexString(content, ' ')}");
             }
             return OperateResult.Ok();
         }
 
-        return new OperateResult((int)OpsErrorCode.UnknownError, $"{OpsErrorCode.UnknownError.Desc()} Msg: { SoftBasic.ByteToHexString(content, ' ')}");
+        return new OperateResult((int)ConnErrorCode.UnknownError, $"{ConnErrorCode.UnknownError.Desc()} Msg: { SoftBasic.ByteToHexString(content, ' ')}");
     }
 
 	#endregion

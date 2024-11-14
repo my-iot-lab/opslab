@@ -1,23 +1,34 @@
+<!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
 <Project>
   <PropertyGroup>
-	<!-- Build Settings -->
-	<Configurations>Debug;Release</Configurations>
-	<Platforms>AnyCPU</Platforms>
-	<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-	<DebugType Condition="'$(Configuration)'=='Release'">pdbonly</DebugType>
-	<DebugSymbols>True</DebugSymbols>
-	<Deterministic>true</Deterministic>
+	  <!-- Build Settings -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <Configurations>Debug;Release</Configurations>
+	  <Platforms>AnyCPU</Platforms>
+	  <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+	  <DebugType Condition="'$(Configuration)'=='Release'">pdbonly</DebugType>
+	  <DebugSymbols>True</DebugSymbols>
+	  <Deterministic>true</Deterministic>
 
-	<!-- Package Settings -->
-	<DebugType Condition="'$(Configuration)'=='Release'">pdbonly</DebugType>
-	<Optimize Condition="'$(Configuration)'=='Release'">true</Optimize>
-	<PackageOutputPath>$(SolutionDir)build_output\packages</PackageOutputPath>
-	<GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">True</GeneratePackageOnBuild>
-	<IncludeSymbols>true</IncludeSymbols>
+	  <!-- Package Settings -->
+	  <DebugType Condition="'$(Configuration)'=='Release'">pdbonly</DebugType>
+	  <Optimize Condition="'$(Configuration)'=='Release'">true</Optimize>
+	  <PackageOutputPath>$(SolutionDir)build_output\packages</PackageOutputPath>
+	  <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">True</GeneratePackageOnBuild>
+	  <IncludeSymbols>true</IncludeSymbols>
 
-	<PackageVersion>0.7.37</PackageVersion>
-	<Version>$(PackageVersion)</Version>
-	<Authors>Gang.Yang</Authors>
-	<Company>OpsLab</Company>
+    <PackageProjectUrl>https://github.com/my-iot-lab/opslab.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/my-iot-lab/opslab.git</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Ops.Communication is a library that communicate with popular PLC</PackageReleaseNotes>
+    <!--<Nullable>true</Nullable>-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+	  <PackageVersion>0.8.1</PackageVersion>
+	  <Version>$(PackageVersion)</Version>
+	  <Authors>Gang.Yang</Authors>
+	  <Company>OpsLab</Company>
   </PropertyGroup>
 </Project>

@@ -27,7 +27,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte unitNumber = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte unitNumber = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<byte[]> operateResult = BuildReadCommand(address, length, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
@@ -50,7 +50,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte unitNumber = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte unitNumber = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<byte[]> operateResult = BuildWriteWordCommand(address, value);
 		if (!operateResult.IsSuccess)
 		{
@@ -82,7 +82,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		int num = Convert.ToInt32(Encoding.ASCII.GetString(operateResult.Content, 5, 2), 16);
 		if (num > 0)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.UnknownError, "Unknown Error");
+			return new OperateResult<string>((int)ConnErrorCode.UnknownError, "Unknown Error");
 		}
 
 		string @string = Encoding.ASCII.GetString(operateResult.Content, 7, 2);
@@ -126,12 +126,12 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 					operateResult.Content1 = (isRead ? "RE" : "WE") + Encoding.ASCII.GetString(SoftBasic.BuildAsciiBytesFrom((byte)num));
 					break;
 				default:
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 			}
 
 			if (address[0] == 'E' || address[0] == 'e')
 			{
-				string[] array2 = address.Split(new char[1] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+				string[] array2 = address.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
 				if (!isBit)
 				{
 					operateResult.Content2 = ushort.Parse(array2[1]).ToString("D4");
@@ -144,7 +144,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 		}
 		catch (Exception ex)
 		{
-			operateResult.ErrorCode = (int)OpsErrorCode.NotSupportedDataType;
+			operateResult.ErrorCode = (int)ConnErrorCode.NotSupportedDataType;
             operateResult.Message = ex.Message;
 			return operateResult;
 		}
@@ -225,7 +225,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 			{
 				return new OperateResult<byte[]>
 				{
-					ErrorCode = (int)OpsErrorCode.OmronReceiveDataError,
+					ErrorCode = (int)ConnErrorCode.OmronReceiveDataError,
 					Content = array
 				};
 			}
@@ -233,7 +233,7 @@ public sealed class OmronHostLinkCMode : SerialDeviceBase
 			return OperateResult.Ok(array);
 		}
 
-		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, ConnErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>

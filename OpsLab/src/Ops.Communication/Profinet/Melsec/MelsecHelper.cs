@@ -40,7 +40,7 @@ public static class MelsecHelper
 						operateResult.Content2 = Convert.ToInt32(address[2..], MelsecA1EDataType.TN.FromBase);
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				case 'C' or 'c':
 					if (address[1] == 'S' || address[1] == 's')
 					{
@@ -60,7 +60,7 @@ public static class MelsecHelper
 						operateResult.Content2 = Convert.ToInt32(address[2..], MelsecA1EDataType.CN.FromBase);
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				case 'X' or 'x':
 					operateResult.Content1 = MelsecA1EDataType.X;
 					address = address[1..];
@@ -114,12 +114,12 @@ public static class MelsecHelper
 					operateResult.Content2 = Convert.ToInt32(address[1..], MelsecA1EDataType.W.FromBase);
 					break;
 				default:
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 			}
 		}
 		catch (Exception ex)
 		{
-			operateResult.ErrorCode = (int)OpsErrorCode.NotSupportedDataType;
+			operateResult.ErrorCode = (int)ConnErrorCode.NotSupportedDataType;
             operateResult.Message = ex.Message;
 			return operateResult;
 		}
@@ -137,9 +137,9 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildReadMcCoreCommand(McAddressData addressData, bool isBit)
 	{
-		return new byte[10]
-		{
-			1,
+		return
+        [
+            1,
 			4,
 			(byte)(isBit ? 1 : 0),
 			0,
@@ -149,7 +149,7 @@ public static class MelsecHelper
 			addressData.McDataType.DataCode,
 			(byte)(addressData.Length % 256),
 			(byte)(addressData.Length / 256)
-		};
+		];
 	}
 
 	/// <summary>
@@ -160,9 +160,9 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildAsciiReadMcCoreCommand(McAddressData addressData, bool isBit)
 	{
-		return new byte[20]
-		{
-			48,
+		return
+        [
+            48,
 			52,
 			48,
 			49,
@@ -182,7 +182,7 @@ public static class MelsecHelper
 			SoftBasic.BuildAsciiBytesFrom(addressData.Length)[1],
 			SoftBasic.BuildAsciiBytesFrom(addressData.Length)[2],
 			SoftBasic.BuildAsciiBytesFrom(addressData.Length)[3]
-		};
+		];
 	}
 
 	/// <summary>
@@ -193,7 +193,7 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteWordCoreCommand(McAddressData addressData, byte[] value)
 	{
-		value ??= Array.Empty<byte>();
+		value ??= [];
 		byte[] array = new byte[10 + value.Length];
 		array[0] = 1;
 		array[1] = 20;
@@ -251,7 +251,7 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteBitCoreCommand(McAddressData addressData, bool[] value)
 	{
-		value ??= Array.Empty<bool>();
+		value ??= [];
 		byte[] array = TransBoolArrayToByteData(value);
 		byte[] array2 = new byte[10 + array.Length];
 		array2[0] = 1;
@@ -276,7 +276,7 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildAsciiWriteBitCoreCommand(McAddressData addressData, bool[] value)
 	{
-		value ??= Array.Empty<bool>();
+		value ??= [];
 		byte[] array = value.Select((bool m) => (byte)(m ? 49 : 48)).ToArray();
 		byte[] array2 = new byte[20 + array.Length];
 		array2[0] = 49;
@@ -312,9 +312,9 @@ public static class MelsecHelper
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildReadMcCoreExtendCommand(McAddressData addressData, ushort extend, bool isBit)
 	{
-		return new byte[17]
-		{
-			1,
+		return
+        [
+            1,
 			4,
 			(byte)(isBit ? 129 : 128),
 			0,
@@ -331,7 +331,7 @@ public static class MelsecHelper
 			249,
 			(byte)(addressData.Length % 256),
 			(byte)(addressData.Length / 256)
-		};
+		];
 	}
 
 	/// <summary>
@@ -467,7 +467,7 @@ public static class MelsecHelper
 	{
 		if (tags.Length != lengths.Length)
 		{
-			throw new Exception(OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
+			throw new Exception(ConnErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		using var memoryStream = new MemoryStream();
@@ -517,7 +517,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, $"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecError, $"{ex.Message} Source: {SoftBasic.ByteToHexString(content, ' ')}");
 		}
 	}
 
@@ -548,7 +548,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -557,18 +557,18 @@ public static class MelsecHelper
 		try
 		{
 			uint value = uint.Parse(address);
-			byte[] array = new byte[20]
-			{
-				48, 54, 49, 51, 48, 48, 48, 48, 0, 0,
+			byte[] array =
+            [
+                48, 54, 49, 51, 48, 48, 48, 48, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-			};
+			];
 			SoftBasic.BuildAsciiBytesFrom(value).CopyTo(array, 8);
 			SoftBasic.BuildAsciiBytesFrom(length).CopyTo(array, 16);
 			return OperateResult.Ok(array);
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -594,15 +594,15 @@ public static class MelsecHelper
 				BitConverter.GetBytes(value)[1],
 				BitConverter.GetBytes(value)[2],
 				BitConverter.GetBytes(value)[3],
-				(byte)((int)length % 256),
-				(byte)((int)length / 256),
+				(byte)(length % 256),
+				(byte)(length / 256),
 				BitConverter.GetBytes(module)[0],
 				BitConverter.GetBytes(module)[1]
 			});
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -611,12 +611,12 @@ public static class MelsecHelper
 		try
 		{
 			uint value = uint.Parse(address);
-			byte[] array = new byte[24]
-			{
-				48, 54, 48, 49, 48, 48, 48, 48, 0, 0,
+			byte[] array =
+            [
+                48, 54, 48, 49, 48, 48, 48, 48, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0
-			};
+			];
 			SoftBasic.BuildAsciiBytesFrom(value).CopyTo(array, 8);
 			SoftBasic.BuildAsciiBytesFrom(length).CopyTo(array, 16);
 			SoftBasic.BuildAsciiBytesFrom(module).CopyTo(array, 20);
@@ -624,7 +624,7 @@ public static class MelsecHelper
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecError, ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecError, ex.Message);
 		}
 	}
 
@@ -633,38 +633,38 @@ public static class MelsecHelper
 	/// </summary>
 	/// <param name="code">错误码</param>
 	/// <returns>描述信息</returns>
-	public static OpsErrorCode GetErrorDescription(int code)
+	public static ConnErrorCode GetErrorDescription(int code)
 	{
 		return code switch
 		{
-			2 => OpsErrorCode.MelsecError02,
-			81 => OpsErrorCode.MelsecError51,
-			82 => OpsErrorCode.MelsecError52,
-			84 => OpsErrorCode.MelsecError54,
-			85 => OpsErrorCode.MelsecError55,
-			86 => OpsErrorCode.MelsecError56,
-			88 => OpsErrorCode.MelsecError58,
-			89 => OpsErrorCode.MelsecError59,
-			49229 => OpsErrorCode.MelsecErrorC04D,
-			49232 => OpsErrorCode.MelsecErrorC050,
-			49233 or 49234 or 49235 or 49236 => OpsErrorCode.MelsecErrorC051_54,
-			49237 => OpsErrorCode.MelsecErrorC055,
-			49238 => OpsErrorCode.MelsecErrorC056,
-			49239 => OpsErrorCode.MelsecErrorC057,
-			49240 => OpsErrorCode.MelsecErrorC058,
-			49241 => OpsErrorCode.MelsecErrorC059,
-			49242 or 49243 => OpsErrorCode.MelsecErrorC05A_B,
-			49244 => OpsErrorCode.MelsecErrorC05C,
-			49245 => OpsErrorCode.MelsecErrorC05D,
-			49246 => OpsErrorCode.MelsecErrorC05E,
-			49247 => OpsErrorCode.MelsecErrorC05F,
-			49248 => OpsErrorCode.MelsecErrorC060,
-			49249 => OpsErrorCode.MelsecErrorC061,
-			49250 => OpsErrorCode.MelsecErrorC062,
-			49264 => OpsErrorCode.MelsecErrorC070,
-			49266 => OpsErrorCode.MelsecErrorC072,
-			49268 => OpsErrorCode.MelsecErrorC074,
-			_ => OpsErrorCode.MelsecPleaseReferToManualDocument,
+			2 => ConnErrorCode.MelsecError02,
+			81 => ConnErrorCode.MelsecError51,
+			82 => ConnErrorCode.MelsecError52,
+			84 => ConnErrorCode.MelsecError54,
+			85 => ConnErrorCode.MelsecError55,
+			86 => ConnErrorCode.MelsecError56,
+			88 => ConnErrorCode.MelsecError58,
+			89 => ConnErrorCode.MelsecError59,
+			49229 => ConnErrorCode.MelsecErrorC04D,
+			49232 => ConnErrorCode.MelsecErrorC050,
+			49233 or 49234 or 49235 or 49236 => ConnErrorCode.MelsecErrorC051_54,
+			49237 => ConnErrorCode.MelsecErrorC055,
+			49238 => ConnErrorCode.MelsecErrorC056,
+			49239 => ConnErrorCode.MelsecErrorC057,
+			49240 => ConnErrorCode.MelsecErrorC058,
+			49241 => ConnErrorCode.MelsecErrorC059,
+			49242 or 49243 => ConnErrorCode.MelsecErrorC05A_B,
+			49244 => ConnErrorCode.MelsecErrorC05C,
+			49245 => ConnErrorCode.MelsecErrorC05D,
+			49246 => ConnErrorCode.MelsecErrorC05E,
+			49247 => ConnErrorCode.MelsecErrorC05F,
+			49248 => ConnErrorCode.MelsecErrorC060,
+			49249 => ConnErrorCode.MelsecErrorC061,
+			49250 => ConnErrorCode.MelsecErrorC062,
+			49264 => ConnErrorCode.MelsecErrorC070,
+			49266 => ConnErrorCode.MelsecErrorC072,
+			49268 => ConnErrorCode.MelsecErrorC074,
+			_ => ConnErrorCode.MelsecPleaseReferToManualDocument,
 		};
 	}
 

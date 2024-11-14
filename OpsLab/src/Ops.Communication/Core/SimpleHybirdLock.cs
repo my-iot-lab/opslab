@@ -13,34 +13,34 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// <summary>
 	/// 基元用户模式构造同步锁
 	/// </summary>
-	private int m_waiters = 0;
-    private int m_lock_tick = 0;
+	private int _waiters = 0;
+    private int _lock_tick = 0;
 
     /// <summary>
     /// 基元内核模式构造同步锁
     /// </summary>
-    private readonly Lazy<AutoResetEvent> m_waiterLock = new(() => new AutoResetEvent(false));
+    private readonly Lazy<AutoResetEvent> _waiterLock = new(() => new AutoResetEvent(false));
 
-	private static long simpleHybirdLockCount;
+	private static long s_simpleHybirdLockCount;
 
-	private static long simpleHybirdLockWaitCount;
+	private static long s_simpleHybirdLockWaitCount;
 
 	/// <summary>
 	/// 获取当前锁是否在等待当中
 	/// </summary>
-	public bool IsWaitting => m_waiters != 0;
+	public bool IsWaitting => _waiters != 0;
 
-    public int LockingTick => m_lock_tick;
+    public int LockingTick => _lock_tick;
 
     /// <summary>
     /// 获取当前总的所有进入锁的信息
     /// </summary>
-    public static long SimpleHybirdLockCount => simpleHybirdLockCount;
+    public static long SimpleHybirdLockCount => s_simpleHybirdLockCount;
 
 	/// <summary>
 	/// 当前正在等待的锁的统计信息，此时已经发生了竞争了
 	/// </summary>
-	public static long SimpleHybirdLockWaitCount => simpleHybirdLockWaitCount;
+	public static long SimpleHybirdLockWaitCount => s_simpleHybirdLockWaitCount;
 
 	private void Dispose(bool disposing)
 	{
@@ -48,7 +48,7 @@ public sealed class SimpleHybirdLock : IDisposable
 		{
 			if (disposing)
 			{
-                m_waiterLock.Value.Close();
+                _waiterLock.Value.Close();
             }
 			
 			disposedValue = true;
@@ -65,15 +65,15 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// </summary>
 	public bool Enter()
 	{
-		Interlocked.Increment(ref simpleHybirdLockCount);
-		if (Interlocked.Increment(ref m_waiters) == 1)
+		Interlocked.Increment(ref s_simpleHybirdLockCount);
+		if (Interlocked.Increment(ref _waiters) == 1)
 		{
 			return true;
 		}
 
-        Interlocked.Increment(ref simpleHybirdLockWaitCount);
-        Interlocked.Increment(ref m_lock_tick);
-        return m_waiterLock.Value.WaitOne();
+        Interlocked.Increment(ref s_simpleHybirdLockWaitCount);
+        Interlocked.Increment(ref _lock_tick);
+        return _waiterLock.Value.WaitOne();
     }
 
 	/// <summary>
@@ -81,15 +81,15 @@ public sealed class SimpleHybirdLock : IDisposable
 	/// </summary>
 	public bool Leave()
 	{
-		Interlocked.Decrement(ref simpleHybirdLockCount);
-		if (Interlocked.Decrement(ref m_waiters) == 0)
+		Interlocked.Decrement(ref s_simpleHybirdLockCount);
+		if (Interlocked.Decrement(ref _waiters) == 0)
 		{
 			return true;
 		}
 
-        var flag = m_waiterLock.Value.Set(); // 设置事件信号，一次只允许执行一个线程, 其它线程继续 WaitOne 。
-        Interlocked.Decrement(ref simpleHybirdLockWaitCount);
-        Interlocked.Decrement(ref m_lock_tick);
+        var flag = _waiterLock.Value.Set(); // 设置事件信号，一次只允许执行一个线程, 其它线程继续 WaitOne 。
+        Interlocked.Decrement(ref s_simpleHybirdLockWaitCount);
+        Interlocked.Decrement(ref _lock_tick);
         return flag;
     }
 }

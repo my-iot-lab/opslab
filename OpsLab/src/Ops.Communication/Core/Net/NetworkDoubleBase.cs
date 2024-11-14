@@ -17,7 +17,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	private PipeSocket _pipeSocket;
 
     private bool _disposedValue = false;
-    private readonly Lazy<Ping> ping = new(() => new Ping());
+    private readonly Lazy<Ping> _ping = new(() => new Ping());
 
     /// <summary>
     /// 是否是长连接的状态。
@@ -182,7 +182,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 	/// <exception cref="PingException"></exception>
 	public IPStatus PingIpAddress(int timeout = 5000)
 	{
-		return ping.Value.Send(IpAddress, timeout).Status;
+		return _ping.Value.Send(IpAddress, timeout).Status;
 	}
 
     /// <summary>
@@ -193,7 +193,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
     /// <exception cref="PingException"></exception>
     public async Task<IPStatus> PingIpAddressAsync(int timeout = 5000)
 	{
-		var pingReply = await ping.Value.SendPingAsync(IpAddress, timeout).ConfigureAwait(false);
+		var pingReply = await _ping.Value.SendPingAsync(IpAddress, timeout).ConfigureAwait(false);
 		return pingReply.Status;
 	}
 
@@ -359,7 +359,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 
 			// 不自动连接服务，抛出异常。
 			string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketUnavailable, err);
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketUnavailable, err);
         }
 
 		// 使用已创建的Socket。
@@ -471,7 +471,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		if (netMessage != null && !netMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-            return new OperateResult<byte[]>((int)OpsErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
+            return new OperateResult<byte[]>((int)ConnErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed{Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(sendValue, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(resultReceive.Content, ' ')}");
 		}
@@ -596,7 +596,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 
             // 不自动连接服务，抛出异常。
             string err = _pipeSocket.IsSocketError ? "Socket Unavailable" : "Must connect server firstly";
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketUnavailable, err);
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketUnavailable, err);
         }
 
         // 使用已创建的Socket。
@@ -674,7 +674,7 @@ public abstract class NetworkDoubleBase : NetworkBase, IDisposable
 		if (newNetMessage != null && !newNetMessage.CheckHeadBytesLegal(base.Token.ToByteArray()))
 		{
 			socket?.Close();
-			return new OperateResult<byte[]>((int)OpsErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed {Environment.NewLine}" +
+			return new OperateResult<byte[]>((int)ConnErrorCode.CommandHeadCodeCheckFailed, $"CommandHeadCodeCheckFailed {Environment.NewLine}" +
 				$"Send: {SoftBasic.ByteToHexString(array, ' ')}{Environment.NewLine}" +
 				$"Receive: {SoftBasic.ByteToHexString(operateResult2.Content, ' ')}");
 		}

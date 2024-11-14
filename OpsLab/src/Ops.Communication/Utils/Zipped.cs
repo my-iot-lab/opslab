@@ -37,7 +37,7 @@ public static class Zipped
 	{
 		if (bytes.Length == 0)
 		{
-			return Array.Empty<byte>();
+			return [];
 		}
 
 		using var stream = new MemoryStream(bytes);

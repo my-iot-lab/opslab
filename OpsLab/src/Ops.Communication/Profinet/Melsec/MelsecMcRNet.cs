@@ -464,11 +464,11 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 			{
 				return OperateResult.Ok(MelsecMcRDataType.Z, Convert.ToInt32(address[1..], MelsecMcRDataType.Z.FromBase));
 			}
-			return new OperateResult<MelsecMcRDataType, int>((int)OpsErrorCode.NotSupportedDataType, OpsErrorCode.NotSupportedDataType.Desc());
+			return new OperateResult<MelsecMcRDataType, int>((int)ConnErrorCode.NotSupportedDataType, ConnErrorCode.NotSupportedDataType.Desc());
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<MelsecMcRDataType, int>((int)OpsErrorCode.NotSupportedDataType, ex.Message);
+			return new OperateResult<MelsecMcRDataType, int>((int)ConnErrorCode.NotSupportedDataType, ex.Message);
 		}
 	}
 
@@ -480,9 +480,9 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildReadMcCoreCommand(McRAddressData address, bool isBit)
 	{
-		return new byte[12]
-		{
-			1,
+		return
+        [
+            1,
 			4,
 			(byte)(isBit ? 1 : 0),
 			0,
@@ -494,7 +494,7 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 			address.McDataType.DataCode[1],
 			(byte)(address.Length % 256),
 			(byte)(address.Length / 256)
-		};
+		];
 	}
 
 	/// <summary>
@@ -505,7 +505,7 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteWordCoreCommand(McRAddressData address, byte[] value)
 	{
-		value ??= Array.Empty<byte>();
+		value ??= [];
 
 		byte[] array = new byte[12 + value.Length];
 		array[0] = 1;
@@ -532,7 +532,7 @@ public sealed class MelsecMcRNet : NetworkDeviceBase
 	/// <returns>带有成功标识的报文对象</returns>
 	public static byte[] BuildWriteBitCoreCommand(McRAddressData address, bool[] value)
 	{
-		value ??= Array.Empty<bool>();
+		value ??= [];
 
 		byte[] array = MelsecHelper.TransBoolArrayToByteData(value);
 		byte[] array2 = new byte[12 + array.Length];

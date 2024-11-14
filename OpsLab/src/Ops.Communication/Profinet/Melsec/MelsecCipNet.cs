@@ -24,11 +24,11 @@ public sealed class MelsecCipNet : AllenBradleyNet
 	/// <returns>Result data with result object </returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		return Read(new string[1] { address }, new int[1] { length });
+		return Read([address], [length]);
 	}
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		return await ReadAsync(new string[1] { address }, new int[1] { length }).ConfigureAwait(false);
+		return await ReadAsync([address], [length]).ConfigureAwait(false);
 	}
 }

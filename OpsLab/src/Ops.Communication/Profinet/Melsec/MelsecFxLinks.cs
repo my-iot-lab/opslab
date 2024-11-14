@@ -13,16 +13,16 @@ namespace Ops.Communication.Profinet.Melsec;
 /// </remarks>
 public sealed class MelsecFxLinks : SerialDeviceBase
 {
-	private byte watiingTime = 0;
+	private byte _watiingTime = 0;
 
 	public byte Station { get; set; } = 0;
 
 	public byte WaittingTime
 	{
-		get => watiingTime;
+		get => _watiingTime;
 		set
 		{
-			watiingTime = watiingTime > 15 ? (byte)15 : value;
+			_watiingTime = _watiingTime > 15 ? (byte)15 : value;
         }
 	}
 
@@ -36,8 +36,8 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadCommand(b, address, length, isBool: false, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadCommand(b, address, length, isBool: false, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult);
@@ -51,7 +51,7 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 
 		byte[] array = new byte[length * 2];
@@ -65,8 +65,8 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildWriteByteCommand(b, address, value, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildWriteByteCommand(b, address, value, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -80,15 +80,15 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadCommand(b, address, length, isBool: true, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadCommand(b, address, length, isBool: true, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult);
@@ -102,7 +102,7 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>((int)OpsErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<bool[]>((int)ConnErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 
 		byte[] array = new byte[length];
@@ -112,8 +112,8 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildWriteBoolCommand(b, address, value, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildWriteBoolCommand(b, address, value, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -127,15 +127,15 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public OperateResult StartPLC(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildStart(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildStart(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -149,15 +149,15 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public OperateResult StopPLC(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildStop(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildStop(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -171,15 +171,15 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public OperateResult<string> ReadPlcType(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadPlcType(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = MelsecFxLinksOverTcp.BuildReadPlcType(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<string>(operateResult);
@@ -193,7 +193,7 @@ public sealed class MelsecFxLinks : SerialDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<string>((int)ConnErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return MelsecFxLinksOverTcp.GetPlcTypeFromCode(Encoding.ASCII.GetString(operateResult2.Content, 5, 2));
 	}

@@ -7,27 +7,15 @@ namespace Ops.Communication.Profinet.Siemens;
 
 public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 {
-	private byte station = 2;
+    private readonly object _communicationLock;
 
-	private readonly object communicationLock;
+    public byte Station { get; set; } = 2;
 
-	public byte Station
-	{
-		get
-		{
-			return station;
-		}
-		set
-		{
-			station = value;
-		}
-	}
-
-	public SiemensPPIOverTcp()
+    public SiemensPPIOverTcp()
 	{
 		base.WordLength = 2;
 		base.ByteTransform = new ReverseBytesTransform();
-		communicationLock = new object();
+		_communicationLock = new object();
 		base.SleepTime = 20;
 	}
 
@@ -46,14 +34,14 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
 
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -85,14 +73,14 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBit: true);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult);
 		}
 
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -124,14 +112,14 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = BuildWriteCommand(b, address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
 
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -158,14 +146,14 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = BuildWriteCommand(b, address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
 
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -192,7 +180,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBit: false);
 		if (!command.IsSuccess)
 		{
@@ -228,7 +216,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBit: true);
 		if (!command.IsSuccess)
 		{
@@ -263,7 +251,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> command = BuildWriteCommand(stat, address, value);
 		if (!command.IsSuccess)
 		{
@@ -293,7 +281,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> command = BuildWriteCommand(stat, address, value);
 		if (!command.IsSuccess)
 		{
@@ -343,17 +331,17 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public OperateResult Start(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[39]
-		{
-			104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 20, 0, 0, 40, 0, 0,
 			0, 0, 0, 0, 253, 0, 0, 9, 80, 95,
 			80, 82, 79, 71, 82, 65, 77, 170, 22
-		};
-		obj[4] = station;
+		];
+		obj[4] = Station;
 		byte[] send = obj;
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult = ReadFromCoreServer(send);
 			if (!operateResult.IsSuccess)
@@ -375,17 +363,17 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public OperateResult Stop(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[35]
-		{
-			104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 16, 0, 0, 41, 0, 0,
 			0, 0, 0, 9, 80, 95, 80, 82, 79, 71,
 			82, 65, 77, 170, 22
-		};
-		obj[4] = station;
+		];
+		obj[4] = Station;
 		byte[] send = obj;
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult = ReadFromCoreServer(send);
 			if (!operateResult.IsSuccess)
@@ -407,15 +395,15 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public async Task<OperateResult> StartAsync(string parameter = "")
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[39]
-		{
-			104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
+		byte stat = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 20, 0, 0, 40, 0, 0,
 			0, 0, 0, 0, 253, 0, 0, 9, 80, 95,
 			80, 82, 79, 71, 82, 65, 77, 170, 22
-		};
-		obj[4] = station;
+		];
+		obj[4] = Station;
 		byte[] cmd = obj;
 		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd).ConfigureAwait(false);
 		if (!read1.IsSuccess)
@@ -436,15 +424,15 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 
 	public async Task<OperateResult> StopAsync(string parameter = "")
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[35]
-		{
-			104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
+		byte stat = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 16, 0, 0, 41, 0, 0,
 			0, 0, 0, 9, 80, 95, 80, 82, 79, 71,
 			82, 65, 77, 170, 22
-		};
-		obj[4] = station;
+		];
+		obj[4] = Station;
 		byte[] cmd = obj;
 		OperateResult<byte[]> read1 = await ReadFromCoreServerAsync(cmd).ConfigureAwait(false);
 		if (!read1.IsSuccess)
@@ -530,7 +518,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 			else if (address[0] == 'D' || address[..2] == "DB")
 			{
 				operateResult.Content1 = 132;
-				string[] array = address.Split(new char[1] { '.' });
+				string[] array = address.Split(['.']);
 				if (address[1] == 'B')
 				{
 					operateResult.Content3 = Convert.ToUInt16(array[0][2..]);
@@ -842,7 +830,7 @@ public sealed class SiemensPPIOverTcp : NetworkDeviceBase
 	/// <returns>二次命令确认的报文</returns>
 	public static byte[] GetExecuteConfirm(byte station)
 	{
-		byte[] array = new byte[6] { 16, 2, 0, 92, 94, 22 };
+		byte[] array = [16, 2, 0, 92, 94, 22];
 		array[1] = station;
 		int num = 0;
 		for (int i = 1; i < 4; i++)

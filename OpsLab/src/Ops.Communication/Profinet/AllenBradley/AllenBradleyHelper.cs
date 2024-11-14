@@ -131,7 +131,7 @@ public static class AllenBradleyHelper
 	private static byte[] BuildRequestPathCommand(string address, bool isConnectedAddress = false)
 	{
 		using var memoryStream = new MemoryStream();
-		string[] array = address.Split(new char[1] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+		string[] array = address.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
 		for (int i = 0; i < array.Length; i++)
 		{
 			string text = string.Empty;
@@ -157,7 +157,7 @@ public static class AllenBradleyHelper
 				continue;
 			}
 
-			string[] array2 = text.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+			string[] array2 = text.Split([','], StringSplitOptions.RemoveEmptyEntries);
 			for (int j = 0; j < array2.Length; j++)
 			{
 				int num3 = Convert.ToInt32(array2[j]);
@@ -227,9 +227,9 @@ public static class AllenBradleyHelper
 	/// <returns>结果数据</returns>
 	public static byte[] GetEnumeratorCommand(ushort startInstance)
 	{
-		return new byte[14]
-		{
-			85,
+		return
+        [
+            85,
 			3,
 			32,
 			107,
@@ -243,7 +243,7 @@ public static class AllenBradleyHelper
 			0,
 			2,
 			0
-		};
+		];
 	}
 
 	/// <summary>
@@ -416,7 +416,7 @@ public static class AllenBradleyHelper
 	public static string AnalysisArrayIndex(string address, out int arrayIndex)
 	{
 		arrayIndex = 0;
-		if (!address.EndsWith("]"))
+		if (!address.EndsWith(']'))
 		{
 			return address;
 		}
@@ -602,7 +602,7 @@ public static class AllenBradleyHelper
 	/// <returns>最终发送的报文数据</returns>
 	public static byte[] PackCommandGetAttributesAll(byte[] portSlot, uint sessionHandle)
 	{
-		byte[] commandSpecificData = PackCommandSpecificData(new byte[4], PackCommandService(portSlot, new byte[6] { 1, 2, 32, 1, 36, 1 }));
+		byte[] commandSpecificData = PackCommandSpecificData(new byte[4], PackCommandService(portSlot, [1, 2, 32, 1, 36, 1]));
 		return PackRequestHeader(111, sessionHandle, commandSpecificData);
 	}
 
@@ -616,7 +616,7 @@ public static class AllenBradleyHelper
 	{
 		if (data == null)
 		{
-			return new byte[6] { 0, 0, 4, 0, 0, 0 };
+			return [0, 0, 4, 0, 0, 0];
 		}
 		return SoftBasic.SpliceArray(new byte[6]
 		{
@@ -662,7 +662,7 @@ public static class AllenBradleyHelper
 	/// <returns>包含服务的信息</returns>
 	public static byte[] PackCommandSingleService(byte[] command)
 	{
-		command ??= Array.Empty<byte>();
+		command ??= [];
 
 		byte[] array = new byte[4 + command.Length];
 		array[0] = 178;
@@ -679,7 +679,7 @@ public static class AllenBradleyHelper
 	/// <returns>报文信息</returns>
 	public static byte[] RegisterSessionHandle()
 	{
-		byte[] commandSpecificData = new byte[4] { 1, 0, 0, 0 };
+		byte[] commandSpecificData = [1, 0, 0, 0];
 		return PackRequestHeader(101, 0u, commandSpecificData);
 	}
 
@@ -711,13 +711,13 @@ public static class AllenBradleyHelper
 			string empty = string.Empty;
 			return new OperateResult(num, num switch
 			{
-				1 => OpsErrorCode.AllenBradleySessionStatus01.Desc(),
-				2 => OpsErrorCode.AllenBradleySessionStatus02.Desc(),
-				3 => OpsErrorCode.AllenBradleySessionStatus03.Desc(),
-				100 => OpsErrorCode.AllenBradleySessionStatus64.Desc(),
-				101 => OpsErrorCode.AllenBradleySessionStatus65.Desc(),
-				105 => OpsErrorCode.AllenBradleySessionStatus69.Desc(),
-				_ => OpsErrorCode.UnknownError.Desc(),
+				1 => ConnErrorCode.AllenBradleySessionStatus01.Desc(),
+				2 => ConnErrorCode.AllenBradleySessionStatus02.Desc(),
+				3 => ConnErrorCode.AllenBradleySessionStatus03.Desc(),
+				100 => ConnErrorCode.AllenBradleySessionStatus64.Desc(),
+				101 => ConnErrorCode.AllenBradleySessionStatus65.Desc(),
+				105 => ConnErrorCode.AllenBradleySessionStatus69.Desc(),
+				_ => ConnErrorCode.UnknownError.Desc(),
 			});
 		}
 		catch (Exception ex)
@@ -754,13 +754,13 @@ public static class AllenBradleyHelper
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley04.Desc(),
+							Message = ConnErrorCode.AllenBradley04.Desc(),
 						};
 					case 5:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley05.Desc(),
+							Message = ConnErrorCode.AllenBradley05.Desc(),
 						};
 					case 6:
 						if (response[num + 2] == 210 || response[num + 2] == 204)
@@ -768,7 +768,7 @@ public static class AllenBradleyHelper
 							return new OperateResult<byte[], ushort, bool>
 							{
 								ErrorCode = num6,
-								Message = OpsErrorCode.AllenBradley06.Desc(),
+								Message = ConnErrorCode.AllenBradley06.Desc(),
 							};
 						}
 						break;
@@ -776,37 +776,37 @@ public static class AllenBradleyHelper
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley0A.Desc(),
+							Message = ConnErrorCode.AllenBradley0A.Desc(),
 						};
 					case 19:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley13.Desc(),
+							Message = ConnErrorCode.AllenBradley13.Desc(),
 						};
 					case 28:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley1C.Desc(),
+							Message = ConnErrorCode.AllenBradley1C.Desc(),
 						};
 					case 30:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley1E.Desc(),
+							Message = ConnErrorCode.AllenBradley1E.Desc(),
 						};
 					case 38:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.AllenBradley26.Desc(),
+							Message = ConnErrorCode.AllenBradley26.Desc(),
 						};
 					default:
 						return new OperateResult<byte[], ushort, bool>
 						{
 							ErrorCode = num6,
-							Message = OpsErrorCode.UnknownError.Desc(),
+							Message = ConnErrorCode.UnknownError.Desc(),
 						};
 					case 0:
 						break;
@@ -830,13 +830,13 @@ public static class AllenBradleyHelper
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley04.Desc(),
+						Message = ConnErrorCode.AllenBradley04.Desc(),
 					};
 				case 5:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley05.Desc(),
+						Message = ConnErrorCode.AllenBradley05.Desc(),
 					};
 				case 6:
 					value = true;
@@ -845,43 +845,43 @@ public static class AllenBradleyHelper
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley0A.Desc(),
+						Message = ConnErrorCode.AllenBradley0A.Desc(),
 					};
 				case 19:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley13.Desc(),
+						Message = ConnErrorCode.AllenBradley13.Desc(),
 					};
 				case 28:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley1C.Desc(),
+						Message = ConnErrorCode.AllenBradley1C.Desc(),
 					};
 				case 30:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley1E.Desc(),
+						Message = ConnErrorCode.AllenBradley1E.Desc(),
 					};
 				case 32:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley20.Desc(),
+						Message = ConnErrorCode.AllenBradley20.Desc(),
 					};
 				case 38:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.AllenBradley26.Desc(),
+						Message = ConnErrorCode.AllenBradley26.Desc(),
 					};
 				default:
 					return new OperateResult<byte[], ushort, bool>
 					{
 						ErrorCode = b,
-						Message = OpsErrorCode.UnknownError.Desc(),
+						Message = ConnErrorCode.UnknownError.Desc(),
 					};
 				case 0:
 					break;

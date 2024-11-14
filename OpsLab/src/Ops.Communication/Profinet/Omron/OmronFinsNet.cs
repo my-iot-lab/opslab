@@ -88,11 +88,11 @@ namespace Ops.Communication.Profinet.Omron;
 /// </example>
 public sealed class OmronFinsNet : NetworkDeviceBase
 {
-	private readonly byte[] handSingle = new byte[20]
-	{
-		70, 73, 78, 83, 0, 0, 0, 12, 0, 0,
+	private readonly byte[] _handSingle =
+    [
+        70, 73, 78, 83, 0, 0, 0, 12, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	};
+	];
 
 	/// <summary>
 	/// 信息控制字段，默认0x80。
@@ -197,7 +197,7 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 	private byte[] PackCommand(byte[] cmd)
 	{
 		byte[] array = new byte[26 + cmd.Length];
-		Array.Copy(handSingle, 0, array, 0, 4);
+		Array.Copy(_handSingle, 0, array, 0, 4);
 		byte[] bytes = BitConverter.GetBytes(array.Length - 8);
 		Array.Reverse((Array)bytes);
 		bytes.CopyTo(array, 4);
@@ -218,19 +218,19 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 
 	protected override OperateResult InitializationOnConnect(Socket socket)
 	{
-		OperateResult<byte[]> operateResult = ReadFromCoreServer(socket, handSingle, hasResponseData: true, usePackAndUnpack: false);
+		OperateResult<byte[]> operateResult = ReadFromCoreServer(socket, _handSingle, hasResponseData: true, usePackAndUnpack: false);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
 
-		int num = BitConverter.ToInt32(new byte[4]
-		{
-			operateResult.Content[15],
+		int num = BitConverter.ToInt32(
+        [
+            operateResult.Content[15],
 			operateResult.Content[14],
 			operateResult.Content[13],
 			operateResult.Content[12]
-		}, 0);
+		], 0);
 
 		if (num != 0)
 		{
@@ -252,19 +252,19 @@ public sealed class OmronFinsNet : NetworkDeviceBase
 
 	protected override async Task<OperateResult> InitializationOnConnectAsync(Socket socket)
 	{
-		OperateResult<byte[]> read = await ReadFromCoreServerAsync(socket, handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
+		OperateResult<byte[]> read = await ReadFromCoreServerAsync(socket, _handSingle, hasResponseData: true, usePackAndUnpack: false).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
 		}
 
-		int status = BitConverter.ToInt32(new byte[4]
-		{
-			read.Content[15],
+		int status = BitConverter.ToInt32(
+        [
+            read.Content[15],
 			read.Content[14],
 			read.Content[13],
 			read.Content[12]
-		}, 0);
+		], 0);
 
 		if (status != 0)
 		{

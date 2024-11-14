@@ -12,7 +12,7 @@ public static class OmronFinsNetHelper
 {
     public static OperateResult<List<byte[]>> BuildReadCommand(string[] address)
     {
-        List<byte[]> list = new();
+        List<byte[]> list = [];
         List<string[]> list2 = SoftBasic.ArraySplitByLength(address, 89);
         for (int i = 0; i < list2.Count; i++)
         {
@@ -110,7 +110,7 @@ public static class OmronFinsNetHelper
 
     public static byte[] BuildReadCommand(OmronFinsAddress address, ushort length, bool isBit)
     {
-        byte[] array = new byte[8] { 1, 1, 0, 0, 0, 0, 0, 0 };
+        byte[] array = [1, 1, 0, 0, 0, 0, 0, 0];
         if (isBit)
         {
             array[2] = address.BitCode;
@@ -137,22 +137,22 @@ public static class OmronFinsNetHelper
 	{
 		if (response.Length >= 16)
 		{
-			int num = BitConverter.ToInt32(new byte[4]
-			{
-				response[15],
+			int num = BitConverter.ToInt32(
+            [
+                response[15],
 				response[14],
 				response[13],
 				response[12]
-			}, 0);
+			], 0);
 
 			if (num > 0)
 			{
-				return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, GetStatusDescription(num));
+				return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, GetStatusDescription(num));
 			}
 
 			return UdpResponseValidAnalysis(response.RemoveBegin(16));
 		}
-		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, ConnErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -201,7 +201,7 @@ public static class OmronFinsNetHelper
 			return operateResult2;
 		}
 
-		return new OperateResult<byte[]>((int)OpsErrorCode.OmronReceiveDataError, OpsErrorCode.OmronReceiveDataError.Desc());
+		return new OperateResult<byte[]>((int)ConnErrorCode.OmronReceiveDataError, ConnErrorCode.OmronReceiveDataError.Desc());
 	}
 
 	/// <summary>
@@ -214,21 +214,21 @@ public static class OmronFinsNetHelper
 		return GetErrorCode(err).Desc();
 	}
 
-    public static OpsErrorCode GetErrorCode(int err)
+    public static ConnErrorCode GetErrorCode(int err)
     {
         return err switch
         {
-            0 => OpsErrorCode.OmronStatus0,
-            1 => OpsErrorCode.OmronStatus1,
-            2 => OpsErrorCode.OmronStatus2,
-            3 => OpsErrorCode.OmronStatus3,
-            32 => OpsErrorCode.OmronStatus20,
-            33 => OpsErrorCode.OmronStatus21,
-            34 => OpsErrorCode.OmronStatus22,
-            35 => OpsErrorCode.OmronStatus23,
-            36 => OpsErrorCode.OmronStatus24,
-            37 => OpsErrorCode.OmronStatus25,
-            _ => OpsErrorCode.UnknownError,
+            0 => ConnErrorCode.OmronStatus0,
+            1 => ConnErrorCode.OmronStatus1,
+            2 => ConnErrorCode.OmronStatus2,
+            3 => ConnErrorCode.OmronStatus3,
+            32 => ConnErrorCode.OmronStatus20,
+            33 => ConnErrorCode.OmronStatus21,
+            34 => ConnErrorCode.OmronStatus22,
+            35 => ConnErrorCode.OmronStatus23,
+            36 => ConnErrorCode.OmronStatus24,
+            37 => ConnErrorCode.OmronStatus25,
+            _ => ConnErrorCode.UnknownError,
         };
     }
 
@@ -431,12 +431,12 @@ public static class OmronFinsNetHelper
 	/// <returns>是否启动成功</returns>
 	public static OperateResult Run(IReadWriteDevice omron)
 	{
-		return omron.ReadFromCoreServer(new byte[5] { 4, 1, 255, 255, 4 });
+		return omron.ReadFromCoreServer([4, 1, 255, 255, 4]);
 	}
 
 	public static async Task<OperateResult> RunAsync(IReadWriteDevice omron)
 	{
-		return await omron.ReadFromCoreServerAsync(new byte[5] { 4, 1, 255, 255, 4 }).ConfigureAwait(false);
+		return await omron.ReadFromCoreServerAsync([4, 1, 255, 255, 4]).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -449,12 +449,12 @@ public static class OmronFinsNetHelper
 	/// <returns>是否停止成功</returns>
 	public static OperateResult Stop(IReadWriteDevice omron)
 	{
-		return omron.ReadFromCoreServer(new byte[4] { 4, 2, 255, 255 });
+		return omron.ReadFromCoreServer([4, 2, 255, 255]);
 	}
 
 	public static async Task<OperateResult> StopAsync(IReadWriteDevice omron)
 	{
-		return await omron.ReadFromCoreServerAsync(new byte[4] { 4, 2, 255, 255 }).ConfigureAwait(false);
+		return await omron.ReadFromCoreServerAsync([4, 2, 255, 255]).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -464,12 +464,12 @@ public static class OmronFinsNetHelper
 	/// <returns>是否读取成功</returns>
 	public static OperateResult<OmronCpuUnitData> ReadCpuUnitData(IReadWriteDevice omron)
 	{
-		return omron.ReadFromCoreServer(new byte[3] { 5, 1, 0 }).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
+		return omron.ReadFromCoreServer([5, 1, 0]).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
 	}
 
 	public static async Task<OperateResult<OmronCpuUnitData>> ReadCpuUnitDataAsync(IReadWriteDevice omron)
 	{
-		return (await omron.ReadFromCoreServerAsync(new byte[3] { 5, 1, 0 }).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
+		return (await omron.ReadFromCoreServerAsync([5, 1, 0]).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitData(m)));
 	}
 
 	/// <summary>
@@ -479,11 +479,11 @@ public static class OmronFinsNetHelper
 	/// <returns>是否读取成功</returns>
 	public static OperateResult<OmronCpuUnitStatus> ReadCpuUnitStatus(IReadWriteDevice omron)
 	{
-		return omron.ReadFromCoreServer(new byte[2] { 6, 1 }).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
+		return omron.ReadFromCoreServer([6, 1]).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
 	}
 
 	public static async Task<OperateResult<OmronCpuUnitStatus>> ReadCpuUnitStatusAsync(IReadWriteDevice omron)
 	{
-		return (await omron.ReadFromCoreServerAsync(new byte[2] { 6, 1 }).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
+		return (await omron.ReadFromCoreServerAsync([6, 1]).ConfigureAwait(false)).Then((byte[] m) => OperateResult.Ok(new OmronCpuUnitStatus(m)));
 	}
 }

@@ -31,9 +31,9 @@ public sealed class OmronCipNet : AllenBradleyNet
 	{
 		if (length > 1)
 		{
-			return Read(new string[1] { address }, new int[1] { 1 });
+			return Read([address], [1]);
 		}
-		return Read(new string[1] { address }, new int[1] { length });
+		return Read([address], [length]);
 	}
 
 	public override OperateResult<short[]> ReadInt16(string address, ushort length)
@@ -43,7 +43,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt16(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
@@ -54,7 +54,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt16(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
@@ -65,7 +65,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt32(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -76,7 +76,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt32(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -87,7 +87,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransSingle(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransSingle(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -98,7 +98,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt64(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -109,7 +109,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt64(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransUInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -120,7 +120,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransDouble(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(Read(address, 1), m => ByteTransform.TransDouble(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -151,7 +151,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 
 	public override OperateResult Write(string address, byte value)
 	{
-		return WriteTag(address, 209, new byte[2] { value, 0 });
+		return WriteTag(address, 209, [value, 0]);
 	}
 
 	public override OperateResult WriteTag(string address, ushort typeCode, byte[] value, int length = 1)
@@ -163,9 +163,9 @@ public sealed class OmronCipNet : AllenBradleyNet
 	{
 		if (length > 1)
 		{
-			return await ReadAsync(new string[1] { address }, new int[1] { 1 }).ConfigureAwait(false);
+			return await ReadAsync([address], [1]).ConfigureAwait(false);
 		}
-		return await ReadAsync(new string[1] { address }, new int[1] { length }).ConfigureAwait(false);
+		return await ReadAsync([address], [length]).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult<short[]>> ReadInt16Async(string address, ushort length)
@@ -175,7 +175,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt16(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
@@ -186,7 +186,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt16(m, (startIndex >= 0) ? (startIndex * 2) : 0, length));
 	}
 
@@ -197,7 +197,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt32(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -208,7 +208,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt32(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -219,7 +219,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransSingle(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransSingle(m, (startIndex >= 0) ? (startIndex * 4) : 0, length));
 	}
 
@@ -230,7 +230,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt64(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -241,7 +241,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransUInt64(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -252,7 +252,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 			return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransDouble(m, 0, length));
 		}
 
-		int startIndex = OpsHelper.ExtractStartIndex(ref address);
+		int startIndex = ConnHelper.ExtractStartIndex(ref address);
 		return ByteTransformHelper.GetResultFromBytes(await ReadAsync(address, 1).ConfigureAwait(false), m => ByteTransform.TransDouble(m, (startIndex >= 0) ? (startIndex * 8) : 0, length));
 	}
 
@@ -278,7 +278,7 @@ public sealed class OmronCipNet : AllenBradleyNet
 
 	public override async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 209, new byte[2] { value, 0 }).ConfigureAwait(false);
+		return await WriteTagAsync(address, 209, [value, 0]).ConfigureAwait(false);
 	}
 
 	public override async Task<OperateResult> WriteTagAsync(string address, ushort typeCode, byte[] value, int length = 1)

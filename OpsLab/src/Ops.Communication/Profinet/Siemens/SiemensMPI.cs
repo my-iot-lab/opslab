@@ -11,19 +11,19 @@ namespace Ops.Communication.Profinet.Siemens;
 /// </summary>
 public sealed class SiemensMPI : SerialDeviceBase
 {
-	private byte station = 2;
+	private byte _station = 2;
 
-	private readonly byte[] readConfirm = new byte[15]
-	{
-		104, 8, 8, 104, 130, 128, 92, 22, 2, 176,
+	private readonly byte[] _readConfirm =
+    [
+        104, 8, 8, 104, 130, 128, 92, 22, 2, 176,
 		7, 0, 45, 22, 229
-	};
+	];
 
-	private readonly byte[] writeConfirm = new byte[15]
-	{
-		104, 8, 8, 104, 130, 128, 124, 22, 2, 176,
+	private readonly byte[] _writeConfirm =
+    [
+        104, 8, 8, 104, 130, 128, 124, 22, 2, 176,
 		7, 0, 77, 22, 229
-	};
+	];
 
 	/// <summary>
 	/// 西门子PLC的站号信息<br />
@@ -33,22 +33,22 @@ public sealed class SiemensMPI : SerialDeviceBase
 	{
 		get
 		{
-			return station;
+			return _station;
 		}
 		set
 		{
-			station = value;
-			readConfirm[4] = (byte)(value + 128);
-			writeConfirm[4] = (byte)(value + 128);
+			_station = value;
+			_readConfirm[4] = (byte)(value + 128);
+			_writeConfirm[4] = (byte)(value + 128);
 			int num = 0;
 			int num2 = 0;
 			for (int i = 4; i < 12; i++)
 			{
-				num += readConfirm[i];
-				num2 += writeConfirm[i];
+				num += _readConfirm[i];
+				num2 += _writeConfirm[i];
 			}
-			readConfirm[12] = (byte)num;
-			writeConfirm[12] = (byte)num2;
+			_readConfirm[12] = (byte)num;
+			_writeConfirm[12] = (byte)num2;
 		}
 	}
 
@@ -71,7 +71,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 	{
 		while (true)
 		{
-			var operateResult = SPReceived(m_ReadData, awaitData: true);
+			var operateResult = SPReceived(_readData, awaitData: true);
 			if (!operateResult.IsSuccess)
 			{
 				return OperateResult.Error<byte[]>(operateResult);
@@ -79,7 +79,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 
 			if (operateResult.Content[0] == 220 && operateResult.Content[1] == 2 && operateResult.Content[2] == 2)
 			{
-				OperateResult operateResult2 = SPSend(m_ReadData, new byte[3] { 220, 0, 0 });
+				OperateResult operateResult2 = SPSend(_readData, new byte[3] { 220, 0, 0 });
 				if (!operateResult2.IsSuccess)
 				{
 					return OperateResult.Error<byte[]>(operateResult2);
@@ -91,7 +91,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			}
 		}
 
-		OperateResult operateResult3 = SPSend(m_ReadData, new byte[3] { 220, 2, 0 });
+		OperateResult operateResult3 = SPSend(_readData, new byte[3] { 220, 2, 0 });
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult3);
@@ -108,7 +108,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		var operateResult = BuildReadCommand(station, address, length, isBit: false);
+		var operateResult = BuildReadCommand(_station, address, length, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -118,13 +118,13 @@ public sealed class SiemensMPI : SerialDeviceBase
 		{
 			ClearSerialCache();
 		}
-		OperateResult operateResult2 = SPSend(m_ReadData, operateResult.Content);
+		OperateResult operateResult2 = SPSend(_readData, operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult2);
 		}
 
-		var operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		var operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult3);
@@ -135,7 +135,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult3.Content));
 		}
 
-		operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult3);
@@ -146,7 +146,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult3.Content[19]);
 		}
 
-		operateResult2 = SPSend(m_ReadData, readConfirm);
+		operateResult2 = SPSend(_readData, _readConfirm);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult2);
@@ -169,19 +169,19 @@ public sealed class SiemensMPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		var operateResult = BuildReadCommand(station, address, length, isBit: true);
+		var operateResult = BuildReadCommand(_station, address, length, isBit: true);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult);
 		}
 
-		OperateResult operateResult2 = SPSend(m_ReadData, operateResult.Content);
+		OperateResult operateResult2 = SPSend(_readData, operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult2);
 		}
 
-		var operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		var operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult3);
@@ -192,7 +192,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<bool[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult3.Content));
 		}
 
-		operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult3);
@@ -203,7 +203,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<bool[]>("PLC Receive Check Failed:" + operateResult3.Content[19]);
 		}
 
-		operateResult2 = SPSend(m_ReadData, readConfirm);
+		operateResult2 = SPSend(_readData, _readConfirm);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult2);
@@ -226,7 +226,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		var operateResult = BuildWriteCommand(station, address, value);
+		var operateResult = BuildWriteCommand(_station, address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -236,13 +236,13 @@ public sealed class SiemensMPI : SerialDeviceBase
 		{
 			ClearSerialCache();
 		}
-		OperateResult operateResult2 = SPSend(m_ReadData, operateResult.Content);
+		OperateResult operateResult2 = SPSend(_readData, operateResult.Content);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult2);
 		}
 
-		var operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		var operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult3);
@@ -253,7 +253,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + SoftBasic.ByteToHexString(operateResult3.Content));
 		}
 
-		operateResult3 = SPReceived(m_ReadData, awaitData: true);
+		operateResult3 = SPReceived(_readData, awaitData: true);
 		if (!operateResult3.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult3);
@@ -264,7 +264,7 @@ public sealed class SiemensMPI : SerialDeviceBase
 			return new OperateResult<byte[]>("PLC Receive Check Failed:" + operateResult3.Content[25]);
 		}
 
-		operateResult2 = SPSend(m_ReadData, writeConfirm);
+		operateResult2 = SPSend(_readData, _writeConfirm);
 		if (!operateResult2.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult2);

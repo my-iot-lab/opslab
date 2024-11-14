@@ -5,7 +5,7 @@ namespace Ops.Communication.Profinet.AllenBradley;
 /// </summary>
 public sealed class AbTagItem
 {
-	private ushort symbolType = 0;
+	private ushort _symbolType = 0;
 
 	/// <summary>
 	/// 实例ID
@@ -24,13 +24,13 @@ public sealed class AbTagItem
 	{
 		get
 		{
-			return symbolType;
+			return _symbolType;
 		}
 		set
 		{
-			symbolType = value;
-			ArrayDimension = ((symbolType & 0x4000) == 16384) ? 2 : (((symbolType & 0x2000) == 8192) ? 1 : 0);
-			IsStruct = (symbolType & 0x8000) == 32768;
+			_symbolType = value;
+			ArrayDimension = ((_symbolType & 0x4000) == 16384) ? 2 : (((_symbolType & 0x2000) == 8192) ? 1 : 0);
+			IsStruct = (_symbolType & 0x8000) == 32768;
 		}
 	}
 

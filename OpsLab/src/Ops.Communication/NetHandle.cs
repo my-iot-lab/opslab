@@ -8,96 +8,36 @@ namespace Ops.Communication;
 [StructLayout(LayoutKind.Explicit)]
 public struct NetHandle
 {
-	/// <summary>
-	/// 完整的暗号值
-	/// </summary>
-	[FieldOffset(0)]
-	private int m_CodeValue;
+    /// <summary>
+    /// 完整的暗号值
+    /// </summary>
+    [field: FieldOffset(0)]
+    public int CodeValue { get; set; }
 
-	/// <summary>
-	/// 主暗号分类0-255
-	/// </summary>
-	[FieldOffset(3)]
-	private byte m_CodeMajor;
+    /// <summary>
+    /// 主暗号分类0-255
+    /// </summary>
+    [field: FieldOffset(3)]
+    public byte CodeMajor { get; private set; }
 
-	/// <summary>
-	/// 次要的暗号分类0-255
-	/// </summary>
-	[FieldOffset(2)]
-	private byte m_CodeMinor;
+    /// <summary>
+    /// 次要的暗号分类0-255
+    /// </summary>
+    [field: FieldOffset(2)]
+    public byte CodeMinor { get; private set; }
 
-	/// <summary>
-	/// 暗号的编号分类0-65535
-	/// </summary>
-	[FieldOffset(0)]
-	private ushort m_CodeIdentifier;
+    /// <summary>
+    /// 暗号的编号分类0-65535
+    /// </summary>
+    [field: FieldOffset(0)]
+    public ushort CodeIdentifier { get; private set; }
 
-	/// <summary>
-	/// 完整的暗号值
-	/// </summary>
-	public int CodeValue
-	{
-		get
-		{
-			return m_CodeValue;
-		}
-		set
-		{
-			m_CodeValue = value;
-		}
-	}
-
-	/// <summary>
-	/// 主暗号分类0-255
-	/// </summary>
-	public byte CodeMajor
-	{
-		get
-		{
-			return m_CodeMajor;
-		}
-		private set
-		{
-			m_CodeMajor = value;
-		}
-	}
-
-	/// <summary>
-	/// 次要的暗号分类0-255
-	/// </summary>
-	public byte CodeMinor
-	{
-		get
-		{
-			return m_CodeMinor;
-		}
-		private set
-		{
-			m_CodeMinor = value;
-		}
-	}
-
-	/// <summary>
-	/// 暗号的编号分类0-65535
-	/// </summary>
-	public ushort CodeIdentifier
-	{
-		get
-		{
-			return m_CodeIdentifier;
-		}
-		private set
-		{
-			m_CodeIdentifier = value;
-		}
-	}
-
-	/// <summary>
-	/// 赋值操作，可以直接赋值int数据
-	/// </summary>
-	/// <param name="value">int数值</param>
-	/// <returns>等值的消息对象</returns>
-	public static implicit operator NetHandle(int value)
+    /// <summary>
+    /// 赋值操作，可以直接赋值int数据
+    /// </summary>
+    /// <param name="value">int数值</param>
+    /// <returns>等值的消息对象</returns>
+    public static implicit operator NetHandle(int value)
 	{
 		return new NetHandle(value);
 	}
@@ -109,7 +49,7 @@ public struct NetHandle
 	/// <returns>等值的消息对象</returns>
 	public static implicit operator int(NetHandle netHandle)
 	{
-		return netHandle.m_CodeValue;
+		return netHandle.CodeValue;
 	}
 
 	/// <summary>
@@ -184,10 +124,10 @@ public struct NetHandle
 	/// <param name="value">使用一个默认的数值进行初始化</param>
 	public NetHandle(int value)
 	{
-		m_CodeMajor = 0;
-		m_CodeMinor = 0;
-		m_CodeIdentifier = 0;
-		m_CodeValue = value;
+		CodeMajor = 0;
+		CodeMinor = 0;
+		CodeIdentifier = 0;
+		CodeValue = value;
 	}
 
 	/// <summary>
@@ -198,19 +138,19 @@ public struct NetHandle
 	/// <param name="identifier">暗号编号</param>
 	public NetHandle(byte major, byte minor, ushort identifier)
 	{
-		m_CodeValue = 0;
-		m_CodeMajor = major;
-		m_CodeMinor = minor;
-		m_CodeIdentifier = identifier;
+		CodeValue = 0;
+		CodeMajor = major;
+		CodeMinor = minor;
+		CodeIdentifier = identifier;
 	}
 
 	/// <summary>
 	/// 获取完整的暗号数据
 	/// </summary>
 	/// <returns>返回暗号的字符串表示形式</returns>
-	public override string ToString()
+	public override readonly string ToString()
 	{
-		return m_CodeValue.ToString();
+		return CodeValue.ToString();
 	}
 
 	/// <summary>

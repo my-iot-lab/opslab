@@ -25,17 +25,17 @@ public class NetworkDeviceBase : NetworkDoubleBase, IReadWriteDevice, IReadWrite
 
 	public virtual OperateResult<byte[]> Read(string address, ushort length)
 	{
-		return new OperateResult<byte[]>(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<byte[]>(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, byte[] value)
 	{
-		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		return new OperateResult<bool[]>(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<bool[]>(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool> ReadBool(string address)
@@ -45,12 +45,12 @@ public class NetworkDeviceBase : NetworkDoubleBase, IReadWriteDevice, IReadWrite
 
 	public virtual OperateResult Write(string address, bool[] value)
 	{
-		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, bool value)
 	{
-		return Write(address, new bool[1] { value });
+		return Write(address, [value]);
 	}
 
 	public OperateResult<T> ReadCustomer<T>(string address) where T : IDataTransfer, new()
@@ -264,7 +264,7 @@ public class NetworkDeviceBase : NetworkDoubleBase, IReadWriteDevice, IReadWrite
 
 	public OperateResult Write(string address, double value)
 	{
-		return Write(address, new double[1] { value });
+		return Write(address, [value]);
 	}
 
 	public virtual OperateResult Write(string address, string value)
@@ -538,7 +538,7 @@ public class NetworkDeviceBase : NetworkDoubleBase, IReadWriteDevice, IReadWrite
 
 	public async Task<OperateResult> WriteAsync(string address, double value)
 	{
-		return await WriteAsync(address, new double[1] { value });
+		return await WriteAsync(address, [value]);
 	}
 
 	public virtual async Task<OperateResult> WriteAsync(string address, string value)

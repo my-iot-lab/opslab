@@ -65,7 +65,7 @@ public class McAddressData : DeviceAddressDataBase
 				case 'X' or 'x':
 					mcAddressData.McDataType = MelsecMcDataType.X;
 					address = address[1..];
-					if (address.StartsWith("0"))
+					if (address.StartsWith('0'))
 					{
 						mcAddressData.AddressStart = Convert.ToInt32(address, 8);
 					}
@@ -77,7 +77,7 @@ public class McAddressData : DeviceAddressDataBase
 				case 'Y' or 'y':
 					mcAddressData.McDataType = MelsecMcDataType.Y;
 					address = address[1..];
-					if (address.StartsWith("0"))
+					if (address.StartsWith('0'))
 					{
 						mcAddressData.AddressStart = Convert.ToInt32(address, 8);
 					}
@@ -104,7 +104,7 @@ public class McAddressData : DeviceAddressDataBase
 					{
 						mcAddressData.McDataType = MelsecMcDataType.DY;
 						address = address[2..];
-						if (address.StartsWith("0"))
+						if (address.StartsWith('0'))
 						{
 							mcAddressData.AddressStart = Convert.ToInt32(address, 8);
 						}
@@ -216,7 +216,7 @@ public class McAddressData : DeviceAddressDataBase
 						mcAddressData.AddressStart = Convert.ToInt32(address[2..], MelsecMcDataType.TC.FromBase);
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				case 'C' or 'c':
 					if (address[1] == 'N' || address[1] == 'n')
 					{
@@ -236,14 +236,14 @@ public class McAddressData : DeviceAddressDataBase
 						mcAddressData.AddressStart = Convert.ToInt32(address[2..], MelsecMcDataType.CC.FromBase);
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				default:
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 			}
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<McAddressData>((int)OpsErrorCode.NotSupportedDataType, ex.Message);
+			return new OperateResult<McAddressData>((int)ConnErrorCode.NotSupportedDataType, ex.Message);
 		}
 
 		return OperateResult.Ok(mcAddressData);

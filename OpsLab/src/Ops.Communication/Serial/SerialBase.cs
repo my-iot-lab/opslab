@@ -10,8 +10,8 @@ namespace Ops.Communication.Serial;
 /// </summary>
 public abstract class SerialBase : IDisposable
 {
-	private bool disposedValue = false;
-    private int sleepTime = 20;
+	private bool _disposedValue = false;
+    private int _sleepTime = 20;
 
     protected PipeSerial _pipeSerial;
     protected int AtLeastReceiveLength = 1;
@@ -19,7 +19,7 @@ public abstract class SerialBase : IDisposable
     /// <summary>
     /// 串口交互的核心
     /// </summary>
-    protected SerialPort m_ReadData = null;
+    protected SerialPort _readData = null;
 
 	/// <summary>
 	/// 获取或设置一个值，该值指示在串行通信中是否启用请求发送 (RTS) 信号。
@@ -28,11 +28,11 @@ public abstract class SerialBase : IDisposable
 	{
 		get
 		{
-			return m_ReadData.RtsEnable;
+			return _readData.RtsEnable;
 		}
 		set
 		{
-			m_ReadData.RtsEnable = value;
+			_readData.RtsEnable = value;
 		}
 	}
 
@@ -48,13 +48,13 @@ public abstract class SerialBase : IDisposable
 	{
 		get
 		{
-			return sleepTime;
+			return _sleepTime;
 		}
 		set
 		{
 			if (value > 0)
 			{
-				sleepTime = value;
+				_sleepTime = value;
 			}
 		}
 	}
@@ -151,7 +151,7 @@ public abstract class SerialBase : IDisposable
         OperateResult operateResult = _pipeSerial.Open();
         if (!operateResult.IsSuccess)
         {
-            return new OperateResult((int)OpsErrorCode.OpenSerialPortException, operateResult.Message);
+            return new OperateResult((int)ConnErrorCode.OpenSerialPortException, operateResult.Message);
         }
 
         return InitializationOnOpen(_pipeSerial.GetPipe());
@@ -274,7 +274,7 @@ public abstract class SerialBase : IDisposable
     /// <returns>是否操作成功的方法</returns>
     public OperateResult<byte[]> ClearSerialCache()
 	{
-		return SPReceived(m_ReadData, awaitData: false);
+		return SPReceived(_readData, awaitData: false);
 	}
 
 	public async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(byte[] value)
@@ -320,7 +320,7 @@ public abstract class SerialBase : IDisposable
 			}
 			catch (Exception ex)
 			{
-				return new OperateResult((int)OpsErrorCode.SerialPortSendException, ex.Message);
+				return new OperateResult((int)ConnErrorCode.SerialPortSendException, ex.Message);
 			}
 		}
 		return OperateResult.Ok();
@@ -344,7 +344,7 @@ public abstract class SerialBase : IDisposable
             num2++;
             if (num2 > 1)
             {
-                Thread.Sleep(sleepTime);
+                Thread.Sleep(_sleepTime);
             }
 
             try
@@ -391,7 +391,7 @@ public abstract class SerialBase : IDisposable
 			}
 			catch (Exception ex)
 			{
-				return new OperateResult<byte[]>((int)OpsErrorCode.SerialPortReceiveException, ex.Message);
+				return new OperateResult<byte[]>((int)ConnErrorCode.SerialPortReceiveException, ex.Message);
 			}
 		}
 
@@ -404,13 +404,13 @@ public abstract class SerialBase : IDisposable
 	/// <param name="disposing">是否在</param>
 	protected virtual void Dispose(bool disposing)
 	{
-		if (!disposedValue)
+		if (!_disposedValue)
 		{
 			if (disposing)
 			{
                 _pipeSerial?.Dispose();
 			}
-			disposedValue = true;
+			_disposedValue = true;
 		}
 	}
 

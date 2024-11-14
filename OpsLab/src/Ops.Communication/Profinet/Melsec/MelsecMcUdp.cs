@@ -144,7 +144,7 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.TwoParametersLengthIsNotSame, OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ConnErrorCode.TwoParametersLengthIsNotSame, ConnErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] array = new McAddressData[address.Length];
@@ -236,7 +236,7 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 
 	public OperateResult RemoteRun()
 	{
-		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand([1, 16, 0, 0, 1, 0, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -252,7 +252,7 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 
 	public OperateResult RemoteStop()
 	{
-		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand(new byte[6] { 2, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand([2, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -268,7 +268,7 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 
 	public OperateResult RemoteReset()
 	{
-		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand(new byte[6] { 6, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand([6, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -284,7 +284,7 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 
 	public OperateResult<string> ReadPlcType()
 	{
-		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand(new byte[4] { 1, 1, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand([1, 1, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<string>(operateResult);
@@ -295,12 +295,12 @@ public class MelsecMcUdp : NetworkUdpDeviceBase
 		{
 			return OperateResult.Error<string>(operateResult2);
 		}
-		return OperateResult.Ok(Encoding.ASCII.GetString(operateResult.Content, 11, 16).TrimEnd(Array.Empty<char>()));
+		return OperateResult.Ok(Encoding.ASCII.GetString(operateResult.Content, 11, 16).TrimEnd([]));
 	}
 
 	public OperateResult ErrorStateReset()
 	{
-		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand(new byte[4] { 23, 22, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(MelsecMcNet.PackMcCommand([23, 22, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;

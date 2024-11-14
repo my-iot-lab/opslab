@@ -240,7 +240,7 @@ public static class ReflectionHelper
 			}
 		}
 
-		return OperateResult.Ok((T)obj);
+		return OperateResult.Ok(obj);
 	}
 
 	/// <summary>
@@ -252,13 +252,10 @@ public static class ReflectionHelper
 	/// <returns>包含是否成功的结果对象</returns>
 	/// <exception cref="ArgumentNullException"></exception>
 	public static OperateResult Write<T>(T data, IReadWriteNet readWrite) where T : class, new()
-	{
-		if (data == null)
-		{
-			throw new ArgumentNullException(nameof(data));
-		}
+    {
+        ArgumentNullException.ThrowIfNull(data);
 
-		Type typeFromHandle = typeof(T);
+        Type typeFromHandle = typeof(T);
 		var properties = typeFromHandle.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 		foreach (PropertyInfo propertyInfo in properties)
 		{
@@ -683,12 +680,9 @@ public static class ReflectionHelper
 	/// <exception cref="ArgumentNullException"></exception>
 	public static async Task<OperateResult> WriteAsync<T>(T data, IReadWriteNet readWrite) where T : class, new()
 	{
-		if (data == null)
-		{
-			throw new ArgumentNullException(nameof(data));
-		}
+        ArgumentNullException.ThrowIfNull(data);
 
-		Type type = typeof(T);
+        Type type = typeof(T);
 		var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 		foreach (PropertyInfo property in properties)
 		{

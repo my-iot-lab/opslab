@@ -11,7 +11,7 @@ namespace Ops.Communication.Profinet.Melsec;
 /// <remarks></remarks>
 public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 {
-	private byte watiingTime = 0;
+	private byte _watiingTime = 0;
 
 	/// <summary>
 	/// PLC的当前的站号，需要根据实际的值来设定，默认是0。
@@ -23,10 +23,10 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// </summary>
 	public byte WaittingTime
 	{
-		get => watiingTime;
+		get => _watiingTime;
 		set
 		{
-			watiingTime = watiingTime > 15 ? (byte)15 : value;
+			_watiingTime = _watiingTime > 15 ? (byte)15 : value;
         }
 	}
 
@@ -66,8 +66,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>读取结果信息</returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBool: false, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBool: false, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult);
@@ -81,7 +81,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 
 		byte[] array = new byte[length * 2];
@@ -101,8 +101,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>是否写入成功</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = BuildWriteByteCommand(b, address, value, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = BuildWriteByteCommand(b, address, value, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -116,15 +116,15 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBool: false, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBool: false, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(command);
@@ -138,7 +138,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<byte[]>((int)ConnErrorCode.MelsecReadFailed, "Read Failed:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 
 		byte[] Content = new byte[length * 2];
@@ -152,8 +152,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> command = BuildWriteByteCommand(stat, address, value, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> command = BuildWriteByteCommand(stat, address, value, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return command;
@@ -167,7 +167,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -180,8 +180,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>读取结果信息</returns>
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBool: true, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = BuildReadCommand(b, address, length, isBool: true, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult);
@@ -195,7 +195,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>((int)OpsErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<bool[]>((int)ConnErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		byte[] array = new byte[length];
 		Array.Copy(operateResult2.Content, 5, array, 0, length);
@@ -210,8 +210,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>是否写入成功</returns>
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> operateResult = BuildWriteBoolCommand(b, address, value, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> operateResult = BuildWriteBoolCommand(b, address, value, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -225,15 +225,15 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public override async Task<OperateResult<bool[]>> ReadBoolAsync(string address, ushort length)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBool: true, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> command = BuildReadCommand(stat, address, length, isBool: true, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(command);
@@ -247,7 +247,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 2)
 		{
-			return new OperateResult<bool[]>((int)OpsErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<bool[]>((int)ConnErrorCode.MelsecReadFailed, "Read Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		byte[] buffer = new byte[length];
 		Array.Copy(read.Content, 5, buffer, 0, length);
@@ -256,8 +256,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool[] value)
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
-		OperateResult<byte[]> command = BuildWriteBoolCommand(stat, address, value, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
+		OperateResult<byte[]> command = BuildWriteBoolCommand(stat, address, value, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return command;
@@ -271,7 +271,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecWriteFailed, "Write Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -283,8 +283,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>是否启动成功</returns>
 	public OperateResult StartPLC(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = BuildStart(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = BuildStart(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -298,7 +298,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -310,8 +310,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>是否停止成功</returns>
 	public OperateResult StopPLC(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = BuildStop(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = BuildStop(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -325,7 +325,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
@@ -337,8 +337,8 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 	/// <returns>带PLC型号的结果信息</returns>
 	public OperateResult<string> ReadPlcType(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> operateResult = BuildReadPlcType(b, SumCheck, watiingTime);
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> operateResult = BuildReadPlcType(b, SumCheck, _watiingTime);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<string>(operateResult);
@@ -352,15 +352,15 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (operateResult2.Content[0] != 6)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
+			return new OperateResult<string>((int)ConnErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(operateResult2.Content, ' '));
 		}
 		return GetPlcTypeFromCode(Encoding.ASCII.GetString(operateResult2.Content, 5, 2));
 	}
 
 	public async Task<OperateResult> StartPLCAsync(string parameter = "")
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> command = BuildStart(stat, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> command = BuildStart(stat, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return command;
@@ -374,15 +374,15 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStartPLCFailed, "Start Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public async Task<OperateResult> StopPLCAsync(string parameter = "")
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> command = BuildStop(stat, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> command = BuildStop(stat, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return command;
@@ -396,15 +396,15 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult((int)OpsErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult((int)ConnErrorCode.MelsecStopPLCFailed, "Stop Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return OperateResult.Ok();
 	}
 
 	public async Task<OperateResult<string>> ReadPlcTypeAsync(string parameter = "")
 	{
-		byte stat = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		OperateResult<byte[]> command = BuildReadPlcType(stat, SumCheck, watiingTime);
+		byte stat = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		OperateResult<byte[]> command = BuildReadPlcType(stat, SumCheck, _watiingTime);
 		if (!command.IsSuccess)
 		{
 			return OperateResult.Error<string>(command);
@@ -418,7 +418,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 
 		if (read.Content[0] != 6)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
+			return new OperateResult<string>((int)ConnErrorCode.MelsecReadPlcTypeError, "ReadPlcType Faild:" + SoftBasic.ByteToHexString(read.Content, ' '));
 		}
 		return GetPlcTypeFromCode(Encoding.ASCII.GetString(read.Content, 5, 2));
 	}
@@ -465,7 +465,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 						operateResult.Content = "TN" + Convert.ToUInt16(address[1..], 10).ToString("D3");
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				case 'C' or 'c':
 					if (address[1] == 'S' || address[1] == 's')
 					{
@@ -477,7 +477,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 						operateResult.Content = "CN" + Convert.ToUInt16(address[1..], 10).ToString("D3");
 						break;
 					}
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 				case 'D' or 'd':
 					operateResult.Content = "D" + Convert.ToUInt16(address[1..], 10).ToString("D4");
 					break;
@@ -485,7 +485,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 					operateResult.Content = "R" + Convert.ToUInt16(address[1..], 10).ToString("D4");
 					break;
 				default:
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 			}
 		}
 		catch (Exception ex)
@@ -710,7 +710,7 @@ public sealed class MelsecFxLinksOverTcp : NetworkDeviceBase
 			"85" => OperateResult.Ok("A4UCPU"),
 			"AB" => OperateResult.Ok("AJ72P25/R25"),
 			"8B" => OperateResult.Ok("AJ72LP25/BR15"),
-			_ => new OperateResult<string>($"{OpsErrorCode.NotSupportedDataType.Desc()} Code:{code}"),
+			_ => new OperateResult<string>($"{ConnErrorCode.NotSupportedDataType.Desc()} Code:{code}"),
 		};
 	}
 }

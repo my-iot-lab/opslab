@@ -13,35 +13,23 @@ namespace Ops.Communication.Profinet.Siemens;
 /// </remarks>
 public sealed class SiemensPPI : SerialDeviceBase
 {
-	private byte station = 2;
+    private readonly object _communicationLock;
 
-	private readonly object communicationLock;
+    /// <summary>
+    /// 西门子PLC的站号信息<br />
+    /// Siemens PLC station number information
+    /// </summary>
+    public byte Station { get; set; } = 2;
 
-	/// <summary>
-	/// 西门子PLC的站号信息<br />
-	/// Siemens PLC station number information
-	/// </summary>
-	public byte Station
-	{
-		get
-		{
-			return station;
-		}
-		set
-		{
-			station = value;
-		}
-	}
-
-	/// <summary>
-	/// 实例化一个西门子的PPI协议对象<br />
-	/// Instantiate a Siemens PPI protocol object
-	/// </summary>
-	public SiemensPPI()
+    /// <summary>
+    /// 实例化一个西门子的PPI协议对象<br />
+    /// Instantiate a Siemens PPI protocol object
+    /// </summary>
+    public SiemensPPI()
 	{
 		base.ByteTransform = new ReverseBytesTransform();
 		base.WordLength = 2;
-		communicationLock = new object();
+		_communicationLock = new object();
 	}
 
 	/// <summary>
@@ -53,13 +41,14 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = SiemensPPIOverTcp.BuildReadCommand(b, address, length, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
-		lock (communicationLock)
+
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -98,13 +87,13 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = SiemensPPIOverTcp.BuildReadCommand(b, address, length, isBit: true);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<bool[]>(operateResult);
 		}
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -143,13 +132,13 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = SiemensPPIOverTcp.BuildWriteCommand(b, address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -183,13 +172,13 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>带返回结果的结果对象</returns>
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		OperateResult<byte[]> operateResult = SiemensPPIOverTcp.BuildWriteCommand(b, address, value);
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
 		}
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult2 = ReadFromCoreServer(operateResult.Content);
 			if (!operateResult2.IsSuccess)
@@ -242,17 +231,17 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>是否启动成功</returns>
 	public OperateResult Start(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[39]
-		{
-			104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 33, 33, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 20, 0, 0, 40, 0, 0,
 			0, 0, 0, 0, 253, 0, 0, 9, 80, 95,
 			80, 82, 79, 71, 82, 65, 77, 170, 22
-		};
+		];
 		obj[4] = b;
 		byte[] send = obj;
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult = ReadFromCoreServer(send);
 			if (!operateResult.IsSuccess)
@@ -279,17 +268,17 @@ public sealed class SiemensPPI : SerialDeviceBase
 	/// <returns>是否停止成功</returns>
 	public OperateResult Stop(string parameter = "")
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref parameter, "s", Station);
-		byte[] obj = new byte[35]
-		{
-			104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
+		byte b = (byte)ConnHelper.ExtractParameter(ref parameter, "s", Station);
+		byte[] obj =
+        [
+            104, 29, 29, 104, 0, 0, 108, 50, 1, 0,
 			0, 0, 0, 0, 16, 0, 0, 41, 0, 0,
 			0, 0, 0, 9, 80, 95, 80, 82, 79, 71,
 			82, 65, 77, 170, 22
-		};
+		];
 		obj[4] = b;
 		byte[] send = obj;
-		lock (communicationLock)
+		lock (_communicationLock)
 		{
 			OperateResult<byte[]> operateResult = ReadFromCoreServer(send);
 			if (!operateResult.IsSuccess)

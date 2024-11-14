@@ -349,7 +349,7 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 			return new OperateResult<byte, byte, ushort>("Address can't find ':', example : A9:0");
 		}
 
-		string[] array = address.Split(new char[1] { ':' });
+		string[] array = address.Split([':']);
 		try
 		{
 			var operateResult = new OperateResult<byte, byte, ushort>
@@ -414,9 +414,9 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 			operateResult.Content3 /= 2;
 		}
 
-		byte[] array = new byte[14]
-		{
-			0,
+		byte[] array =
+        [
+            0,
 			5,
 			0,
 			0,
@@ -430,7 +430,7 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 			operateResult.Content1,
 			0,
 			0,
-		};
+		];
 		BitConverter.GetBytes(operateResult.Content3).CopyTo(array, 12);
 		return OperateResult.Ok(array);
 	}
@@ -496,11 +496,11 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 			operateResult.Content3 /= 2;
 		}
 		int value2 = 1 << bitIndex;
-		byte[] array = new byte[20]
-		{
-			0, 5, 0, 0, 15, 0, 0, 1, 171, 255,
+		byte[] array =
+        [
+            0, 5, 0, 0, 15, 0, 0, 1, 171, 255,
 			2, 0, operateResult.Content2, operateResult.Content1, 0, 0, 0, 0, 0, 0
-		};
+		];
 		BitConverter.GetBytes(operateResult.Content3).CopyTo(array, 14);
 		array[16] = BitConverter.GetBytes(value2)[0];
 		array[17] = BitConverter.GetBytes(value2)[1];
@@ -521,7 +521,7 @@ public sealed class AllenBradleySLCNet : NetworkDeviceBase
 	{
 		if (content.Length < 36)
 		{
-			return new OperateResult<byte[]>($"{OpsErrorCode.ReceiveDataLengthTooShort.Desc()} {content.ToHexString(' ')}");
+			return new OperateResult<byte[]>($"{ConnErrorCode.ReceiveDataLengthTooShort.Desc()} {content.ToHexString(' ')}");
 		}
 		return OperateResult.Ok(content.RemoveBegin(36));
 	}

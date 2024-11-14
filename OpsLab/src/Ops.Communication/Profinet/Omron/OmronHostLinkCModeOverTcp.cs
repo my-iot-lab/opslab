@@ -34,7 +34,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte unitNumber = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte unitNumber = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		OperateResult<byte[]> operateResult = OmronHostLinkCMode.BuildReadCommand(address, length, isBit: false);
 		if (!operateResult.IsSuccess)
 		{
@@ -57,7 +57,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte unitNumber = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte unitNumber = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var operateResult = OmronHostLinkCMode.BuildWriteWordCommand(address, value);
 		if (!operateResult.IsSuccess)
 		{
@@ -80,7 +80,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronHostLinkCMode.BuildReadCommand(address, length, isBit: false);
 		if (!command.IsSuccess)
 		{
@@ -103,7 +103,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, byte[] value)
 	{
-		byte station = (byte)OpsHelper.ExtractParameter(ref address, "s", UnitNumber);
+		byte station = (byte)ConnHelper.ExtractParameter(ref address, "s", UnitNumber);
 		var command = OmronHostLinkCMode.BuildWriteWordCommand(address, value);
 		if (!command.IsSuccess)
 		{
@@ -139,7 +139,7 @@ public sealed class OmronHostLinkCModeOverTcp : NetworkDeviceBase
 		int num = Convert.ToInt32(Encoding.ASCII.GetString(operateResult.Content, 5, 2), 16);
 		if (num > 0)
 		{
-			return new OperateResult<string>((int)OpsErrorCode.UnknownError, "Unknown Error");
+			return new OperateResult<string>((int)ConnErrorCode.UnknownError, "Unknown Error");
 		}
 
 		string @string = Encoding.ASCII.GetString(operateResult.Content, 7, 2);

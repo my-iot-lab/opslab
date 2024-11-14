@@ -63,17 +63,17 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public virtual OperateResult<byte[]> Read(string address, ushort length)
 	{
-		return new OperateResult<byte[]>(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<byte[]>(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, byte[] value)
 	{
-		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		return new OperateResult<bool[]>(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult<bool[]>(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult<bool> ReadBool(string address)
@@ -83,12 +83,12 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public virtual OperateResult Write(string address, bool[] value)
 	{
-		return new OperateResult(OpsErrorCode.NotSupportedFunction.Desc());
+		return new OperateResult(ConnErrorCode.NotSupportedFunction.Desc());
 	}
 
 	public virtual OperateResult Write(string address, bool value)
 	{
-		return Write(address, new bool[1] { value });
+		return Write(address, [value]);
 	}
 
 	public OperateResult<T> ReadCustomer<T>(string address) where T : IDataTransfer, new()
@@ -301,7 +301,7 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public OperateResult Write(string address, double value)
 	{
-		return Write(address, new double[1] { value });
+		return Write(address, [value]);
 	}
 
 	public virtual OperateResult Write(string address, string value)
@@ -364,18 +364,18 @@ public abstract class SerialDeviceBase : SerialBase, IReadWriteDevice, IReadWrit
 
 	public virtual async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await WriteAsync(address, new bool[1] { value }).ConfigureAwait(false);
+		return await WriteAsync(address, [value]).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult<T>> ReadCustomerAsync<T>(string address) where T : IDataTransfer, new()
 	{
 		var result = new OperateResult<T>();
-		T Content = new();
-		var read = await ReadAsync(address, Content.ReadCount).ConfigureAwait(false);
+		T content = new();
+		var read = await ReadAsync(address, content.ReadCount).ConfigureAwait(false);
 		if (read.IsSuccess)
 		{
-			Content.ParseSource(read.Content);
-			result.Content = Content;
+			content.ParseSource(read.Content);
+			result.Content = content;
 			result.IsSuccess = true;
 		}
 		else

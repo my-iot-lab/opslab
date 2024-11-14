@@ -23,25 +23,25 @@ public sealed class MelsecA3CNet1 : SerialDeviceBase
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return MelsecA3CNet1OverTcp.ReadHelper(address, length, b, ReadWithPackCommand);
 	}
 
 	public override OperateResult Write(string address, byte[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return MelsecA3CNet1OverTcp.WriteHelper(address, value, b, ReadWithPackCommand);
 	}
 
 	public override OperateResult<bool[]> ReadBool(string address, ushort length)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return MelsecA3CNet1OverTcp.ReadBoolHelper(address, length, b, ReadWithPackCommand);
 	}
 
 	public override OperateResult Write(string address, bool[] value)
 	{
-		byte b = (byte)OpsHelper.ExtractParameter(ref address, "s", Station);
+		byte b = (byte)ConnHelper.ExtractParameter(ref address, "s", Station);
 		return MelsecA3CNet1OverTcp.WriteHelper(address, value, b, ReadWithPackCommand);
 	}
 

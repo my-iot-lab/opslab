@@ -545,7 +545,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>(OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>(ConnErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] array = new McAddressData[address.Length];
@@ -640,7 +640,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.TwoParametersLengthIsNotSame, OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ConnErrorCode.TwoParametersLengthIsNotSame, ConnErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] mcAddressDatas = new McAddressData[address.Length];
@@ -1027,7 +1027,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>是否成功</returns>
 	public OperateResult RemoteRun()
 	{
-		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(PackMcCommand([1, 16, 0, 0, 1, 0, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -1047,7 +1047,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>是否成功</returns>
 	public OperateResult RemoteStop()
 	{
-		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[6] { 2, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(PackMcCommand([2, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -1067,7 +1067,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>是否成功</returns>
 	public OperateResult RemoteReset()
 	{
-		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[6] { 6, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(PackMcCommand([6, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -1087,7 +1087,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>返回型号的结果对象</returns>
 	public OperateResult<string> ReadPlcType()
 	{
-		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[4] { 1, 1, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(PackMcCommand([1, 1, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<string>(operateResult);
@@ -1098,7 +1098,7 @@ public class MelsecMcNet : NetworkDeviceBase
 		{
 			return OperateResult.Error<string>(operateResult2);
 		}
-		return OperateResult.Ok(Encoding.ASCII.GetString(operateResult.Content, 11, 16).TrimEnd(Array.Empty<char>()));
+		return OperateResult.Ok(Encoding.ASCII.GetString(operateResult.Content, 11, 16).TrimEnd([]));
 	}
 
 	/// <summary>
@@ -1107,7 +1107,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	/// <returns>是否成功</returns>
 	public OperateResult ErrorStateReset()
 	{
-		var operateResult = ReadFromCoreServer(PackMcCommand(new byte[4] { 23, 22, 0, 0 }, NetworkNumber, NetworkStationNumber));
+		var operateResult = ReadFromCoreServer(PackMcCommand([23, 22, 0, 0], NetworkNumber, NetworkStationNumber));
 		if (!operateResult.IsSuccess)
 		{
 			return operateResult;
@@ -1123,7 +1123,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteRunAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[8] { 1, 16, 0, 0, 1, 0, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
+		var read = await ReadFromCoreServerAsync(PackMcCommand([1, 16, 0, 0, 1, 0, 0, 0], NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1139,7 +1139,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteStopAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 2, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
+		var read = await ReadFromCoreServerAsync(PackMcCommand([2, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1155,7 +1155,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> RemoteResetAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[6] { 6, 16, 0, 0, 1, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
+		var read = await ReadFromCoreServerAsync(PackMcCommand([6, 16, 0, 0, 1, 0], NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1171,7 +1171,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult<string>> ReadPlcTypeAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 1, 1, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
+		var read = await ReadFromCoreServerAsync(PackMcCommand([1, 1, 0, 0], NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<string>(read);
@@ -1187,7 +1187,7 @@ public class MelsecMcNet : NetworkDeviceBase
 
 	public async Task<OperateResult> ErrorStateResetAsync()
 	{
-		var read = await ReadFromCoreServerAsync(PackMcCommand(new byte[4] { 23, 22, 0, 0 }, NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
+		var read = await ReadFromCoreServerAsync(PackMcCommand([23, 22, 0, 0], NetworkNumber, NetworkStationNumber)).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return read;
@@ -1268,7 +1268,7 @@ public class MelsecMcNet : NetworkDeviceBase
 	{
         if (content == null || content.Length < 11)
         {
-            return new OperateResult((int)OpsErrorCode.ReceiveDataLengthTooShort, $"{OpsErrorCode.ReceiveDataLengthTooShort.Desc()} 11, Content: {content.ToHexString(' ')}");
+            return new OperateResult((int)ConnErrorCode.ReceiveDataLengthTooShort, $"{ConnErrorCode.ReceiveDataLengthTooShort.Desc()} 11, Content: {content.ToHexString(' ')}");
         }
 
         ushort num = BitConverter.ToUInt16(content, 9);

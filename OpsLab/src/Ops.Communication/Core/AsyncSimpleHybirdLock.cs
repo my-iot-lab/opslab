@@ -7,7 +7,7 @@ namespace Ops.Communication.Core;
 /// </summary>
 public sealed class AsyncSimpleHybirdLock : IDisposable
 {
-    private bool disposedValue = false;
+    private bool _disposedValue = false;
 
     /// <summary>
     /// 基元用户模式构造同步锁
@@ -43,14 +43,14 @@ public sealed class AsyncSimpleHybirdLock : IDisposable
 
     private void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!_disposedValue)
         {
             if (disposing)
             {
                 m_waiterLock.Value.Set();
             }
 
-            disposedValue = true;
+            _disposedValue = true;
         }
     }
 

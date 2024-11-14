@@ -21,7 +21,7 @@ public class OperateResult
 	/// <summary>
 	/// 具体的错误代码。
 	/// </summary>
-	public int ErrorCode { get; set; } = (int)Communication.OpsErrorCode.Success;
+	public int ErrorCode { get; set; } = (int)Communication.ConnErrorCode.Success;
 
 	/// <summary>
 	/// 实例化一个默认的结果对象

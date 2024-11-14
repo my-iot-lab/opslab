@@ -140,7 +140,7 @@ public class MelsecMcAsciiUdp : NetworkUdpDeviceBase
 	{
 		if (length.Length != address.Length)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.TwoParametersLengthIsNotSame, OpsErrorCode.TwoParametersLengthIsNotSame.Desc());
+			return new OperateResult<byte[]>((int)ConnErrorCode.TwoParametersLengthIsNotSame, ConnErrorCode.TwoParametersLengthIsNotSame.Desc());
 		}
 
 		McAddressData[] array = new McAddressData[address.Length];

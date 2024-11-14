@@ -272,7 +272,7 @@ public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 		{
 			return Convert.ToInt32(address);
 		}
-		string[] array = address.Split(new char[1] { '.' });
+		string[] array = address.Split(['.']);
 		return Convert.ToInt32(array[0]);
 	}
 
@@ -315,7 +315,7 @@ public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 			else if (address[0] == 'D' || address[..2] == "DB")
 			{
 				operateResult.Content1 = 1;
-				string[] array = address.Split(new char[1] { '.' });
+				string[] array = address.Split(['.']);
 				if (address[1] == 'B')
 				{
 					operateResult.Content3 = Convert.ToUInt16(array[0][2..]);
@@ -374,9 +374,9 @@ public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 			return OperateResult.Error<byte[]>(operateResult);
 		}
 
-		byte[] array = new byte[16]
-		{
-			83,
+		byte[] array =
+        [
+            83,
 			53,
 			16,
 			1,
@@ -392,7 +392,7 @@ public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 			0,
 			0,
 			0
-		};
+		];
 		if (operateResult.Content1 == 1 || operateResult.Content1 == 6 || operateResult.Content1 == 7)
 		{
 			if (count % 2 != 0)
@@ -421,7 +421,7 @@ public sealed class SiemensFetchWriteNet : NetworkDeviceBase
 	/// <returns>带结果对象的报文数据 -&gt; Message data with a result object</returns>
 	public static OperateResult<byte[]> BuildWriteCommand(string address, byte[] data)
 	{
-		data ??= Array.Empty<byte>();
+		data ??= [];
 		OperateResult<byte, int, ushort> operateResult = AnalysisAddress(address);
 		if (!operateResult.IsSuccess)
 		{

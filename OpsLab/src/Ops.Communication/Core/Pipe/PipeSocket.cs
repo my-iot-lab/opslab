@@ -6,7 +6,7 @@ namespace Ops.Communication.Core.Pipe;
 public sealed class PipeSocket : PipeBase, IDisposable
 {
     private string _ipAddress = "127.0.0.1";
-    private int[] _port = new int[1] { 2000 };
+    private int[] _port = [2000];
     private int _indexPort = -1;
 
     public string IpAddress
@@ -17,7 +17,7 @@ public sealed class PipeSocket : PipeBase, IDisposable
         }
         set
         {
-            _ipAddress = OpsHelper.GetIpAddressFromInput(value);
+            _ipAddress = ConnHelper.GetIpAddressFromInput(value);
         }
     }
 

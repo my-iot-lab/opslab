@@ -95,7 +95,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
 					}
 					break;
 				default:
-					throw new Exception(OpsErrorCode.NotSupportedDataType.Desc());
+					throw new Exception(ConnErrorCode.NotSupportedDataType.Desc());
 			}
 
 			if (address[0] == 'E' || address[0] == 'e')
@@ -104,7 +104,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
 				int num2 = ushort.Parse(array2[1]) * 16;
 				if (array2.Length > 2)
 				{
-					num2 += OpsHelper.CalculateBitStartIndex(array2[2]);
+					num2 += ConnHelper.CalculateBitStartIndex(array2[2]);
 				}
 				omronFinsAddress.AddressStart = num2;
 			}
@@ -114,7 +114,7 @@ public class OmronFinsAddress : DeviceAddressDataBase
 				int num3 = ushort.Parse(array3[0]) * 16;
 				if (array3.Length > 1)
 				{
-					num3 += OpsHelper.CalculateBitStartIndex(array3[1]);
+					num3 += ConnHelper.CalculateBitStartIndex(array3[1]);
 				}
 				omronFinsAddress.AddressStart = num3;
 			}

@@ -13,7 +13,7 @@ public class ConnectPool<TConnector> where TConnector : IConnector
 	private bool _canGetConnector = true;
 	private readonly Timer _checkTimer;
 	private readonly object _syncLock = new();
-	private readonly List<TConnector> _connectors = new();
+	private readonly List<TConnector> _connectors = [];
 
 	/// <summary>
 	/// 获取或设置最大的连接数，当实际的连接数超过最大的连接数的时候，就会进行阻塞，直到有新的连接对象为止。

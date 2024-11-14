@@ -32,7 +32,7 @@ internal static class NetSupport
 
     internal static OperateResult<byte[]> ReadFromCoreServer(IEnumerable<byte[]> send, Func<byte[], OperateResult<byte[]>> funcRead)
     {
-        List<byte> list = new();
+        List<byte> list = [];
         foreach (byte[] item in send)
         {
             OperateResult<byte[]> operateResult = funcRead(item);
@@ -53,7 +53,7 @@ internal static class NetSupport
 
     internal static async Task<OperateResult<byte[]>> ReadFromCoreServerAsync(IEnumerable<byte[]> send, Func<byte[], Task<OperateResult<byte[]>>> funcRead)
     {
-        List<byte> array = new();
+        List<byte> array = [];
         foreach (byte[] data in send)
         {
             OperateResult<byte[]> read = await funcRead(data).ConfigureAwait(false);
@@ -147,12 +147,12 @@ internal static class NetSupport
         catch (OperationCanceledException)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
         catch (SocketException ex)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
         }
     }
 
@@ -179,12 +179,12 @@ internal static class NetSupport
         catch (OperationCanceledException)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketConnectTimeoutException, $"Socket Connect Timeout Exception, EndPoint:{endPoint}, Timeout: {timeOut}ms");
         }
         catch (SocketException ex)
         {
             socket.Close();
-            return new OperateResult<Socket>((int)OpsErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
+            return new OperateResult<Socket>((int)ConnErrorCode.SocketConnectException, $"Socket Connect Exception -> {ex.Message}");
         }
     }
 }

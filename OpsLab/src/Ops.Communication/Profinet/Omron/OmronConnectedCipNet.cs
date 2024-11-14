@@ -179,9 +179,9 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	/// <summary>
 	/// O -&gt; T Network Connection ID
 	/// </summary>
-	private uint OTConnectionId = 0u;
+	private uint _oTConnectionId = 0u;
 
-	private readonly IncrementCount incrementCount = new(65535L, 0L);
+	private readonly IncrementCount _incrementCount = new(65535L, 0L);
 
 	public uint SessionHandle { get; protected set; }
 
@@ -247,13 +247,13 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		{
 			if (base.ByteTransform.TransUInt16(operateResult3.Content, 44) == 256)
 			{
-				return new OperateResult((int)OpsErrorCode.OmronForwardOpenFailed, "Connection in use or duplicate Forward Open");
+				return new OperateResult((int)ConnErrorCode.OmronForwardOpenFailed, "Connection in use or duplicate Forward Open");
 			}
-			return new OperateResult((int)OpsErrorCode.OmronForwardOpenFailed, "Forward Open failed, Code: " + base.ByteTransform.TransUInt16(operateResult3.Content, 44));
+			return new OperateResult((int)ConnErrorCode.OmronForwardOpenFailed, "Forward Open failed, Code: " + base.ByteTransform.TransUInt16(operateResult3.Content, 44));
 		}
 
-		OTConnectionId = ByteTransform.TransUInt32(operateResult3.Content, 44);
-		incrementCount.ResetCurrentValue();
+		_oTConnectionId = ByteTransform.TransUInt32(operateResult3.Content, 44);
+		_incrementCount.ResetCurrentValue();
 		var operateResult4 = ReadFromCoreServer(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), true, false);
 		if (!operateResult4.IsSuccess)
 		{
@@ -302,13 +302,13 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		{
 			if (ByteTransform.TransUInt16(read2.Content, 44) == 256)
 			{
-				return new OperateResult((int)OpsErrorCode.OmronForwardOpenFailed, "Connection in use or duplicate Forward Open");
+				return new OperateResult((int)ConnErrorCode.OmronForwardOpenFailed, "Connection in use or duplicate Forward Open");
 			}
-			return new OperateResult((int)OpsErrorCode.OmronForwardOpenFailed, "Forward Open failed, Code: " + ByteTransform.TransUInt16(read2.Content, 44));
+			return new OperateResult((int)ConnErrorCode.OmronForwardOpenFailed, "Forward Open failed, Code: " + ByteTransform.TransUInt16(read2.Content, 44));
 		}
 
-		OTConnectionId = ByteTransform.TransUInt32(read2.Content, 44);
-		incrementCount.ResetCurrentValue();
+		_oTConnectionId = ByteTransform.TransUInt32(read2.Content, 44);
+		_incrementCount.ResetCurrentValue();
 		var read3 = await ReadFromCoreServerAsync(socket, AllenBradleyHelper.PackRequestHeader(111, SessionHandle, GetAttributeAll()), true, false).ConfigureAwait(false);
 		if (!read3.IsSuccess)
 		{
@@ -334,8 +334,8 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	private byte[] GetOTConnectionIdService()
 	{
-		byte[] array = new byte[8] { 161, 0, 4, 0, 0, 0, 0, 0 };
-		ByteTransform.TransByte(OTConnectionId).CopyTo(array, 4);
+		byte[] array = [161, 0, 4, 0, 0, 0, 0, 0];
+		ByteTransform.TransByte(_oTConnectionId).CopyTo(array, 4);
 		return array;
 	}
 
@@ -352,7 +352,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.OmronAddressWrong, "Address Wrong:" + ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.OmronAddressWrong, "Address Wrong:" + ex.Message);
 		}
 	}
 
@@ -364,7 +364,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		}
 		catch (Exception ex)
 		{
-			return new OperateResult<byte[]>((int)OpsErrorCode.OmronAddressWrong, "Address Wrong:" + ex.Message);
+			return new OperateResult<byte[]>((int)ConnErrorCode.OmronAddressWrong, "Address Wrong:" + ex.Message);
 		}
 	}
 
@@ -375,7 +375,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		memoryStream.WriteByte(0);
 		memoryStream.WriteByte(0);
 		memoryStream.WriteByte(0);
-		long currentValue = incrementCount.GetCurrentValue();
+		long currentValue = _incrementCount.GetCurrentValue();
 		memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[0]);
 		memoryStream.WriteByte(BitConverter.GetBytes(currentValue)[1]);
 		if (cip.Length == 1)
@@ -384,7 +384,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		}
 		else
 		{
-			memoryStream.Write(new byte[6] { 10, 2, 32, 2, 36, 1 }, 0, 6);
+			memoryStream.Write([10, 2, 32, 2, 36, 1], 0, 6);
 			memoryStream.WriteByte(BitConverter.GetBytes(cip.Length)[0]);
 			memoryStream.WriteByte(BitConverter.GetBytes(cip.Length)[1]);
 			int num = 2 + cip.Length * 2;
@@ -472,7 +472,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		{
 			return OperateResult.Error<T>(operateResult);
 		}
-		return OpsHelper.ByteArrayToStruct<T>(operateResult.Content.RemoveBegin(2));
+		return ConnHelper.ByteArrayToStruct<T>(operateResult.Content.RemoveBegin(2));
 	}
 
 	private async Task<OperateResult<byte[], ushort, bool>> ReadWithTypeAsync(string[] address, ushort[] length)
@@ -521,12 +521,12 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 		{
 			return OperateResult.Error<T>(read);
 		}
-		return OpsHelper.ByteArrayToStruct<T>(read.Content.RemoveBegin(2));
+		return ConnHelper.ByteArrayToStruct<T>(read.Content.RemoveBegin(2));
 	}
 
 	public override OperateResult<byte[]> Read(string address, ushort length)
 	{
-		OperateResult<byte[], ushort, bool> operateResult = ReadWithType(new string[1] { address }, new ushort[1] { length });
+		OperateResult<byte[], ushort, bool> operateResult = ReadWithType([address], [length]);
 		if (!operateResult.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(operateResult);
@@ -602,7 +602,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult<byte[]>> ReadAsync(string address, ushort length)
 	{
-		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync(new string[1] { address }, new ushort[1] { length }).ConfigureAwait(false);
+		OperateResult<byte[], ushort, bool> read = await ReadWithTypeAsync([address], [length]).ConfigureAwait(false);
 		if (!read.IsSuccess)
 		{
 			return OperateResult.Error<byte[]>(read);
@@ -633,7 +633,7 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 	/// <returns>写入结果值</returns>
 	public override OperateResult Write(string address, byte[] value)
 	{
-		return new OperateResult((int)OpsErrorCode.NotSupportedFunction, $"{OpsErrorCode.NotSupportedFunction.Desc()} Please refer to use WriteTag instead ");
+		return new OperateResult((int)ConnErrorCode.NotSupportedFunction, $"{ConnErrorCode.NotSupportedFunction.Desc()} Please refer to use WriteTag instead ");
 	}
 
 	/// <summary>
@@ -872,18 +872,18 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override OperateResult Write(string address, string value)
 	{
-		byte[] array = (string.IsNullOrEmpty(value) ? Array.Empty<byte>() : Encoding.UTF8.GetBytes(value));
+		byte[] array = (string.IsNullOrEmpty(value) ? [] : Encoding.UTF8.GetBytes(value));
 		return WriteTag(address, 208, SoftBasic.SpliceArray(BitConverter.GetBytes((ushort)array.Length), array));
 	}
 
 	public override OperateResult Write(string address, bool value)
 	{
-		return WriteTag(address, 193, (!value) ? new byte[2] : new byte[2] { 255, 255 });
+		return WriteTag(address, 193, (!value) ? new byte[2] : [255, 255]);
 	}
 
 	public OperateResult Write(string address, byte value)
 	{
-		return WriteTag(address, 194, new byte[1] { value });
+		return WriteTag(address, 194, [value]);
 	}
 
 	public override async Task<OperateResult> WriteAsync(string address, short[] values)
@@ -934,12 +934,12 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 
 	public override async Task<OperateResult> WriteAsync(string address, bool value)
 	{
-		return await WriteTagAsync(address, 193, !value ? new byte[2] : new byte[2] { 255, 255 }).ConfigureAwait(false);
+		return await WriteTagAsync(address, 193, !value ? new byte[2] : [255, 255]).ConfigureAwait(false);
 	}
 
 	public async Task<OperateResult> WriteAsync(string address, byte value)
 	{
-		return await WriteTagAsync(address, 194, new byte[1] { value }).ConfigureAwait(false);
+		return await WriteTagAsync(address, 194, [value]).ConfigureAwait(false);
 	}
 
 	private static byte[] GetLargeForwardOpen()
@@ -979,60 +979,60 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 					case 4:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley04,
-							Message = OpsErrorCode.AllenBradley04.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley04,
+							Message = ConnErrorCode.AllenBradley04.Desc(),
 						};
 					case 5:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley05,
-                            Message = OpsErrorCode.AllenBradley05.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley05,
+                            Message = ConnErrorCode.AllenBradley05.Desc(),
 						};
 					case 6:
 						if (response[num + 2] == 210 || response[num + 2] == 204)
 						{
 							return new OperateResult<byte[], ushort, bool>
 							{
-								ErrorCode = (int)OpsErrorCode.AllenBradley06,
-                                Message = OpsErrorCode.AllenBradley06.Desc(),
+								ErrorCode = (int)ConnErrorCode.AllenBradley06,
+                                Message = ConnErrorCode.AllenBradley06.Desc(),
 							};
 						}
 						break;
 					case 10:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley0A,
-                            Message = OpsErrorCode.AllenBradley0A.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley0A,
+                            Message = ConnErrorCode.AllenBradley0A.Desc(),
 						};
 					case 19:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley13,
-                            Message = OpsErrorCode.AllenBradley13.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley13,
+                            Message = ConnErrorCode.AllenBradley13.Desc(),
 						};
 					case 28:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley1C,
-							Message = OpsErrorCode.AllenBradley1C.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley1C,
+							Message = ConnErrorCode.AllenBradley1C.Desc(),
 						};
 					case 30:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley1E,
-                            Message = OpsErrorCode.AllenBradley1E.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley1E,
+                            Message = ConnErrorCode.AllenBradley1E.Desc(),
 						};
 					case 38:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.AllenBradley26,
-							Message = OpsErrorCode.AllenBradley26.Desc(),
+							ErrorCode = (int)ConnErrorCode.AllenBradley26,
+							Message = ConnErrorCode.AllenBradley26.Desc(),
 						};
 					default:
 						return new OperateResult<byte[], ushort, bool>
 						{
-							ErrorCode = (int)OpsErrorCode.UnknownError,
-							Message = OpsErrorCode.UnknownError.Desc(),
+							ErrorCode = (int)ConnErrorCode.UnknownError,
+							Message = ConnErrorCode.UnknownError.Desc(),
 						};
                     case 0:
 						break;
@@ -1054,14 +1054,14 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 				case 4:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley04,
-						Message = OpsErrorCode.AllenBradley04.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley04,
+						Message = ConnErrorCode.AllenBradley04.Desc(),
 					};
 				case 5:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley05,
-                        Message = OpsErrorCode.AllenBradley05.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley05,
+                        Message = ConnErrorCode.AllenBradley05.Desc(),
 					};
 				case 6:
 					value = true;
@@ -1069,38 +1069,38 @@ public class OmronConnectedCipNet : NetworkDeviceBase
 				case 10:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley0A,
-						Message = OpsErrorCode.AllenBradley0A.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley0A,
+						Message = ConnErrorCode.AllenBradley0A.Desc(),
 					};
 				case 19:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley13,
-						Message = OpsErrorCode.AllenBradley13.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley13,
+						Message = ConnErrorCode.AllenBradley13.Desc(),
 					};
 				case 28:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley1C,
-                        Message = OpsErrorCode.AllenBradley1C.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley1C,
+                        Message = ConnErrorCode.AllenBradley1C.Desc(),
 					};
 				case 30:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley1E,
-                        Message = OpsErrorCode.AllenBradley1E.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley1E,
+                        Message = ConnErrorCode.AllenBradley1E.Desc(),
 					};
 				case 38:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.AllenBradley26,
-                        Message = OpsErrorCode.AllenBradley26.Desc(),
+						ErrorCode = (int)ConnErrorCode.AllenBradley26,
+                        Message = ConnErrorCode.AllenBradley26.Desc(),
 					};
 				default:
 					return new OperateResult<byte[], ushort, bool>
 					{
-						ErrorCode = (int)OpsErrorCode.UnknownError,
-                        Message = OpsErrorCode.UnknownError.Desc(),
+						ErrorCode = (int)ConnErrorCode.UnknownError,
+                        Message = ConnErrorCode.UnknownError.Desc(),
 					};
 				case 0:
 					break;

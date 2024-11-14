@@ -16,8 +16,8 @@ public interface IDataTransfer
 	/// <summary>
 	/// 从字节数组进行解析实际的对象
 	/// </summary>
-	/// <param name="Content">从远程读取的数据源</param>
-	void ParseSource(byte[] Content);
+	/// <param name="content">从远程读取的数据源</param>
+	void ParseSource(byte[] content);
 
 	/// <summary>
 	/// 将对象生成字符源，写入PLC中
